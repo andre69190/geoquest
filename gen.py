@@ -1626,6 +1626,9 @@ function renderDailyHero(){
 }
 
 /* RENDER — main dispatcher */
+/* Phase 33 T2 helper: percentage for duell bar */
+function duellPct(a,b){const mx=Math.max(a,b,1);return Math.round(a/mx*100);}
+
 function render(){
   updateHdrGuest();
   const app=document.getElementById("app");if(\!app)return;
@@ -1762,8 +1765,8 @@ function render(){
         </div>
         ${S.mpOppFinal
           ?`<div class="duell-final-bar">
-              <div class="dfb-fill-you" style="width:${Math.round(S.sc/Math.max(S.sc,S.mpOppFinal.score,1)*100)}%"></div>
-              <div class="dfb-fill-opp" style="width:${Math.round(S.mpOppFinal.score/Math.max(S.sc,S.mpOppFinal.score,1)*100)}%"></div>
+              <div class="dfb-fill-you" style="width:${duellPct(S.sc,S.mpOppFinal.score)}%"></div>
+              <div class="dfb-fill-opp" style="width:${duellPct(S.mpOppFinal.score,S.sc)}%"></div>
             </div>
             <div class="mp-result-verdict">${S.sc>S.mpOppFinal.score?'\u{1F3C6} Du gewinnst!':S.sc<S.mpOppFinal.score?'\u{1F614} Niederlage':'\u{1F91D} Unentschieden!'}</div>`
           :'<div class="mp-waiting">\u23f3 Warte auf Gegner\u2026<br><button class="btn-g" style="margin-top:.5rem;width:auto;padding:.35rem .9rem;font-size:.75rem" onclick="S.mpOpponent=null;render()">Trotzdem weiter</button></div>'}
@@ -1841,8 +1844,8 @@ function render(){
           <button class="btn-cancel" onclick="clr();S.ph='menu';S.tab='home';render()">\u00d7</button>
         </div>
       </div>
-      ${S.mpOpponent?`<div class="duell-bar-wrap" style="margin:0 0 4px"><div class="duell-lbl duell-you">Ich<span class="duell-score">${sc.toLocaleString()}</span></div><div class="duell-track"><div class="duell-fill-you" style="width:${(()=>{const mx=Math.max(sc,S.mpOppScore||0,1);return Math.round(sc/mx*100)})()}%"></div><div class="duell-fill-opp" style="width:${(()=>{const mx=Math.max(sc,S.mpOppScore||0,1);return Math.round((S.mpOppScore||0)/mx*100)})()}%"></div></div><div class="duell-lbl duell-opp"><span class="duell-score">${(S.mpOppScore||0).toLocaleString()}</span>${esc(S.mpOpponent.slice(0,8))}</div></div>`:""}
-      <div class="tbar${S.freezeActive?\" frozen\":\"\"}"><div class="tfill" style="width:${p}%;background:${col}"></div></div>
+      ${S.mpOpponent?`<div class="duell-bar-wrap" style="margin:0 0 4px"><div class="duell-lbl duell-you">Ich<span class="duell-score">${sc.toLocaleString()}</span></div><div class="duell-track"><div class="duell-fill-you" style="width:${duellPct(sc,S.mpOppScore||0)}%"></div><div class="duell-fill-opp" style="width:${duellPct(S.mpOppScore||0,sc)}%"></div></div><div class="duell-lbl duell-opp"><span class="duell-score">${(S.mpOppScore||0).toLocaleString()}</span>${esc(S.mpOpponent.slice(0,8))}</div></div>`:""}
+      <div class="tbar${S.freezeActive?" frozen":""}"><div class="tfill" style="width:${p}%;background:${col}"></div></div>
       <div class="map-prompt">\u{1F5FA} Finde: <strong>${esc(q.subj)}</strong></div>
       <div id="gq-map-svg" class="map-container"></div>
       ${mapFb}
@@ -1899,7 +1902,7 @@ function render(){
         <button class="btn-cancel" onclick="clr();S.ph='menu';S.tab='home';render()">\u00d7</button>
       </div>
     </div>
-    ${S.mpOpponent?`<div class="duell-bar-wrap"><div class="duell-lbl duell-you">Ich<span class="duell-score">${sc.toLocaleString()}</span></div><div class="duell-track"><div class="duell-fill-you" style="width:${(()=>{const mx=Math.max(sc,S.mpOppScore||0,1);return Math.round(sc/mx*100)})()}%"></div><div class="duell-fill-opp" style="width:${(()=>{const mx=Math.max(sc,S.mpOppScore||0,1);return Math.round((S.mpOppScore||0)/mx*100)})()}%"></div></div><div class="duell-lbl duell-opp"><span class="duell-score">${(S.mpOppScore||0).toLocaleString()}</span>${esc(S.mpOpponent.slice(0,8))}</div></div>`:""}
+    ${S.mpOpponent?`<div class="duell-bar-wrap"><div class="duell-lbl duell-you">Ich<span class="duell-score">${sc.toLocaleString()}</span></div><div class="duell-track"><div class="duell-fill-you" style="width:${duellPct(sc,S.mpOppScore||0)}%"></div><div class="duell-fill-opp" style="width:${duellPct(S.mpOppScore||0,sc)}%"></div></div><div class="duell-lbl duell-opp"><span class="duell-score">${(S.mpOppScore||0).toLocaleString()}</span>${esc(S.mpOpponent.slice(0,8))}</div></div>`:""}
     ${st>=3?`<div style="text-align:center;font-size:.76rem;font-weight:700;color:#fb923c;margin-bottom:6px">${t.l}</div>`:""}
     <div class="tbar${S.freezeActive?" frozen":""}"><div class="tfill" style="width:${p}%;background:${col}"></div></div>
     <div class="qcard">${qBody}<div class="qtimer" style="color:${col}">${tm}</div></div>
