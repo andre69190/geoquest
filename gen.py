@@ -679,24 +679,24 @@ function genHLPopQ(){
   const ai=~~(rng()*pool.length);let bi=~~(rng()*pool.length);while(bi===ai)bi=~~(rng()*pool.length);
   const a=pool[ai],b=pool[bi];
   const fmt=(p)=>p>=1e9?(p/1e9).toFixed(2)+" Mrd.":p>=1e6?(p/1e6).toFixed(1)+" Mio.":(p/1e3).toFixed(0)+" Tsd.";
-  const ans=b.pop>a.pop?"Mehr ⬆️":"Weniger ⬇️";const wrong=b.pop>a.pop?"Weniger ⬇️":"Mehr ⬆️";
-  return{type:"hl_pop",prompt:"Mehr Einwohner als "+a.c+"?",nameA:a.c,valA:fmt(a.pop),nameB:b.c,valB:fmt(b.pop),ans,opts:[ans,wrong],lid:b.c,cc:ccFromCountry(b.c)};
+  const ans=b.pop>a.pop?"higher":"lower";
+  return{type:"hl_pop",prompt:"Mehr Einwohner als "+a.c+"?",nameA:a.c,valA:fmt(a.pop),nameB:b.c,valB:fmt(b.pop),ans,opts:["higher","lower"],lid:b.c,cc:ccFromCountry(b.c)};
 }
 function genHLRiverQ(){
   if(\!RIVERS_REAL||RIVERS_REAL.length<2)return null;
   const pool=RIVERS_REAL.filter(r=>r.len>100);if(pool.length<2)return null;
   const ai=~~(rng()*pool.length);let bi=~~(rng()*pool.length);while(bi===ai)bi=~~(rng()*pool.length);
   const a=pool[ai],b=pool[bi];
-  const ans=b.len>a.len?"Länger ⬆️":"Kürzer ⬇️";const wrong=b.len>a.len?"Kürzer ⬇️":"Länger ⬆️";
-  return{type:"hl_river",prompt:"Länger als "+a.n+"?",nameA:a.n,valA:a.len+" km",nameB:b.n,valB:b.len+" km",ans,opts:[ans,wrong],lid:b.n,cc:ccFromCountry(b.c)};
+  const ans=b.len>a.len?"higher":"lower";
+  return{type:"hl_river",prompt:"Länger als "+a.n+"?",nameA:a.n,valA:a.len+" km",nameB:b.n,valB:b.len+" km",ans,opts:["higher","lower"],lid:b.n,cc:ccFromCountry(b.c)};
 }
 function genHLAreaQ(){
   if(\!AREA_DATA||AREA_DATA.length<2)return null;
   const ai=~~(rng()*AREA_DATA.length);let bi=~~(rng()*AREA_DATA.length);while(bi===ai)bi=~~(rng()*AREA_DATA.length);
   const a=AREA_DATA[ai],b=AREA_DATA[bi];
   const fmt=(x)=>x>=1e6?(x/1e6).toFixed(2)+" Mio. km²":(x/1000).toFixed(0)+" Tsd. km²";
-  const ans=b.area>a.area?"Größer ⬆️":"Kleiner ⬇️";const wrong=b.area>a.area?"Kleiner ⬇️":"Größer ⬆️";
-  return{type:"hl_area",prompt:"Größer als "+a.c+"?",nameA:a.c,valA:fmt(a.area),nameB:b.c,valB:fmt(b.area),ans,opts:[ans,wrong],lid:b.c,cc:ccFromCountry(b.c)};
+  const ans=b.area>a.area?"higher":"lower";
+  return{type:"hl_area",prompt:"Größer als "+a.c+"?",nameA:a.c,valA:fmt(a.area),nameB:b.c,valB:fmt(b.area),ans,opts:["higher","lower"],lid:b.c,cc:ccFromCountry(b.c)};
 }
 function genNeighborQ(){
   const nb=NEIGHBORS;const valid=Object.keys(nb).filter(c=>nb[c]&&nb[c].length>=2);if(\!valid.length)return null;
@@ -1782,7 +1782,7 @@ function render(){
   if(q.type==="flag"){
     qBody=`<div class="qprompt">${q.prompt}</div><div class="qflag"><img src="https://flagcdn.com/w160/${q.subj}.png" alt="Flagge" onerror="this.style.display='none'"></div><div class="qmeta">${q.meta||""}</div>`;
   }else if(q.type==="outline"){
-    qBody=`<div class="qprompt">${q.prompt}</div><div class="outline-wrap"><img src="https://flagcdn.com/w160/${q.subj}.png" style="max-height:120px;max-width:200px;object-fit:contain;filter:brightness(0) invert(1) sepia(1) hue-rotate(95deg) saturate(3);opacity:.9" alt="Umriss" onerror="this.src=''"></div>`;
+    qBody=`<div class="qprompt">${q.prompt}</div><div class="outline-wrap" id="gq-outline-svg"></div>`;
   }else if(q.type==="food"){
     qBody=`<div class="qprompt">${q.prompt}</div><div class="food-emoji">${q.emoji||"\u{1F37D}"}</div><div class="qmain">${q.subj}</div>`;
   }else if(q.type==="brand"){
@@ -1793,12 +1793,16 @@ function render(){
     qBody=`<div class="qprompt">${q.prompt}</div>
       <div style="text-align:center;margin:8px 0 10px">
         <div class="plate-badge">${q.subj}</div>
-        ${q.type==="plate_casual"&&q.meta?`<div style="color:var(--text3);font-size:.75rem;margin-top:6px">${q.meta}</div>`:""}
+        ${q.type==="plate_casual"&&q.meta&&sel\!==null?`<div style="color:var(--text3);font-size:.75rem;margin-top:6px">${q.meta}</div>`:""}
       </div>`;
   }else if(q.type==="hl_pop"||q.type==="hl_river"||q.type==="hl_area"){
-    /* Higher/Lower card: show Item A (revealed), Item B hidden until answer */
+    /* Higher/Lower card + dedicated answer buttons (clean "higher"/"lower" keys) */
     const revB=sel\!==null;
-    qBody=`<div class="qprompt">${q.prompt}</div>
+    const hlIcon=q.type==="hl_pop"?"\u{1F465}":q.type==="hl_river"?"\u{1F4A7}":"\u{1F5FA}";
+    const hlFbH=sel===null?"":ok&&q.ans==="higher"?"ok":"ng";
+    const hlFbL=sel===null?"":ok&&q.ans==="lower"?"ok":"ng";
+    const hlDis=sel\!==null?"disabled":"";
+    qBody=`<div class="qprompt">${hlIcon} ${q.prompt}</div>
       <div class="hl-wrap">
         <div class="hl-card hl-known">
           <div class="hl-name">${q.nameA}</div>
@@ -1807,9 +1811,18 @@ function render(){
         <div class="hl-vs">\u{1F914}</div>
         <div class="hl-card hl-hidden${revB?" hl-revealed":""}">
           <div class="hl-name">${q.nameB}</div>
-          <div class="hl-val">${revB?q.valB:"❓"}</div>
+          <div class="hl-val">${revB?q.valB:"\u2753"}</div>
         </div>
+      </div>
+      <div class="hl-btn-row">
+        <button class="hl-btn hl-higher${sel\!==null?(q.ans==="higher"?" ok":(sel==="higher"?" ng":" dm")):\"\"}" ${hlDis} onclick="answer('higher')">\u2b06\ufe0f Mehr / L\u00e4nger / Gr\u00f6\u00dfer</button>
+        <button class="hl-btn hl-lower${sel\!==null?(q.ans==="lower"?" ok":(sel==="lower"?" ng":" dm")):\"\"}" ${hlDis} onclick="answer('lower')">\u2b07\ufe0f Weniger / K\u00fcrzer / Kleiner</button>
       </div>`;
+  }else if(q.type==="curr_real"){
+    /* Show country name; hide currency name (meta) until answered */
+    qBody=`<div class="qprompt">${q.prompt}</div>
+      <div class="qmain">${q.subj}</div>
+      ${sel\!==null?`<div class="qmeta">${q.meta||""}</div>`:""}`;
   }else if(q.type==="neighbor"){
     qBody=`<div class="qprompt" style="font-size:1rem">${q.prompt}</div>
       <div style="text-align:center;margin:10px 0 6px">
@@ -1856,7 +1869,8 @@ function render(){
   }
   let answerHtml="";
   if(q.type==="flagsel"){
-    const fb2=q.opts.map(cc=>{let cls="btn-flag";if(sel\!==null){if(cc===q.ans)cls+=" ok";else if(cc===sel)cls+=" ng";else cls+=" dm";}return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${cc}')"><img src="https://flagcdn.com/w120/${cc}.png" alt="${cc}" onerror="this.style.display='none'"></button>`;}).join("");
+    const fb2=q.opts.map(cc=>{let cls="btn-flag";if(sel\!==null){if(cc===q.ans)cls+=" ok";else if(cc===sel)cls+=" ng";else cls+=" dm";}const flagEmoji=cc.toUpperCase().replace(/./g,c=>String.fromCodePoint(c.charCodeAt(0)+127397));
+      return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${cc}')"><img src="https://flagcdn.com/w120/${cc}.png" alt="${cc}" onerror="this.outerHTML='<span class=flag-fb>'+flagEmoji+'</span>'"></button>`;}).join("");
     answerHtml=`<div class="flag-grid">${fb2}</div>`;
   }else{
     // Population comparison: special subj rendering
@@ -1909,7 +1923,37 @@ function render(){
     ${sel===null?puBar:""}
     ${answerHtml}${fb}
   </div>`;
+  /* Phase 35: draw country outline after DOM update */
+  if(q.type==="outline")requestAnimationFrame(()=>drawCountryOutline(q.subj,"gq-outline-svg"));
 }
+
+/* Phase 35: draw single-country D3 silhouette for outline mode */
+function drawCountryOutline(cc,targetId){
+  const el=document.getElementById(targetId);
+  if(\!el)return;
+  if(typeof d3==='undefined'||typeof topojson==='undefined'||\!window.WORLD_TOPO){
+    el.innerHTML='<span style="font-size:3rem">'+cc.toUpperCase()+'</span>';
+    return;
+  }
+  const countries=topojson.feature(window.WORLD_TOPO,window.WORLD_TOPO.objects.countries);
+  /* Map cc to TopoJSON name via MAP_COUNTRIES */
+  const entry=MAP_COUNTRIES.find(x=>x.cc===cc);
+  if(\!entry){el.innerHTML='<span style="font-size:1rem;color:var(--text3)">?</span>';return;}
+  const feat=countries.features.find(f=>f.properties.name===entry.name);
+  if(\!feat){el.innerHTML='<span style="font-size:1rem;color:var(--text3)">?</span>';return;}
+  const W=el.clientWidth||200,H=el.clientHeight||140;
+  const proj=d3.geoMercator().fitSize([W,H],feat);
+  const path=d3.geoPath().projection(proj);
+  d3.select(el).html('').append('svg')
+    .attr('width','100%').attr('height','100%')
+    .attr('viewBox',`0 0 ${W} ${H}`)
+    .append('path')
+    .datum(feat)
+    .attr('d',path)
+    .attr('fill','var(--text,#1e293b)')
+    .attr('stroke','none');
+}
+
 
 /* Phase 34 — D3 World Map component */
 function drawWorldMap(targetName,sel,ok){

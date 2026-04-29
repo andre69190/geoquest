@@ -324,3 +324,20 @@ input[type=text]::placeholder{color:var(--text3)}
 .dfb-fill-you{background:#10b981;transition:width .8s ease}
 .dfb-fill-opp{background:#8b5cf6;margin-left:auto;transition:width .8s ease}
 .mp-waiting{color:var(--text3);font-size:.82rem;margin-top:.5rem;line-height:1.6}
+
+/* ── Phase 35: H/L dedicated buttons ─────────────────────────── */
+.hl-btn-row{display:flex;flex-direction:column;gap:8px;margin:.6rem 0 .2rem;padding:0 .5rem}
+.hl-btn{width:100%;padding:.7rem .5rem;border-radius:12px;border:2px solid var(--border);
+  background:var(--bg2);color:var(--text);font-weight:700;font-size:.92rem;
+  cursor:pointer;transition:background .15s,border-color .15s}
+.hl-btn:not([disabled]):hover{background:var(--bg3)}
+.hl-btn.ok{background:#d1fae5;border-color:#10b981;color:#065f46}
+.hl-btn.ng{background:#fee2e2;border-color:#ef4444;color:#991b1b}
+.hl-btn.dm{opacity:.45}
+/* outline SVG container */
+.outline-wrap{display:flex;align-items:center;justify-content:center;
+  height:150px;width:100%;margin:6px auto}
+.outline-wrap svg{max-height:150px;width:auto}
+/* flag fallback */
+.flag-fb{font-size:2.5rem;line-height:1;display:flex;align-items:center;justify-content:center;
+  width:100%;height:100%}
