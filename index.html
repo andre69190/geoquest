@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>GeoQuest</title>
 <link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <style>
@@ -693,7 +694,14 @@ function mpCountdown(seed,mode){
 function mpCreate(){
   if(!sb){showToast("Supabase nicht verbunden!");return;}
   const code=mpCode();
-  const channel=sb.channel("room_"+code,{config:{broadcast:{self:false}}});
+  let channel;
+  try{
+    channel=sb.channel("room_"+code,{config:{broadcast:{self:false}}});
+  }catch(e){
+    showToast("\u26a0\ufe0f Verbindungsfehler: "+e.message);
+    console.error("mpCreate channel error:",e);
+    return;
+  }
   S.mp={role:"host",code,channel,phase:"waiting",myReady:false,oppReady:false,oppName:null};
   render();
 
@@ -728,7 +736,13 @@ function mpJoin(code){
   if(!sb){showToast("Supabase nicht verbunden!");return;}
   if(!code||code.length<4){showToast("Bitte gültigen Code eingeben!");return;}
   const uc=code.toUpperCase().trim();
-  const channel=sb.channel("room_"+uc,{config:{broadcast:{self:false}}});
+  let channel;
+  try{
+    channel=sb.channel("room_"+uc,{config:{broadcast:{self:false}}});
+  }catch(e){
+    showToast("\u26a0\ufe0f Verbindungsfehler: "+e.message);
+    return;
+  }
   S.mp={role:"guest",code:uc,channel,phase:"joining",myReady:false,oppReady:false,oppName:null};
   render();
 
@@ -775,9 +789,9 @@ function renderMultiplayerLobby(){
   if(!mp){
     const joinInput=S._mpJoinCode||"";
     return`<div class="scr">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.2rem">
-        <button class="btn-cancel" onclick="S.mpModal=false;render()">←</button>
-        <h2 style="font-size:1.3rem;font-weight:900;color:var(--text);margin:0">⚔️ Live 1vs1 Duell</h2>
+      <div style="text-align:center;margin-bottom:1.4rem;padding-top:.5rem">
+        <div class="mp-lobby-title">\u2694\ufe0f Live 1vs1 Duell</div>
+        <div style="color:var(--text3);font-size:.8rem;margin-top:.25rem">Spiele live gegen einen Freund</div>
       </div>
       <div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:1.4rem;margin-bottom:1rem;text-align:center">
         <div style="font-size:2.5rem;margin-bottom:.5rem">\u{1F3E0}</div>
@@ -796,13 +810,14 @@ function renderMultiplayerLobby(){
           <button class="btn-p" style="width:auto;padding:.6rem 1.2rem" onclick="mpJoin(S._mpJoinCode)">▶</button>
         </div>
       </div>
+      <button class="mp-back-btn" onclick="S.mpModal=false;render()">\u2b05\ufe0f Zurück zum Hauptmenü</button>
     </div>`;
   }
 
   /* ── Phase: host waiting for guest ───────────────────────── */
   if(mp.phase==="waiting"){
     return`<div class="scr" style="text-align:center">
-      <button class="btn-cancel" style="float:left" onclick="mpLeave()">←</button>
+      <button class="mp-back-btn" style="margin-bottom:.5rem" onclick="mpLeave()">\u2b05\ufe0f Abbrechen</button>
       <div style="clear:both;padding-top:.5rem"></div>
       <div style="font-size:3rem;margin:1rem 0">\u{1F4F1}</div>
       <h2 style="font-size:1.3rem;font-weight:900;color:var(--text);margin-bottom:.5rem">Warte auf Gegner…</h2>
@@ -828,7 +843,7 @@ function renderMultiplayerLobby(){
   if(mp.phase==="ready"){
     const myR=mp.myReady,oppR=mp.oppReady;
     return`<div class="scr" style="text-align:center">
-      <button class="btn-cancel" style="float:left" onclick="mpLeave()">←</button>
+      <button class="mp-back-btn" style="margin-bottom:.5rem" onclick="mpLeave()">\u2b05\ufe0f Abbrechen</button>
       <div style="clear:both;padding-top:.5rem"></div>
       <div style="font-size:2.5rem;margin:.6rem 0">\u{1F7E2}</div>
       <h2 style="font-size:1.2rem;font-weight:900;color:var(--text);margin-bottom:.3rem">Gegner gefunden!</h2>
@@ -962,7 +977,15 @@ function ccFromCountry(name){const c=COUNTRIES.find(x=>x.c===name);return c?c.cc
 function flagOf(name){const cc=ccFromCountry(name);return cc?`<img src="https://flagcdn.com/w40/${cc}.png" style="height:22px;vertical-align:middle;border-radius:2px" alt="${name}" onerror="this.style.display='none'">`:"";}
 
 const sbOK=SUPABASE_URL.includes("supabase.co");
-if(sbOK){try{sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);initAuth();}catch(e){}}
+if(sbOK){
+  try{
+    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+    initAuth();
+  }catch(e){
+    console.error("Supabase init failed:",e);
+    setTimeout(()=>showToast("\u26a0\ufe0f Supabase-Verbindung fehlgeschlagen: "+e.message),1200);
+  }
+}
 
 async function initAuth(){
   if(!sb)return;
@@ -1741,8 +1764,8 @@ function render(){
         </div>
       </div>
       <div class="hl-btn-row">
-        <button class="hl-btn hl-higher${sel!==null?(q.ans==="higher"?" ok":(sel==="higher"?" ng":" dm")):\"\"}" ${hlDis} onclick="answer('higher')">\u2b06\ufe0f Mehr / L\u00e4nger / Gr\u00f6\u00dfer</button>
-        <button class="hl-btn hl-lower${sel!==null?(q.ans==="lower"?" ok":(sel==="lower"?" ng":" dm")):\"\"}" ${hlDis} onclick="answer('lower')">\u2b07\ufe0f Weniger / K\u00fcrzer / Kleiner</button>
+        <button class="hl-btn hl-higher${sel!==null?(q.ans==="higher"?" ok":(sel==="higher"?" ng":" dm")):""}" ${hlDis} onclick="answer('higher')">\u2b06\ufe0f Mehr / L\u00e4nger / Gr\u00f6\u00dfer</button>
+        <button class="hl-btn hl-lower${sel!==null?(q.ans==="lower"?" ok":(sel==="lower"?" ng":" dm")):""}" ${hlDis} onclick="answer('lower')">\u2b07\ufe0f Weniger / K\u00fcrzer / Kleiner</button>
       </div>`;
   }else if(q.type==="curr_real"){
     /* Show country name; hide currency name (meta) until answered */
