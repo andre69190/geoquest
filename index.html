@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>GeoQuest</title>
 <link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <style>
 :root{--bg:#f0f4f8;--bg2:#ffffff;--bg3:#f8fafc;--bg4:#e2e8f0;--border:#e2e8f0;--text:#0f172a;--text2:#475569;--text3:#94a3b8;--accent:#10b981;--shadow:0 1px 8px rgba(0,0,0,.08);--qcard:#fff;--hdr-bg:#fff;--hdr-border:#e2e8f0}
 [data-theme=dark]{--bg:#0f172a;--bg2:#1e293b;--bg3:#0a0f1e;--bg4:#334155;--border:#334155;--text:#f1f5f9;--text2:#94a3b8;--text3:#475569;--shadow:0 2px 20px rgba(0,0,0,.4);--qcard:#fff;--hdr-bg:#0a0f1e;--hdr-border:#1e293b}
@@ -283,6 +285,59 @@ input[type=text]::placeholder{color:var(--text3)}
 /* Phase 30 — Survival diff button */
 .diff-btn.active[onclick*="survival"]{background:#7f1d1d;color:#fca5a5;border-color:#ef4444}
 
+/* Phase 33 — Multiplayer */
+.pvp-hero{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);border:1.5px solid #7c3aed;border-radius:14px;padding:.85rem 1rem;margin-bottom:.65rem;cursor:pointer;transition:opacity .15s}
+.pvp-hero:active{opacity:.8}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:#7c3aed;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Phase 34: Map Guesser ───────────────────────────────────── */
+.map-scr{display:flex;flex-direction:column;padding-bottom:.5rem}
+.map-prompt{text-align:center;font-size:1rem;font-weight:700;color:var(--text);
+  padding:.5rem .8rem .35rem;letter-spacing:.01em}
+.map-prompt strong{color:#3b82f6}
+.map-container{flex:1;min-height:200px;max-height:300px;width:100%;
+  background:var(--bg2);border-radius:14px;overflow:hidden;
+  touch-action:pan-x pan-y;margin-bottom:.5rem}
+.map-container svg{display:block;width:100%;height:100%}
+.map-container .ctry{cursor:pointer;transition:fill .15s}
+.map-weiter{margin:.25rem .8rem .4rem}
+
+/* ── Phase 33 Teil 2: MP result card ────────────────────────── */
+.mp-result-card{background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:18px;padding:1rem;margin:.75rem 0 .25rem;text-align:center}
+.mp-result-title{font-size:.68rem;font-weight:800;letter-spacing:1.5px;
+  color:var(--text3);text-transform:uppercase;margin-bottom:.75rem}
+.mp-result-row{display:flex;justify-content:space-around;align-items:center;gap:.5rem}
+.mp-result-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.mp-result-name{font-size:.75rem;color:var(--text2);font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
+.mp-result-score{font-size:1.65rem;font-weight:900;letter-spacing:-1px}
+.mp-you .mp-result-score{color:#10b981}
+.mp-opp .mp-result-score{color:#8b5cf6}
+.mp-result-verdict{font-size:.95rem;font-weight:800;margin-top:.65rem;color:var(--text)}
+
+/* ── Phase 33 T2: Duell Live-Bar ─────────────────────────────── */
+.duell-bar-wrap{display:flex;align-items:center;gap:5px;
+  padding:3px 8px 5px;margin-bottom:2px}
+.duell-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;
+  overflow:hidden;display:flex}
+.duell-fill-you{background:#10b981;height:100%;border-radius:3px 0 0 3px;
+  transition:width .5s ease}
+.duell-fill-opp{background:#8b5cf6;height:100%;border-radius:0 3px 3px 0;
+  transition:width .5s ease;margin-left:auto}
+.duell-lbl{font-size:.62rem;font-weight:700;color:var(--text3);
+  display:flex;flex-direction:column;align-items:center;min-width:34px;line-height:1.2}
+.duell-you{color:#10b981}
+.duell-opp{color:#8b5cf6}
+.duell-score{font-size:.7rem;font-weight:800;font-variant-numeric:tabular-nums}
+/* final comparison bar on game-over */
+.duell-final-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;
+  margin:.6rem 0 .4rem;background:var(--bg3)}
+.dfb-fill-you{background:#10b981;transition:width .8s ease}
+.dfb-fill-opp{background:#8b5cf6;margin-left:auto;transition:width .8s ease}
+.mp-waiting{color:var(--text3);font-size:.82rem;margin-top:.5rem;line-height:1.6}
+
 </style>
 </head>
 <body>
@@ -292,10 +347,12 @@ input[type=text]::placeholder{color:var(--text3)}
 
 const SUPABASE_URL  = "https://lpwcqvxajahiftvwxovq.supabase.co";
 const SUPABASE_ANON = "sb_publishable_HL6cIlPOtVAdkjycaiceGQ_CBNFF-dG";
-const ADMIN_EMAIL   = "admin@geoquest.local";
+/* ADMIN_EMAIL removed — use Supabase trigger instead */
 
 /* PAYMENT CONFIG */
 const STRIPE_PK = "";
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#x27;");}
+
 const PAY_PRODUCTS = [
   {id:"coins_500",  name:"500 GeoCoins",         price:"1,99 \u20ac", coins:500,  premium:false, desc:"Einmalkauf \u2022 sofort gutgeschrieben"},
   {id:"coins_2000", name:"2.000 GeoCoins",        price:"4,99 \u20ac", coins:2000, premium:false, desc:"Beliebt \u2022 Sparpreis", featured:true},
@@ -420,6 +477,8 @@ const MODES=[
   {id:"hl_river", icon:"\u{1F30A}",title:"H/L Flussl\u00e4nge", group:"hl_compare",prompt:"L\u00e4ngerer Fluss?"},
   {id:"hl_area",  icon:"\u{1F5FA}",title:"H/L Landfl\u00e4che",  group:"hl_compare",prompt:"Gr\u00f6\u00dferes Land?"},
   {id:"neighbor", icon:"\u{1F91D}",title:"Grenzg\u00e4nger",     group:"neighbors", prompt:"Grenzt an\u2026?"},
+  /* Phase 34 */
+  {id:"map_guess",icon:"\u{1F5FA}",title:"Finde das Land",group:"map_mode",prompt:"Klick auf das gesuchte Land"},
 ];
 
 const MODE_CATS={
@@ -428,6 +487,7 @@ const MODE_CATS={
   eu_plates:{label:"EU-Kennzeichen",icon:"\u{1F697}",modes:["plate_casual","plate_hard"],cost:500},
   hl_compare:{label:"Higher / Lower",icon:"\u2b06\ufe0f",modes:["hl_pop","hl_river","hl_area"],cost:0},
   neighbors:{label:"Nachbarl\u00e4nder",icon:"\u{1F91D}",modes:["neighbor"],cost:0},
+  map_mode:{label:"Weltkarte",icon:"\u{1F5FA}",modes:["map_guess"],cost:0},
 };
 
 /* Phase 28: New real-data mode generators */
@@ -435,8 +495,9 @@ function genCurrRealQ(){
   if(!CURR_REAL||!CURR_REAL.length)return null;
   const idx=~~(Math.random()*CURR_REAL.length);
   const cor=CURR_REAL[idx];
-  const dis=CURR_REAL.filter((_,i)=>i!==idx).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.c+" ("+x.iso+")");
-  const ans=cor.c+" ("+cor.iso+")";
+  /* Show only currency name+ISO — NOT country name (would give away the answer) */
+  const dis=CURR_REAL.filter((_,i)=>i!==idx).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.n+" ("+x.iso+")");
+  const ans=cor.n+" ("+cor.iso+")";
   return{type:"curr_real",prompt:"Welche W\u00e4hrung hat …",subj:cor.c,ans,opts:sh([ans,...dis]),meta:cor.n,lid:cor.c,cc:ccFromCountry(cor.c)};
 }
 function genPopCompareQ(){
@@ -561,6 +622,227 @@ function genNeighborQ(){
     return{type:"neighbor",prompt:"Welches Land grenzt an "+country+"?",subj:country,ans,opts:sh([ans,...dis.slice(0,3)]),lid:country+'|'+ans,cc:ccFromCountry(country)||''};
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 33 — REALTIME 1vs1 MULTIPLAYER  (Supabase Broadcast)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Helpers */
+function mpCode(){let c="";const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";for(let i=0;i<4;i++)c+=chars[~~(Math.random()*chars.length)];return c;}
+function mpLog(...a){console.log("[MP]",...a);}
+
+/* Close and clean up current channel */
+function mpLeave(){
+  if(S.mp?.channel)try{S.mp.channel.unsubscribe();}catch(e){}
+  S.mp=null;S.mpModal=false;render();
+}
+
+/* Send a broadcast on the current channel */
+function mpSend(event,payload){
+  if(!S.mp?.channel)return;
+  S.mp.channel.send({type:"broadcast",event,payload});
+}
+
+/* Countdown then start */
+function mpCountdown(seed,mode){
+  let t=3;
+  S.mp.phase="countdown";S.mp.countdown=t;render();
+  const iv=setInterval(()=>{
+    t--;S.mp.countdown=t;
+    if(t<=0){
+      clearInterval(iv);
+      S.mpModal=false;
+      /* Phase 33 Teil 2: keep channel alive for in-game score sync */
+      const _ch=S.mp.channel,_oppName=S.mp.oppName||"Gegner";
+      window.mpGameCh=_ch;
+      _ch.on("broadcast",{event:"score_update"},({payload})=>{
+        S.mpOppScore=payload.score||0;S.mpOppRd=payload.rd||0;render();
+      }).on("broadcast",{event:"game_over"},({payload})=>{
+        S.mpOppFinal=payload;
+        if(S.ph==="gameover")render();
+      });
+      S.mp=null;
+      /* Sync start — same seed on both sides */
+      initRng(seed);
+      startGame(mode||"city");
+      /* Tag session as multiplayer */
+      S.mpSeed=seed;S.mpOpponent=_oppName;
+      S.mpOppScore=0;S.mpOppRd=0;S.mpOppFinal=null;
+    }else render();
+  },1000);
+}
+
+/* HOST: create room */
+function mpCreate(){
+  if(!sb){showToast("Supabase nicht verbunden!");return;}
+  const code=mpCode();
+  const channel=sb.channel("room_"+code,{config:{broadcast:{self:false}}});
+  S.mp={role:"host",code,channel,phase:"waiting",myReady:false,oppReady:false,oppName:null};
+  render();
+
+  channel
+    .on("broadcast",{event:"player_joined"},({payload})=>{
+      mpLog("guest joined:",payload);
+      S.mp.oppName=payload.name||"Gast";
+      S.mp.phase="ready";
+      render();
+      /* Acknowledge the join */
+      mpSend("host_ack",{name:sbProfile?.username||"Host"});
+    })
+    .on("broadcast",{event:"player_ready"},({payload})=>{
+      mpLog("guest ready");
+      S.mp.oppReady=true;render();
+      if(S.mp.myReady&&S.mp.oppReady){
+        const seed=~~(Math.random()*1e9);
+        const mode=S.mode||"city";
+        mpSend("game_start",{seed,mode});
+        mpCountdown(seed,mode);
+      }
+    })
+    .on("broadcast",{event:"game_start"},()=>{/* host ignores own game_start */})
+    .subscribe((status)=>{
+      mpLog("host channel status:",status);
+      if(status==="SUBSCRIBED")render();
+    });
+}
+
+/* GUEST: join room */
+function mpJoin(code){
+  if(!sb){showToast("Supabase nicht verbunden!");return;}
+  if(!code||code.length<4){showToast("Bitte gültigen Code eingeben!");return;}
+  const uc=code.toUpperCase().trim();
+  const channel=sb.channel("room_"+uc,{config:{broadcast:{self:false}}});
+  S.mp={role:"guest",code:uc,channel,phase:"joining",myReady:false,oppReady:false,oppName:null};
+  render();
+
+  channel
+    .on("broadcast",{event:"host_ack"},({payload})=>{
+      mpLog("host ack:",payload);
+      S.mp.oppName=payload.name||"Host";
+      S.mp.phase="ready";render();
+    })
+    .on("broadcast",{event:"player_ready"},()=>{
+      S.mp.oppReady=true;render();
+    })
+    .on("broadcast",{event:"game_start"},({payload})=>{
+      mpLog("game_start received:",payload);
+      mpCountdown(payload.seed,payload.mode);
+    })
+    .subscribe((status)=>{
+      mpLog("guest channel status:",status);
+      if(status==="SUBSCRIBED"){
+        mpSend("player_joined",{name:sbProfile?.username||"Spieler"});
+        render();
+      }
+    });
+}
+
+/* Ready button */
+function mpReady(){
+  S.mp.myReady=true;render();
+  mpSend("player_ready",{name:sbProfile?.username||"Ich"});
+  /* Host: if guest was already ready */
+  if(S.mp.role==="host"&&S.mp.oppReady){
+    const seed=~~(Math.random()*1e9);
+    const mode=S.mode||"city";
+    mpSend("game_start",{seed,mode});
+    mpCountdown(seed,mode);
+  }
+}
+
+/* Render the full lobby modal */
+function renderMultiplayerLobby(){
+  const mp=S.mp;
+
+  /* ── Phase: initial (no room yet) ────────────────────────── */
+  if(!mp){
+    const joinInput=S._mpJoinCode||"";
+    return`<div class="scr">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.2rem">
+        <button class="btn-cancel" onclick="S.mpModal=false;render()">←</button>
+        <h2 style="font-size:1.3rem;font-weight:900;color:var(--text);margin:0">⚔️ Live 1vs1 Duell</h2>
+      </div>
+      <div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:1.4rem;margin-bottom:1rem;text-align:center">
+        <div style="font-size:2.5rem;margin-bottom:.5rem">\u{1F3E0}</div>
+        <div style="font-weight:900;font-size:1rem;color:var(--text);margin-bottom:.35rem">Spiel erstellen</div>
+        <div style="color:var(--text3);font-size:.78rem;margin-bottom:.9rem">Generiere einen Code und lade einen Freund ein</div>
+        <button class="btn-p" style="width:100%" onclick="mpCreate()">➕ Neues Spiel erstellen</button>
+      </div>
+      <div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:1.4rem;text-align:center">
+        <div style="font-size:2.5rem;margin-bottom:.5rem">\u{1F517}</div>
+        <div style="font-weight:900;font-size:1rem;color:var(--text);margin-bottom:.35rem">Mit Code beitreten</div>
+        <div style="color:var(--text3);font-size:.78rem;margin-bottom:.9rem">Gib den 4-stelligen Code deines Freundes ein</div>
+        <div style="display:flex;gap:8px">
+          <input type="text" maxlength="4" placeholder="z.B. A7B2" value="${esc(joinInput)}"
+            oninput="S._mpJoinCode=this.value.toUpperCase();this.value=this.value.toUpperCase()"
+            style="flex:1;font-size:1.2rem;font-weight:900;text-align:center;letter-spacing:4px;text-transform:uppercase">
+          <button class="btn-p" style="width:auto;padding:.6rem 1.2rem" onclick="mpJoin(S._mpJoinCode)">▶</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ── Phase: host waiting for guest ───────────────────────── */
+  if(mp.phase==="waiting"){
+    return`<div class="scr" style="text-align:center">
+      <button class="btn-cancel" style="float:left" onclick="mpLeave()">←</button>
+      <div style="clear:both;padding-top:.5rem"></div>
+      <div style="font-size:3rem;margin:1rem 0">\u{1F4F1}</div>
+      <h2 style="font-size:1.3rem;font-weight:900;color:var(--text);margin-bottom:.5rem">Warte auf Gegner…</h2>
+      <p style="color:var(--text3);font-size:.82rem;margin-bottom:1.4rem">Gib diesen Code an deinen Freund:</p>
+      <div style="display:inline-block;background:var(--bg3);border:3px solid #7c3aed;border-radius:16px;padding:1rem 2rem;font-size:3rem;font-weight:900;letter-spacing:10px;color:#7c3aed;margin-bottom:1rem">${esc(mp.code)}</div>
+      <p style="color:var(--text3);font-size:.74rem">Verbunden — Channel aktiv</p>
+      <div style="margin-top:1.5rem;display:flex;justify-content:center">
+        <div class="spinner"></div>
+      </div>
+    </div>`;
+  }
+
+  /* ── Phase: guest joining ─────────────────────────────────── */
+  if(mp.phase==="joining"){
+    return`<div class="scr" style="text-align:center">
+      <div style="font-size:3rem;margin:2rem 0">\u{1F50D}</div>
+      <h2 style="font-size:1.2rem;font-weight:900;color:var(--text)">Verbinde mit Raum ${esc(mp.code)}…</h2>
+      <div style="margin-top:1.5rem;display:flex;justify-content:center"><div class="spinner"></div></div>
+    </div>`;
+  }
+
+  /* ── Phase: both in room — ready check ───────────────────── */
+  if(mp.phase==="ready"){
+    const myR=mp.myReady,oppR=mp.oppReady;
+    return`<div class="scr" style="text-align:center">
+      <button class="btn-cancel" style="float:left" onclick="mpLeave()">←</button>
+      <div style="clear:both;padding-top:.5rem"></div>
+      <div style="font-size:2.5rem;margin:.6rem 0">\u{1F7E2}</div>
+      <h2 style="font-size:1.2rem;font-weight:900;color:var(--text);margin-bottom:.3rem">Gegner gefunden!</h2>
+      <p style="color:var(--text3);font-size:.8rem;margin-bottom:1.2rem">Gegner: <strong>${esc(mp.oppName||"Unbekannt")}</strong></p>
+      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:1.4rem">
+        <div style="background:var(--bg2);border:2px solid ${myR?"#10b981":"var(--border)"};border-radius:12px;padding:.75rem 1.2rem;min-width:100px">
+          <div style="font-size:1.3rem">${myR?"✅":"⏳"}</div>
+          <div style="font-size:.72rem;color:var(--text3);margin-top:4px">Du</div>
+        </div>
+        <div style="font-size:1.4rem;align-self:center;color:var(--text3)">VS</div>
+        <div style="background:var(--bg2);border:2px solid ${oppR?"#10b981":"var(--border)"};border-radius:12px;padding:.75rem 1.2rem;min-width:100px">
+          <div style="font-size:1.3rem">${oppR?"✅":"⏳"}</div>
+          <div style="font-size:.72rem;color:var(--text3);margin-top:4px">${esc(mp.oppName||"Gegner")}</div>
+        </div>
+      </div>
+      ${myR?`<div style="color:var(--text3);font-size:.82rem">Warte auf ${esc(mp.oppName||"Gegner")}…</div>`
+           :`<button class="btn-p" style="width:100%;font-size:1.1rem" onclick="mpReady()">\u{1F3C1} Bereit!</button>`}
+    </div>`;
+  }
+
+  /* ── Phase: countdown ────────────────────────────────────── */
+  if(mp.phase==="countdown"){
+    return`<div class="scr" style="text-align:center;padding-top:30%">
+      <div style="font-size:6rem;font-weight:900;color:#7c3aed;line-height:1">${mp.countdown}</div>
+      <div style="color:var(--text2);font-size:1rem;margin-top:.8rem">Spiel startet…</div>
+    </div>`;
+  }
+
+  return`<div class="scr"><button onclick="mpLeave()">← Zurück</button></div>`;
+}
+
 /* ACHIEVEMENTS */
 const ACHIEVEMENTS=[
   {id:"first_blood", icon:"\u{1F3AF}", title:"Erster Treffer",    desc:"Erste richtige Antwort", check:(S,h)=>h.some(g=>g.correct>0)},
@@ -583,6 +865,7 @@ function loadUnlocked(){try{return JSON.parse(localStorage.getItem("gq_unlocked"
 function saveUnlocked(arr){try{localStorage.setItem("gq_unlocked",JSON.stringify(arr));}catch(e){}}
 function isCategoryUnlocked(catId){return true;/* TEST MODE — all categories unlocked */}
 function buyCategory(catId){
+  if(!sb||!sbUser?.id){showToast("Bitte einloggen!"); return;}
   const cat=MODE_CATS[catId];if(!cat)return;
   const coins=sbProfile?.geo_coins||0;
   if(coins<cat.cost){showToast("Zu wenig GeoCoins!");return;}
@@ -674,10 +957,7 @@ async function loadProfile(){
   if(!sb||!sbUser)return;
   const{data}=await sb.from("profiles").select("*").eq("id",sbUser.id).single();
   sbProfile=data;
-  if(sbUser.email===ADMIN_EMAIL&&(!sbProfile?.is_premium)){
-    await sb.from("profiles").update({is_premium:true,geo_coins:999999}).eq("id",sbUser.id);
-    if(sbProfile){sbProfile.is_premium=true;sbProfile.geo_coins=999999;}
-  }
+  /* Admin privileges handled server-side via Supabase trigger */
   const{data:stamps}=await sb.from("user_stamps").select("stamp_id,stamps(country_code)").eq("user_id",sbUser.id);
   if(stamps)stamps.forEach(s=>s.stamps&&sbStamps.add(s.stamps.country_code));
   render();
@@ -782,10 +1062,18 @@ async function doLogout(){
   if(data)sbUser=data.user;
   render();
 }
-async function saveSession(mode,score,bs,correct){
+async function saveSession(mode,score,bs,correct,durationMs){
+  /* Phase 33 Teil 2: notify opponent at game end */
+  if(window.mpGameCh&&S.mpOpponent){
+    window.mpGameCh.send({type:"broadcast",event:"game_over",
+      payload:{score,name:sbProfile?.username||"Ich",correct}}).catch(()=>{});
+    window.mpGameCh=null;
+  }
   if(!sb||!sbUser)return;
+  if(!sb||!sbUser?.id)return;
   await sb.from("game_sessions").insert({user_id:sbUser.id,mode,score,best_streak:bs,rounds:ROUNDS,accuracy:Math.round(correct/ROUNDS*100),username:sbProfile?.username||null});
-  await sb.from("profiles").update({total_score:(sbProfile?.total_score||0)+score,games_played:(sbProfile?.games_played||0)+1}).eq("id",sbUser.id);
+  /* Use RPC to prevent client-side score tampering */
+  await sb.rpc("add_score",{p_user_id:sbUser.id,p_score:score,p_coins:Math.floor(score/100),p_rounds:ROUNDS,p_duration_ms:durationMs||0}).catch(()=>{});
   if(sbProfile){sbProfile.total_score=(sbProfile.total_score||0)+score;sbProfile.games_played=(sbProfile.games_played||0)+1;}
 }
 async function fetchLeaderboard(mode){
@@ -849,7 +1137,7 @@ let S={
   lbData:[],lbLoading:false,scoreSaved:false,newUsername:"",
   sessionAnswers:[],newStamps:[],modal:null,
   obStep:-1,obLang:"de",obDiff:"casual",
-  payModal:false,
+  payModal:false,mpModal:false,mp:null,
   challenge:null,challengeSeed:null,
   pwaPrompt:null,
   lockModal:null,
@@ -1046,6 +1334,16 @@ function genPlateQ(hardcore){
   };
 }
 
+/* Phase 34: Map quiz countries */
+const MAP_COUNTRIES=[{"cc":"fj","name":"Fiji"},{"cc":"tz","name":"Tanzania"},{"cc":"ca","name":"Canada"},{"cc":"us","name":"United States of America"},{"cc":"kz","name":"Kazakhstan"},{"cc":"uz","name":"Uzbekistan"},{"cc":"pg","name":"Papua New Guinea"},{"cc":"id","name":"Indonesia"},{"cc":"ar","name":"Argentina"},{"cc":"cl","name":"Chile"},{"cc":"cd","name":"Dem. Rep. Congo"},{"cc":"so","name":"Somalia"},{"cc":"ke","name":"Kenya"},{"cc":"sd","name":"Sudan"},{"cc":"td","name":"Chad"},{"cc":"ht","name":"Haiti"},{"cc":"do","name":"Dominican Rep."},{"cc":"ru","name":"Russia"},{"cc":"bs","name":"Bahamas"},{"cc":"no","name":"Norway"},{"cc":"za","name":"South Africa"},{"cc":"ls","name":"Lesotho"},{"cc":"mx","name":"Mexico"},{"cc":"uy","name":"Uruguay"},{"cc":"br","name":"Brazil"},{"cc":"bo","name":"Bolivia"},{"cc":"pe","name":"Peru"},{"cc":"co","name":"Colombia"},{"cc":"pa","name":"Panama"},{"cc":"cr","name":"Costa Rica"},{"cc":"ni","name":"Nicaragua"},{"cc":"hn","name":"Honduras"},{"cc":"sv","name":"El Salvador"},{"cc":"gt","name":"Guatemala"},{"cc":"bz","name":"Belize"},{"cc":"ve","name":"Venezuela"},{"cc":"gy","name":"Guyana"},{"cc":"sr","name":"Suriname"},{"cc":"fr","name":"France"},{"cc":"ec","name":"Ecuador"},{"cc":"jm","name":"Jamaica"},{"cc":"cu","name":"Cuba"},{"cc":"zw","name":"Zimbabwe"},{"cc":"bw","name":"Botswana"},{"cc":"na","name":"Namibia"},{"cc":"sn","name":"Senegal"},{"cc":"ml","name":"Mali"},{"cc":"mr","name":"Mauritania"},{"cc":"bj","name":"Benin"},{"cc":"ne","name":"Niger"},{"cc":"ng","name":"Nigeria"},{"cc":"cm","name":"Cameroon"},{"cc":"tg","name":"Togo"},{"cc":"gh","name":"Ghana"},{"cc":"ci","name":"Côte d'Ivoire"},{"cc":"gn","name":"Guinea"},{"cc":"gw","name":"Guinea-Bissau"},{"cc":"lr","name":"Liberia"},{"cc":"sl","name":"Sierra Leone"},{"cc":"bf","name":"Burkina Faso"},{"cc":"cf","name":"Central African Rep."},{"cc":"cg","name":"Congo"},{"cc":"ga","name":"Gabon"},{"cc":"gq","name":"Eq. Guinea"},{"cc":"zm","name":"Zambia"},{"cc":"mw","name":"Malawi"},{"cc":"mz","name":"Mozambique"},{"cc":"sz","name":"eSwatini"},{"cc":"ao","name":"Angola"},{"cc":"bi","name":"Burundi"},{"cc":"il","name":"Israel"},{"cc":"lb","name":"Lebanon"},{"cc":"mg","name":"Madagascar"},{"cc":"ps","name":"Palestine"},{"cc":"gm","name":"Gambia"},{"cc":"tn","name":"Tunisia"},{"cc":"dz","name":"Algeria"},{"cc":"jo","name":"Jordan"},{"cc":"ae","name":"United Arab Emirates"},{"cc":"qa","name":"Qatar"},{"cc":"kw","name":"Kuwait"},{"cc":"iq","name":"Iraq"},{"cc":"om","name":"Oman"},{"cc":"vu","name":"Vanuatu"},{"cc":"kh","name":"Cambodia"},{"cc":"th","name":"Thailand"},{"cc":"la","name":"Laos"},{"cc":"mm","name":"Myanmar"},{"cc":"vn","name":"Vietnam"},{"cc":"kp","name":"North Korea"},{"cc":"kr","name":"South Korea"},{"cc":"mn","name":"Mongolia"},{"cc":"in","name":"India"},{"cc":"bd","name":"Bangladesh"},{"cc":"bt","name":"Bhutan"},{"cc":"np","name":"Nepal"},{"cc":"pk","name":"Pakistan"},{"cc":"af","name":"Afghanistan"},{"cc":"tj","name":"Tajikistan"},{"cc":"kg","name":"Kyrgyzstan"},{"cc":"tm","name":"Turkmenistan"},{"cc":"ir","name":"Iran"},{"cc":"sy","name":"Syria"},{"cc":"am","name":"Armenia"},{"cc":"se","name":"Sweden"},{"cc":"by","name":"Belarus"},{"cc":"ua","name":"Ukraine"},{"cc":"pl","name":"Poland"},{"cc":"at","name":"Austria"},{"cc":"hu","name":"Hungary"},{"cc":"md","name":"Moldova"},{"cc":"ro","name":"Romania"},{"cc":"lt","name":"Lithuania"},{"cc":"lv","name":"Latvia"},{"cc":"ee","name":"Estonia"},{"cc":"de","name":"Germany"},{"cc":"bg","name":"Bulgaria"},{"cc":"gr","name":"Greece"},{"cc":"tr","name":"Turkey"},{"cc":"al","name":"Albania"},{"cc":"hr","name":"Croatia"},{"cc":"ch","name":"Switzerland"},{"cc":"lu","name":"Luxembourg"},{"cc":"be","name":"Belgium"},{"cc":"nl","name":"Netherlands"},{"cc":"pt","name":"Portugal"},{"cc":"es","name":"Spain"},{"cc":"ie","name":"Ireland"},{"cc":"nz","name":"New Zealand"},{"cc":"au","name":"Australia"},{"cc":"lk","name":"Sri Lanka"},{"cc":"cn","name":"China"},{"cc":"tw","name":"Taiwan"},{"cc":"it","name":"Italy"},{"cc":"dk","name":"Denmark"},{"cc":"gb","name":"United Kingdom"},{"cc":"is","name":"Iceland"},{"cc":"az","name":"Azerbaijan"},{"cc":"ge","name":"Georgia"},{"cc":"ph","name":"Philippines"},{"cc":"my","name":"Malaysia"},{"cc":"bn","name":"Brunei"},{"cc":"si","name":"Slovenia"},{"cc":"fi","name":"Finland"},{"cc":"sk","name":"Slovakia"},{"cc":"cz","name":"Czechia"},{"cc":"er","name":"Eritrea"},{"cc":"jp","name":"Japan"},{"cc":"py","name":"Paraguay"},{"cc":"ye","name":"Yemen"},{"cc":"sa","name":"Saudi Arabia"},{"cc":"cy","name":"Cyprus"},{"cc":"ma","name":"Morocco"},{"cc":"eg","name":"Egypt"},{"cc":"ly","name":"Libya"},{"cc":"et","name":"Ethiopia"},{"cc":"dj","name":"Djibouti"},{"cc":"ug","name":"Uganda"},{"cc":"rw","name":"Rwanda"},{"cc":"ba","name":"Bosnia and Herz."},{"cc":"mk","name":"Macedonia"},{"cc":"rs","name":"Serbia"},{"cc":"me","name":"Montenegro"},{"cc":"tt","name":"Trinidad and Tobago"},{"cc":"ss","name":"S. Sudan"}];
+
+function genMapGuessQ(){
+  if(!MAP_COUNTRIES.length)return null;
+  const idx=~~(Math.random()*MAP_COUNTRIES.length);
+  const co=MAP_COUNTRIES[idx];if(!co)return null;
+  return{type:"map_guess",prompt:"Finde das Land auf der Karte",subj:co.name,
+    ans:co.name,opts:[],meta:"",lid:co.cc,cc:co.cc};
+}
 const GEN={
   city:genCityQ,flag:genFlagQ,capital:genCapitalQ,river:genRiverQ,
   landmark:genLandmarkQ,park:genParkQ,unesco:genUnescoQ,citymark:genCitymarkQ,
@@ -1060,10 +1358,22 @@ const GEN={
   hl_river:genHLRiverQ,
   hl_area:genHLAreaQ,
   neighbor:genNeighborQ,
+  map_guess:genMapGuessQ,
 };
 
 /* GAME LOOP */
 function clr(){clearInterval(tIv);clearTimeout(fTo);}
+function nextRound(){
+  clr();
+  const nr=S.rd+1;
+  if(S.diff!=="survival"&&nr>=ROUNDS){
+    S.ph="gameover";S.scoreSaved=false;soundOver();checkMastery();
+    if(S.isDailyRun&&!isDailyDone()){markDailyDone(S.sc);if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;if(sb&&sbUser)sb.from("profiles").update({geo_coins:(sbProfile?.geo_coins||0)}).eq("id",sbUser.id).catch(()=>{});}
+    saveHistory({mode:S.mode,score:S.sc,correct:S.correct,rounds:ROUNDS,date:Date.now(),answers:S.sessionAnswers.map(a=>({cc:a.cc,correct:a.correct}))});
+    if(sbOK)saveSession(S.mode,S.sc,S.bs,S.correct,Date.now()-(S.gameStartTime||Date.now())).then(()=>{S.scoreSaved=true;render();});
+    render();
+  }else{S.rd=nr;lq();}
+}
 function lq(){
   if(!S.queueExtra)S.queueExtra=[];
   if(!S.askedLids)S.askedLids=new Set();
@@ -1103,7 +1413,7 @@ function answer(a){
       S.survivalBest=Math.max(survived,sb_prev);
       S.ph="gameover";S.scoreSaved=false;soundOver();checkMastery();
       saveHistory({mode:S.mode,score:S.sc,correct:S.correct,rounds:survived,date:Date.now(),diff:"survival",answers:S.sessionAnswers.map(a=>({cc:a.cc,correct:a.correct}))});
-      if(sbOK)saveSession(S.mode,S.sc,S.bs,S.correct).then(()=>{S.scoreSaved=true;render();});
+      if(sbOK)saveSession(S.mode,S.sc,S.bs,S.correct,Date.now()-(S.gameStartTime||Date.now())).then(()=>{S.scoreSaved=true;render();});
       if(sb&&sbUser)sb.from("profiles").update({survival_best:Math.max(survived,sbProfile?.survival_best||0)}).eq("id",sbUser.id).catch(()=>{});
       S.pts=pts;S.lid=S.q.lid;render();
       return;
@@ -1112,6 +1422,11 @@ function answer(a){
     if(S.diff==="casual"&&!S.q._retry){if(!S.queueExtra)S.queueExtra=[];S.queueExtra.push({...S.q,_retry:true});}
   }
   S.pts=pts;S.lid=S.q.lid;S.ph="feedback";render();
+  /* Phase 33 Teil 2 */
+  if(window.mpGameCh&&S.mpOpponent){
+    window.mpGameCh.send({type:"broadcast",event:"score_update",
+      payload:{score:S.sc,rd:S.rd,correct:S.correct}}).catch(()=>{});
+  }
   fTo=setTimeout(()=>{
     const nr=S.rd+1;
     if(S.diff!=="survival"&&nr>=ROUNDS){
@@ -1122,7 +1437,7 @@ function answer(a){
         if(sb&&sbUser)sb.from("profiles").update({geo_coins:(sbProfile?.geo_coins||0)}).eq("id",sbUser.id).catch(()=>{});
       }
       saveHistory({mode:S.mode,score:S.sc,correct:S.correct,rounds:ROUNDS,date:Date.now(),answers:S.sessionAnswers.map(a=>({cc:a.cc,correct:a.correct}))});
-      if(sbOK)saveSession(S.mode,S.sc,S.bs,S.correct).then(()=>{S.scoreSaved=true;render();});
+      if(sbOK)saveSession(S.mode,S.sc,S.bs,S.correct,Date.now()-(S.gameStartTime||Date.now())).then(()=>{S.scoreSaved=true;render();});
       render();
     }else{S.rd=nr;lq();}
   },1700);
@@ -1133,7 +1448,7 @@ function startGame(m){
   Object.assign(S,{sc:0,st:0,bs:0,rd:0,correct:0,lid:null,ph:"playing",mode:m||S.mode,
     scoreSaved:false,sessionAnswers:[],newStamps:[],isDailyRun:false,challengeStarted:false,
     half_removed:false,freezeActive:false,queueExtra:[],askedLids:new Set(),
-    survivalBest:survBest});
+    survivalBest:survBest,gameStartTime:Date.now()});
   lq();
 }
 async function showLeaderboard(){S.ph="menu";S.tab="home";S.lbLoading=true;render();S.lbData=await fetchLeaderboard(S.mode);S.lbLoading=false;render();}
@@ -1161,7 +1476,7 @@ function shareResult(){
 function updateHdrGuest(){
   const hdr=document.getElementById("g-hdr");
   const _uname=sbProfile?.username||localStorage.getItem("gq_username")||null;
-  if(hdr)hdr.innerHTML=`<span class="g-logo">GEO<span>QUEST</span></span><div class="g-stats">${_uname?`<span class="g-stat" style="color:#10b981">\uD83D\uDC64 ${_uname}</span>`:""}<span class="g-stat">\u{1F525} ${S.st}</span><span class="g-stat">\u{1F4B0} ${(sbProfile?.geo_coins||0).toLocaleString()}</span><button class="hdr-gear" onclick="S.settingsModal=!S.settingsModal;render()" title="Einstellungen">\u2699\ufe0f</button></div>`;
+  if(hdr)hdr.innerHTML=`<span class="g-logo">GEO<span>QUEST</span></span><div class="g-stats">${_uname?`<span class="g-stat" style="color:#10b981">\uD83D\uDC64 ${esc(_uname)}</span>`:""}<span class="g-stat">\u{1F525} ${S.st}</span><span class="g-stat">\u{1F4B0} ${(sbProfile?.geo_coins||0).toLocaleString()}</span><button class="hdr-gear" onclick="S.settingsModal=!S.settingsModal;render()" title="Einstellungen">\u2699\ufe0f</button></div>`;
 }
 function stampHtml(cc,rank,rot){
   const cn=COUNTRIES.find(c=>c.cc===cc)?.c||cc.toUpperCase();
@@ -1188,7 +1503,7 @@ function startDailyChallenge(){
   const seed=getDailySeed();
   initRng(seed);
   S.mode="city";S.diff="casual";S.isDailyRun=true;
-  Object.assign(S,{sc:0,st:0,bs:0,rd:0,correct:0,lid:null,ph:"playing",scoreSaved:false,sessionAnswers:[],newStamps:[],half_removed:false,freezeActive:false,queueExtra:[],askedLids:new Set()});
+  Object.assign(S,{sc:0,st:0,bs:0,rd:0,correct:0,lid:null,ph:"playing",scoreSaved:false,sessionAnswers:[],newStamps:[],half_removed:false,freezeActive:false,queueExtra:[],askedLids:new Set(),gameStartTime:Date.now()});
   lq();
 }
 function renderDailyHero(){
@@ -1230,6 +1545,7 @@ function render(){
     if(S.obStep<0)S.obStep=0;
     app.innerHTML=renderOnboarding(S.obStep);return;
   }
+  if(S.mpModal){app.innerHTML=renderMultiplayerLobby();return;}
   if(S.payModal){app.innerHTML=renderPayModal();return;}
   if(S.lockModal){app.innerHTML=renderLockModal(S.lockModal);return;}
 
@@ -1339,6 +1655,28 @@ function render(){
       <button class="share-btn" onclick="shareResult()">\u{1F4CB} Ergebnis teilen</button>
       <button class="btn-p" onclick="rngSeed=null;S.challenge=null;S.challengeStarted=false;startGame()">NOCHMAL</button>
       <button class="btn-g" onclick="S.ph='menu';S.tab='home';rngSeed=null;render()">Hauptmen\u00fc</button>
+      ${S.mpOpponent?`
+      <div class="mp-result-card">
+        <div class="mp-result-title">\u2694\ufe0f Duell-Ergebnis</div>
+        <div class="mp-result-row">
+          <div class="mp-result-col mp-you">
+            <div class="mp-result-name">Ich</div>
+            <div class="mp-result-score">${S.sc.toLocaleString()}</div>
+          </div>
+          <div style="font-size:1.4rem;align-self:center;color:var(--text3)">vs</div>
+          <div class="mp-result-col mp-opp">
+            <div class="mp-result-name">${esc(S.mpOpponent)}</div>
+            <div class="mp-result-score">${S.mpOppFinal?S.mpOppFinal.score.toLocaleString():'...'}</div>
+          </div>
+        </div>
+        ${S.mpOppFinal
+          ?`<div class="duell-final-bar">
+              <div class="dfb-fill-you" style="width:${Math.round(S.sc/Math.max(S.sc,S.mpOppFinal.score,1)*100)}%"></div>
+              <div class="dfb-fill-opp" style="width:${Math.round(S.mpOppFinal.score/Math.max(S.sc,S.mpOppFinal.score,1)*100)}%"></div>
+            </div>
+            <div class="mp-result-verdict">${S.sc>S.mpOppFinal.score?'\u{1F3C6} Du gewinnst!':S.sc<S.mpOppFinal.score?'\u{1F614} Niederlage':'\u{1F91D} Unentschieden!'}</div>`
+          :'<div class="mp-waiting">\u23f3 Warte auf Gegner\u2026<br><button class="btn-g" style="margin-top:.5rem;width:auto;padding:.35rem .9rem;font-size:.75rem" onclick="S.mpOpponent=null;render()">Trotzdem weiter</button></div>'}
+      </div>`:""}
     </div>`;
     return;
   }
@@ -1393,6 +1731,35 @@ function render(){
     const pc=PLATES_DATA.find(p=>p.code===q.subj);
     if(pc)plateReveal=`<div style="text-align:center;color:var(--text2);font-size:.8rem;margin-top:4px">${pc.region} \u00b7 ${pc.country}${pc.state?" \u00b7 "+pc.state:""}</div>`;
   }
+  /* Phase 34: Map-Guesser — early return, D3 map replaces answer buttons */
+  if(q.type==="map_guess"){
+    const mapFb=sel===null?"":ok
+      ?`<div class="fb ok">\u2713 Richtig! +${pts}</div>`
+      :`<div class="fb ng">\u2717 Falsch \u2192 ${q.ans}</div>`;
+    app.innerHTML=`<div class="scr map-scr">
+      <div class="hud">
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="pill"><div class="hlbl">SCORE</div><div class="hval">${sc.toLocaleString()}</div></div>
+          ${st>0?`<div class="pill-s"><div class="hlbl" style="color:#fb923c">STREAK</div><div class="hval-s">\u00d7${st}</div></div>`:""}
+          ${S.mpOpponent?`<div class="pill" style="opacity:.7"><div class="hlbl" style="color:#8b5cf6">\u2694</div><div class="hval" style="color:#8b5cf6">${(S.mpOppScore||0).toLocaleString()}</div></div>`:""}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${diff==="survival"
+            ?`<div style="text-align:right"><div class="hlbl" style="color:#ef4444">\ud83d\udc80 SURVIVAL</div><div style="color:var(--text);font-weight:700;font-size:.9rem">${rd+1}<span style="color:var(--text3)">\u221e</span></div></div>`
+            :`<div style="text-align:right"><div class="hlbl" style="color:var(--text3)">RUNDE</div><div style="color:var(--text);font-weight:700;font-size:.9rem">${rd+1}<span style="color:var(--text3)">/${ROUNDS}</span></div></div>`}
+          <button class="btn-cancel" onclick="clr();S.ph='menu';S.tab='home';render()">\u00d7</button>
+        </div>
+      </div>
+      ${S.mpOpponent?`<div class="duell-bar-wrap" style="margin:0 0 4px"><div class="duell-lbl duell-you">Ich<span class="duell-score">${sc.toLocaleString()}</span></div><div class="duell-track"><div class="duell-fill-you" style="width:${(()=>{const mx=Math.max(sc,S.mpOppScore||0,1);return Math.round(sc/mx*100)})()}%"></div><div class="duell-fill-opp" style="width:${(()=>{const mx=Math.max(sc,S.mpOppScore||0,1);return Math.round((S.mpOppScore||0)/mx*100)})()}%"></div></div><div class="duell-lbl duell-opp"><span class="duell-score">${(S.mpOppScore||0).toLocaleString()}</span>${esc(S.mpOpponent.slice(0,8))}</div></div>`:""}
+      <div class="tbar${S.freezeActive?\" frozen\":\"\"}"><div class="tfill" style="width:${p}%;background:${col}"></div></div>
+      <div class="map-prompt">\u{1F5FA} Finde: <strong>${esc(q.subj)}</strong></div>
+      <div id="gq-map-svg" class="map-container"></div>
+      ${mapFb}
+      ${sel!==null?`<button class="btn-p map-weiter" onclick="clr();nextRound()">Weiter \u2192</button>`:""}
+    </div>`;
+    requestAnimationFrame(()=>drawWorldMap(q.ans,sel,ok));
+    return;
+  }
   let answerHtml="";
   if(q.type==="flagsel"){
     const fb2=q.opts.map(cc=>{let cls="btn-flag";if(sel!==null){if(cc===q.ans)cls+=" ok";else if(cc===sel)cls+=" ng";else cls+=" dm";}return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${cc}')"><img src="https://flagcdn.com/w120/${cc}.png" alt="${cc}" onerror="this.style.display='none'"></button>`;}).join("");
@@ -1415,9 +1782,9 @@ function render(){
         <div style="color:var(--text3);font-size:.82rem;text-align:center;margin:.5rem 0">${q.prompt}</div>
         <div class="btns">${q.opts.map(o=>{let cls="btn-a";if(sel!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${o.replace(/'/g,"\'")}')">${o}</button>`;}).join("")}</div>
         ${sel?`<div class="meta-line">${q.meta}</div>`:""}
-        ${sel?`<button class="btn-p" onclick="lq()">Weiter \u2192</button>`:""}`;
+        ${sel?`<button class="btn-p" onclick="nextRound()">Weiter \u2192</button>`:""}`;
     }
-    const btns=q.opts.map(o=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${os}')">${o}${mk}</button>`;}).join("");
+    const btns=q.opts.map(o=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${os}')">${esc(o)}${mk}</button>`;}).join("");
     answerHtml=`<div class="answers">${btns}</div>`;
   }
   let fb="";
@@ -1441,6 +1808,7 @@ function render(){
         <button class="btn-cancel" onclick="clr();S.ph='menu';S.tab='home';render()">\u00d7</button>
       </div>
     </div>
+    ${S.mpOpponent?`<div class="duell-bar-wrap"><div class="duell-lbl duell-you">Ich<span class="duell-score">${sc.toLocaleString()}</span></div><div class="duell-track"><div class="duell-fill-you" style="width:${(()=>{const mx=Math.max(sc,S.mpOppScore||0,1);return Math.round(sc/mx*100)})()}%"></div><div class="duell-fill-opp" style="width:${(()=>{const mx=Math.max(sc,S.mpOppScore||0,1);return Math.round((S.mpOppScore||0)/mx*100)})()}%"></div></div><div class="duell-lbl duell-opp"><span class="duell-score">${(S.mpOppScore||0).toLocaleString()}</span>${esc(S.mpOpponent.slice(0,8))}</div></div>`:""}
     ${st>=3?`<div style="text-align:center;font-size:.76rem;font-weight:700;color:#fb923c;margin-bottom:6px">${t.l}</div>`:""}
     <div class="tbar${S.freezeActive?" frozen":""}"><div class="tfill" style="width:${p}%;background:${col}"></div></div>
     <div class="qcard">${qBody}<div class="qtimer" style="color:${col}">${tm}</div></div>
@@ -1448,6 +1816,97 @@ function render(){
     ${answerHtml}${fb}
   </div>`;
 }
+
+/* Phase 34 — D3 World Map component */
+function drawWorldMap(targetName,sel,ok){
+  const container=document.getElementById('gq-map-svg');
+  if(!container||typeof d3==='undefined'||typeof topojson==='undefined'){
+    if(container)container.innerHTML='<p style="color:var(--text3);text-align:center;padding:2rem">Karte nicht verfügbar</p>';
+    return;
+  }
+  if(!window.WORLD_TOPO){
+    container.innerHTML='<p style="color:var(--text3);text-align:center;padding:2rem">Kartendaten werden geladen…</p>';
+    return;
+  }
+  const W=container.clientWidth||(window.innerWidth||360),H=Math.min(W*.56,290);
+  const svg=d3.select(container).html('').append('svg')
+    .attr('width','100%').attr('height',H)
+    .attr('viewBox',`0 0 ${W} ${H}`)
+    .style('background','var(--bg2)');
+
+  const proj=d3.geoNaturalEarth1().scale(W/6.2).translate([W/2,H/2]);
+  const path=d3.geoPath().projection(proj);
+  const countries=topojson.feature(window.WORLD_TOPO,window.WORLD_TOPO.objects.countries);
+
+  const g=svg.append('g');
+
+  /* Zoom + pan */
+  const zoom=d3.zoom().scaleExtent([1,10])
+    .on('zoom',ev=>{
+      if(sel!==null)return; /* lock zoom during feedback so user sees the result */
+      g.attr('transform',ev.transform);
+    });
+  svg.call(zoom);
+
+  /* Sphere backdrop */
+  g.append('path').datum({type:'Sphere'}).attr('d',path)
+    .attr('fill','#bfdbfe').attr('stroke','none');
+
+  /* Country paths */
+  g.selectAll('path.ctry')
+    .data(countries.features)
+    .enter().append('path')
+    .attr('class','ctry')
+    .attr('d',path)
+    .attr('data-n',d=>d.properties.name)
+    .attr('fill',d=>{
+      const n=d.properties.name;
+      if(sel!==null){
+        if(n===targetName)return'#10b981';
+        if(n===sel&&!ok)return'#ef4444';
+        return'#d1d5db';
+      }
+      return'var(--bg3,#e2e8f0)';
+    })
+    .attr('stroke','var(--border,#94a3b8)')
+    .attr('stroke-width',.35)
+    .on('mouseover',function(_,d){
+      if(sel!==null)return;
+      d3.select(this).attr('fill','#93c5fd');
+    })
+    .on('mouseout',function(_,d){
+      if(sel!==null)return;
+      d3.select(this).attr('fill','var(--bg3,#e2e8f0)');
+    })
+    .on('click',function(ev,d){
+      if(sel!==null)return;
+      ev.stopPropagation();
+      answer(d.properties.name);
+    });
+
+  /* Pulse correct country after feedback */
+  if(sel!==null){
+    const cp=g.selectAll('path.ctry').filter(d=>d.properties.name===targetName);
+    let n=ok?2:4;
+    function pulse(){
+      if(n--<=0)return;
+      cp.transition().duration(300).attr('fill','#6ee7b7')
+        .transition().duration(300).attr('fill','#10b981').on('end',pulse);
+    }
+    pulse();
+    /* Zoom to correct country */
+    const feat=countries.features.find(d=>d.properties.name===targetName);
+    if(feat){
+      const[[x0,y0],[x1,y1]]=path.bounds(feat);
+      const cw=x1-x0,ch=y1-y0;
+      const s=Math.max(1,Math.min(8,.8/Math.max(cw/W,ch/H)));
+      const tx=W/2-(x0+x1)/2*s,ty=H/2-(y0+y1)/2*s;
+      svg.transition().duration(700)
+        .call(zoom.transform,d3.zoomIdentity.translate(tx,ty).scale(s));
+    }
+  }
+}
+
 
 /* BOTTOM NAV */
 function renderBottomNav(){
@@ -1502,6 +1961,16 @@ function renderHomeTab(){
     </div>`;
   }
   return`${renderDailyHero()}
+    <div class="pvp-hero" onclick="S.mpModal=true;render()" role="button" aria-label="Live 1vs1 starten">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:2.2rem">⚔️</div>
+        <div>
+          <div style="font-size:1rem;font-weight:900;color:var(--text)">Live 1vs1 Duell</div>
+          <div style="font-size:.74rem;color:var(--text2);margin-top:2px">Echtzeit gegen einen Freund spielen</div>
+        </div>
+        <div style="margin-left:auto;background:#7c3aed;color:#fff;border-radius:20px;padding:.3rem .85rem;font-size:.76rem;font-weight:700">▶ Spielen</div>
+      </div>
+    </div>
     <div class="filter-bar">${chips}</div>
     ${catSection("pure_geo")}
     ${catSection("lifestyle")}
@@ -1749,7 +2218,7 @@ function renderLeaderboard(lbData,lbLoading,mode){
   if(!lbData.length)return`<div class="panel"><p style="color:var(--text3);font-size:.85rem">Noch keine Eintr\u00e4ge.</p></div>`;
   const n=lbData.length;
   return`<div style="display:flex;gap:5px;margin-bottom:.75rem;flex-wrap:wrap">${MODES.map(m=>`<button onclick="S.mode='${m.id}';showLeaderboard()" style="flex:1;min-width:36px;background:${mode===m.id?"#10b981":"var(--bg3)"};color:${mode===m.id?"#fff":"var(--text2)"};border:1px solid var(--border);border-radius:7px;padding:.3rem .2rem;font-size:.8rem;font-weight:700;cursor:pointer">${m.icon}</button>`).join("")}</div>
-    ${lbData.map((r,i)=>{const rc=i===0?"gold":i===1?"silver":i===2?"bronze":"";const isMe=sbUser&&r.user_id===sbUser.id;const isPromo=i<5;const isRel=i>=n-5;let cls="lb-row";if(isMe)cls+=" me";else if(isPromo)cls+=" promo";else if(isRel)cls+=" relg";return`<div class="${cls}"><span class="lb-rank ${rc}">${r.rank}</span><span class="lb-name">${r.username||"Anonym"}${isMe?`<span style="color:#34d399;font-size:.7rem;margin-left:4px">Du</span>`:""}</span><span class="lb-score">${Number(r.best_score||0).toLocaleString()}</span></div>`;}).join("")}`;
+    ${lbData.map((r,i)=>{const rc=i===0?"gold":i===1?"silver":i===2?"bronze":"";const isMe=sbUser&&r.user_id===sbUser.id;const isPromo=i<5;const isRel=i>=n-5;let cls="lb-row";if(isMe)cls+=" me";else if(isPromo)cls+=" promo";else if(isRel)cls+=" relg";return`<div class="${cls}"><span class="lb-rank ${rc}">${r.rank}</span><span class="lb-name">${esc(r.username||"Anonym")}${isMe?`<span style="color:#34d399;font-size:.7rem;margin-left:4px">Du</span>`:""}</span><span class="lb-score">${Number(r.best_score||0).toLocaleString()}</span></div>`;}).join("")}`;
 }
 
 /* GAME HISTORY */
@@ -1808,7 +2277,7 @@ function renderOnboarding(step){
 }
 
 /* CHALLENGE (Phase 16) */
-const CHALLENGE=(()=>{try{const p=new URLSearchParams(location.search);const gq=p.get("gq");if(gq){const[s,o,m]=gq.split(":");return{seed:parseInt(s),oppScore:parseInt(o),mode:m||"city"};}}catch(e){}return null;})();
+const CHALLENGE=(()=>{try{const p=new URLSearchParams(location.search);const gq=p.get("gq");if(gq){const[s,o,m]=gq.split(":");const safeM=MODES.find(x=>x.id===m)?m:"city";return{seed:parseInt(s),oppScore:parseInt(o),mode:safeM};}}catch(e){}return null;})();
 function generateChallengeLink(seed,score){
   const url=location.href.split("?")[0]+"?gq="+seed+":"+score+":"+S.mode;
   navigator.clipboard.writeText(url).then(showCopyToast).catch(()=>{});
@@ -1962,6 +2431,8 @@ async function loadGameData(){
   const rRaw  =await safeFetch('./rivers.json',           'Lade Flüsse…',    62)||[];
   const nbRaw =await safeFetch('./neighbors.json',        'Lade Nachbarländer…',78)||[];
   const arRaw =await safeFetch('./area.json',             'Lade Länderfächen…',92)||[];
+  const topoRaw=await safeFetch('./world-110m.json',       'Lade Weltkarte…',98);
+  if(topoRaw)window.WORLD_TOPO=topoRaw;
 
   PLATES_DATA = parsePlates(Array.isArray(pRaw)?pRaw:(pRaw?.results?.bindings||[]));
   CURR_REAL   = parseCurr(cRaw);
@@ -1993,6 +2464,24 @@ self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWi
   }catch(e){}
   window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();S.pwaPrompt=e;const b=document.getElementById("pwa-banner");if(b)b.style.display="flex";});
 }
+/* Phase 32: Tab-focus anti-cheat — timer keeps running in background */
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden)return;          /* only fire when going hidden */
+  if(S.ph!=="playing"||S.sel!==null)return; /* not mid-question */
+  /* Record when tab was hidden; on return the setInterval fires catch-up */
+  S._hiddenAt=Date.now();
+});
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden)return;           /* only fire when becoming visible */
+  if(S.ph!=="playing"||S.sel!==null||!S._hiddenAt)return;
+  const elapsed=Math.ceil((Date.now()-S._hiddenAt)/1000);
+  S._hiddenAt=null;
+  if(elapsed>0){
+    S.tm=Math.max(0,S.tm-elapsed);
+    if(S.tm<=0){clearInterval(tIv);answer(null);}else render();
+  }
+});
+
 loadGameData().then(()=>render()).catch((e)=>{console.error("loadGameData fatal:",e);document.getElementById("gq-loader")?.remove();render();});
 
 

@@ -271,3 +271,56 @@ input[type=text]::placeholder{color:var(--text3)}
 .hl-vs{font-size:1.5rem;flex-shrink:0;color:var(--text3)}
 /* Phase 30 — Survival diff button */
 .diff-btn.active[onclick*="survival"]{background:#7f1d1d;color:#fca5a5;border-color:#ef4444}
+
+/* Phase 33 — Multiplayer */
+.pvp-hero{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);border:1.5px solid #7c3aed;border-radius:14px;padding:.85rem 1rem;margin-bottom:.65rem;cursor:pointer;transition:opacity .15s}
+.pvp-hero:active{opacity:.8}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:#7c3aed;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Phase 34: Map Guesser ───────────────────────────────────── */
+.map-scr{display:flex;flex-direction:column;padding-bottom:.5rem}
+.map-prompt{text-align:center;font-size:1rem;font-weight:700;color:var(--text);
+  padding:.5rem .8rem .35rem;letter-spacing:.01em}
+.map-prompt strong{color:#3b82f6}
+.map-container{flex:1;min-height:200px;max-height:300px;width:100%;
+  background:var(--bg2);border-radius:14px;overflow:hidden;
+  touch-action:pan-x pan-y;margin-bottom:.5rem}
+.map-container svg{display:block;width:100%;height:100%}
+.map-container .ctry{cursor:pointer;transition:fill .15s}
+.map-weiter{margin:.25rem .8rem .4rem}
+
+/* ── Phase 33 Teil 2: MP result card ────────────────────────── */
+.mp-result-card{background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:18px;padding:1rem;margin:.75rem 0 .25rem;text-align:center}
+.mp-result-title{font-size:.68rem;font-weight:800;letter-spacing:1.5px;
+  color:var(--text3);text-transform:uppercase;margin-bottom:.75rem}
+.mp-result-row{display:flex;justify-content:space-around;align-items:center;gap:.5rem}
+.mp-result-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.mp-result-name{font-size:.75rem;color:var(--text2);font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
+.mp-result-score{font-size:1.65rem;font-weight:900;letter-spacing:-1px}
+.mp-you .mp-result-score{color:#10b981}
+.mp-opp .mp-result-score{color:#8b5cf6}
+.mp-result-verdict{font-size:.95rem;font-weight:800;margin-top:.65rem;color:var(--text)}
+
+/* ── Phase 33 T2: Duell Live-Bar ─────────────────────────────── */
+.duell-bar-wrap{display:flex;align-items:center;gap:5px;
+  padding:3px 8px 5px;margin-bottom:2px}
+.duell-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;
+  overflow:hidden;display:flex}
+.duell-fill-you{background:#10b981;height:100%;border-radius:3px 0 0 3px;
+  transition:width .5s ease}
+.duell-fill-opp{background:#8b5cf6;height:100%;border-radius:0 3px 3px 0;
+  transition:width .5s ease;margin-left:auto}
+.duell-lbl{font-size:.62rem;font-weight:700;color:var(--text3);
+  display:flex;flex-direction:column;align-items:center;min-width:34px;line-height:1.2}
+.duell-you{color:#10b981}
+.duell-opp{color:#8b5cf6}
+.duell-score{font-size:.7rem;font-weight:800;font-variant-numeric:tabular-nums}
+/* final comparison bar on game-over */
+.duell-final-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;
+  margin:.6rem 0 .4rem;background:var(--bg3)}
+.dfb-fill-you{background:#10b981;transition:width .8s ease}
+.dfb-fill-opp{background:#8b5cf6;margin-left:auto;transition:width .8s ease}
+.mp-waiting{color:var(--text3);font-size:.82rem;margin-top:.5rem;line-height:1.6}
