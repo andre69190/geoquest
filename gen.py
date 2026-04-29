@@ -727,7 +727,7 @@ function getDailyStreakCount(){
 
 function loadUnlocked(){try{return JSON.parse(localStorage.getItem("gq_unlocked")||'["pure_geo"]');}catch(e){return["pure_geo"];}}
 function saveUnlocked(arr){try{localStorage.setItem("gq_unlocked",JSON.stringify(arr));}catch(e){}}
-function isCategoryUnlocked(catId){if(catId==="pure_geo")return true;if(sbProfile?.is_premium)return true;return loadUnlocked().includes(catId);}
+function isCategoryUnlocked(catId){return true;/* TEST MODE — all categories unlocked */}
 function buyCategory(catId){
   const cat=MODE_CATS[catId];if(\!cat)return;
   const coins=sbProfile?.geo_coins||0;
@@ -2086,42 +2086,46 @@ async function loadGameData(){
       .map(([c,area])=>({c,area:Math.round(area)}));
   }
 
-  try{
-    prog(5); msg('Lade Kennzeichen…');
-    const pRaw  =await (await fetch('./license_plates.json')).json();   prog(18);
-    msg('Lade Währungen…');
-    const cRaw  =await (await fetch('./currencies.json')).json();        prog(32);
-    msg('Lade Hauptstädte…');
-    const capRaw=await (await fetch('./capitals_population.json')).json();prog(48);
-    msg('Lade Flüsse…');
-    const rRaw  =await (await fetch('./rivers.json')).json();            prog(62);
-    msg('Lade Nachbarländer…');
-    const nbRaw =await (await fetch('./neighbors.json')).json();         prog(78);
-    msg('Lade Länderfächen…');
-    const arRaw =await (await fetch('./area.json')).json();              prog(92);
-
-    PLATES_DATA = parsePlates(pRaw);
-    CURR_REAL   = parseCurr(cRaw);
-    CAPS_POP    = parseCaps(capRaw);
-    RIVERS_REAL = parseRivers(rRaw);
-    const nbMap = parseNeighbors(nbRaw);
-    NEIGHBORS   = Object.keys(nbMap).filter(k=>nbMap[k]&&nbMap[k].length>0).length>=10?nbMap:_DEFAULT_NEIGHBORS;
-    AREA_DATA   = parseArea(arRaw);
-
-    prog(100);
-    console.log('GeoQuest data loaded: '+PLATES_DATA.length+' plates | '+CURR_REAL.length+' currencies | '+CAPS_POP.length+' caps | '+RIVERS_REAL.length+' rivers | '+Object.keys(NEIGHBORS).length+' neighbors | '+AREA_DATA.length+' areas');
-    await new Promise(r=>setTimeout(r,150));
-    ov.remove();
-  }catch(e){
-    console.error('loadGameData failed:',e);
-    ov.innerHTML='<div style="font-size:2.5rem;margin-bottom:.8rem">⚠️</div>'
-      +'<div style="font-size:1rem;font-weight:700;color:#dc2626;margin-bottom:.6rem">Spieldaten konnten nicht geladen werden</div>'
-      +'<div style="font-size:.82rem;color:#64748b;text-align:center;max-width:290px;line-height:1.55;padding:0 1rem">'
-      +'Bitte öffne das Spiel über <strong>Netlify Drop</strong> oder einen lokalen Server,<br>damit die JSON-Dateien geladen werden können.'
-      +'<br><br><span style="font-size:.72rem;color:#94a3b8;word-break:break-all">'+e.message+'</span></div>'
-      +'<button onclick="location.reload()" style="margin-top:1.2rem;padding:.55rem 1.4rem;background:#10b981;color:#fff;border:none;border-radius:9px;font-size:.85rem;font-weight:700;cursor:pointer">↻ Erneut versuchen</button>';
-    throw e;
+  /* ── per-file graceful fetch ── */
+  async function safeFetch(url,label,pct){
+    try{
+      msg(label);
+      const r=await fetch(url);
+      if(\!r.ok)throw new Error(r.status+' '+url);
+      const j=await r.json();
+      prog(pct);
+      return j;
+    }catch(ex){
+      console.warn('GeoQuest: could not load '+url+':',ex.message);
+      prog(pct);
+      return null;
+    }
   }
+  const errors=[];
+  const pRaw  =await safeFetch('./license_plates.json',  'Lade Kennzeichen…',  18)||[];
+  const cRaw  =await safeFetch('./currencies.json',       'Lade Währungen…', 32)||[];
+  const capRaw=await safeFetch('./capitals_population.json','Lade Hauptstädte…',48)||[];
+  const rRaw  =await safeFetch('./rivers.json',           'Lade Flüsse…',    62)||[];
+  const nbRaw =await safeFetch('./neighbors.json',        'Lade Nachbarländer…',78)||[];
+  const arRaw =await safeFetch('./area.json',             'Lade Länderfächen…',92)||[];
+
+  PLATES_DATA = parsePlates(Array.isArray(pRaw)?pRaw:(pRaw?.results?.bindings||[]));
+  CURR_REAL   = parseCurr(cRaw);
+  CAPS_POP    = parseCaps(capRaw);
+  RIVERS_REAL = parseRivers(rRaw);
+  const nbMap = parseNeighbors(nbRaw);
+  NEIGHBORS   = Object.keys(nbMap).filter(k=>nbMap[k]&&nbMap[k].length>0).length>=10?nbMap:_DEFAULT_NEIGHBORS;
+  AREA_DATA   = parseArea(arRaw);
+
+  prog(100);
+  const loaded=[PLATES_DATA.length,'plates',CURR_REAL.length,'curr',CAPS_POP.length,'caps',RIVERS_REAL.length,'rivers',Object.keys(NEIGHBORS).length,'nb',AREA_DATA.length,'areas'];
+  console.log('GeoQuest data:',loaded.join(' '));
+  if(\!PLATES_DATA.length||\!CURR_REAL.length||\!CAPS_POP.length){
+    /* core files missing — show toast after render but still render */
+    setTimeout(()=>showToast('Fehler beim Laden einiger Datensätze.'),800);
+  }
+  await new Promise(r=>setTimeout(r,120));
+  ov.remove();
 }
 
 if("serviceWorker"in navigator){
@@ -2135,16 +2139,37 @@ self.addEventListener('fetch',e=>{if(e.request.method\!=='GET')return;e.respondW
   }catch(e){}
   window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();S.pwaPrompt=e;const b=document.getElementById("pwa-banner");if(b)b.style.display="flex";});
 }
-loadGameData().then(()=>render()).catch(()=>{});
+loadGameData().then(()=>render()).catch((e)=>{console.error("loadGameData fatal:",e);document.getElementById("gq-loader")?.remove();render();});
 
 
 '''
+
+# ── Substitute build-time data placeholders into JS ─────────────────────────
+JS = (JS
+  .replace('PLACEHOLDER_CJ',  CJ)
+  .replace('PLACEHOLDER_CAPJ', CAPJ)
+  .replace('PLACEHOLDER_RJ',  RJ)
+  .replace('PLACEHOLDER_LMJ', LMJ)
+  .replace('PLACEHOLDER_NPJ', NPJ)
+  .replace('PLACEHOLDER_UNJ', UNJ)
+  .replace('PLACEHOLDER_CLJ', CLJ)
+  .replace('PLACEHOLDER_SWJ', SWJ)
+  .replace('PLACEHOLDER_FJ',  FJ)
+  .replace('PLACEHOLDER_BJ',  BJ)
+  .replace('PLACEHOLDER_CUJ', CUJ)
+)
+remaining = __import__('re').findall(r'PLACEHOLDER_\w+', JS)
+if remaining:
+    print('WARNING: unreplaced placeholders:', set(remaining))
+else:
+    print('All placeholders substituted OK')
 
 HTML = f"""<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>GeoQuest</title>
@@ -2173,3 +2198,4 @@ fixed_raw = raw.replace(b'\x5c\x21', b'\x21')
 n_fixed = raw.count(b'\x5c\x21')
 open(out,'wb').write(fixed_raw)
 print(f'Post-process: fixed {n_fixed} backslash-bang occurrences')
+                                                                                                           
