@@ -1269,7 +1269,7 @@ let S={
   collectedPlates:loadCollectedPlates(),
   ligaData:[],ligaLoading:false,
   titleShop:false,
-  spotterInput:"",spotterMsg:"",spotterOk:null,albumView:"list",albumCountry:"all",spotterCountry:localStorage.getItem("gq_spotter_country")||"all",
+  spotterInput:"",spotterMsg:"",spotterOk:null,albumView:"list",albumCountry:_smartDefaultCountry(),spotterCountry:_smartDefaultCountry(),
   collFilter:"all",collRarity:"all",collSearch:"",
 };
 let tIv=null,fTo=null,toastTo=null;
@@ -1681,6 +1681,35 @@ function _gqLoad(key,fallback){
   }catch(e){return fallback;}
 }
 
+function _smartDefaultCountry(){
+  /* Priority: new unified pref → old spotter key → navigator.language → fallback */
+  const saved=localStorage.getItem("geoquest_pref_country")||localStorage.getItem("gq_spotter_country");
+  if(saved&&saved!=="all")return saved;
+  const lang=(navigator.language||"de-DE").toLowerCase();
+  const langMap={
+    "de-de":"Deutschland","de-at":"Österreich","de-ch":"Schweiz","de-li":"Liechtenstein",
+    "fr-fr":"Frankreich","fr-be":"Belgien","fr-ch":"Schweiz","fr-lu":"Luxemburg",
+    "nl-nl":"Niederlande","nl-be":"Belgien",
+    "pl-pl":"Polen","it-it":"Italien","es-es":"Spanien","pt-pt":"Portugal",
+    "cs-cz":"Tschechien","sk-sk":"Slowakei","hu-hu":"Ungarn","ro-ro":"Rumänien",
+    "bg-bg":"Bulgarien","hr-hr":"Kroatien","sl-si":"Slowenien",
+    "et-ee":"Estland","lv-lv":"Lettland","lt-lt":"Litauen",
+    "fi-fi":"Finnland","sv-se":"Schweden","nb-no":"Norwegen","da-dk":"Dänemark",
+    "el-gr":"Griechenland","tr-tr":"Türkei"
+  };
+  if(langMap[lang])return langMap[lang];
+  /* Try just the language prefix (e.g. "de" for de-DE) */
+  const prefix=lang.split("-")[0];
+  const prefixMap={
+    "de":"Deutschland","fr":"Frankreich","nl":"Niederlande","pl":"Polen",
+    "it":"Italien","es":"Spanien","pt":"Portugal","cs":"Tschechien",
+    "sk":"Slowakei","hu":"Ungarn","ro":"Rumänien","bg":"Bulgarien",
+    "hr":"Kroatien","sl":"Slowenien","et":"Estland","lv":"Lettland",
+    "lt":"Litauen","fi":"Finnland","sv":"Schweden","nb":"Norwegen","da":"Dänemark",
+    "el":"Griechenland","tr":"Türkei"
+  };
+  return prefixMap[prefix]||"Deutschland";
+}
 function loadCollectedPlates(){return _gqLoad("gq_coll",[]);}
 function saveCollectedPlates(arr){_gqSave("gq_coll",arr);}
 function getRarity(code){
@@ -2320,7 +2349,7 @@ function renderCollectionScreen(){
   const spotter=`<div class="album-spotter">
     <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:.4rem">
       <span class="album-spotter-title">\u{1F697} Roadtrip-Spotter</span>
-      <select class="spotter-country-sel" onchange="S.spotterCountry=this.value;localStorage.setItem('gq_spotter_country',this.value);S.spotterMsg='';render()">
+      <select class="spotter-country-sel" onchange="S.spotterCountry=this.value;S.albumCountry=this.value;localStorage.setItem('geoquest_pref_country',this.value);S.spotterMsg='';render()">
         <option value="all" ${sCountry==="all"?"selected":""}>\u{1F30D} Alle Länder</option>
         ${countries.map(c=>`<option value="${esc(c)}" ${sCountry===c?"selected":""}>${esc(c)}</option>`).join("")}
       </select>
@@ -2352,7 +2381,7 @@ function renderCollectionScreen(){
   const controls=`<div style="display:flex;gap:6px;margin-bottom:.7rem;align-items:center">
     <button class="view-toggle-btn${view==="list"?" active":""}" onclick="S.albumView='list';render()">\u{1F4DD} Liste</button>
     <button class="view-toggle-btn${view==="map"?" active":""}" onclick="S.albumView='map';render()">\u{1F5FA} Karte</button>
-    <select style="margin-left:auto;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:.3rem .5rem;font-size:.76rem" onchange="S.albumCountry=this.value;render()">
+    <select style="margin-left:auto;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:.3rem .5rem;font-size:.76rem" onchange="S.albumCountry=this.value;S.spotterCountry=this.value;localStorage.setItem('geoquest_pref_country',this.value);render()">
       <option value="all" ${acF==="all"?"selected":""}>Alle Länder</option>
       ${countries.map(c=>`<option value="${esc(c)}" ${acF===c?"selected":""}>${esc(c)}</option>`).join("")}
     </select>
@@ -2387,7 +2416,8 @@ function renderCollectionScreen(){
 
   if(view==="map")requestAnimationFrame(()=>drawAlbumMap());
 
-  return`<div>${spotter}${progressBar}${achBar}${controls}${listContent}${mapContent}</div>`;
+  const backBtn=`<button onclick="S.tab='home';render()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--text3);font-size:.82rem;font-weight:700;cursor:pointer;padding:.3rem .1rem;margin-bottom:.6rem;letter-spacing:.3px;transition:color .15s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--text3)'"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Zurück zum Hauptmenü</button>`;
+  return`<div>${backBtn}${spotter}${progressBar}${achBar}${controls}${listContent}${mapContent}</div>`;
 }
 
 /* ── Trophy Map ──────────────────────────────────────────────────────────*/
