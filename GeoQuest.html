@@ -1370,7 +1370,7 @@ function displayCountry(name){
 let rngSeed=null,rngState=0;
 function initRng(seed){rngSeed=seed>>>0;rngState=rngSeed;}
 function seededRand(){rngState=(rngState+0x6D2B79F5)>>>0;let t=Math.imul(rngState^rngState>>>15,rngState|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}
-function rng(){return rngSeed!==null?seededRand():Math.random();}
+function rng(){return rngSeed\!==null?seededRand():Math.random();}
 
 let PLATES_DATA=[],CURR_REAL=[],CAPS_POP=[],RIVERS_REAL=[],NEIGHBORS={},AREA_DATA=[];
 
@@ -1467,7 +1467,7 @@ const MODES=[
   {id:"brand",   icon:"\u{1F3F7}",title:"Marke \u2192 Land",        group:"lifestyle",prompt:"Aus welchem Land kommt diese Marke?"},
   {id:"currency",icon:"\u{1F4B1}",title:"W\u00e4hrung \u2192 Land",group:"lifestyle",prompt:"Zu welchem Land geh\u00f6rt diese W\u00e4hrung?"},
   {id:"plate_casual",icon:"\u{1F697}",title:"EU-Kennzeichen",      group:"eu_plates",prompt:"Woher kommt dieses Kennzeichen?"},
-  {id:"plate_hard",  icon:"\u{1F6A6}",title:"Kennzeichen Pro",     group:"eu_plates",prompt:"Region erkennen \u2014 kein Tipp!"},
+  {id:"plate_hard",  icon:"\u{1F6A6}",title:"Kennzeichen Pro",     group:"eu_plates",prompt:"Region erkennen \u2014 kein Tipp\!"},
   {id:"curr_real",  icon:"\u{1F4B5}",title:"Land \u2192 W\u00e4hrung",group:"lifestyle",prompt:"Welche W\u00e4hrung hat …"},
   {id:"pop_compare",icon:"\u{1F465}",title:"Mehr Einwohner?",          group:"lifestyle",prompt:"Hat [Land B] mehr oder weniger Einwohner?"},
   {id:"river_real", icon:"\u{1F30A}",title:"Fluss \u2192 Land",       group:"pure_geo", prompt:"Durch welches Land flie\u00dft dieser Fluss?"},
@@ -1582,7 +1582,7 @@ const _DEFAULT_NEIGHBORS={
   "Slowenien":["Italien","Österreich","Ungarn","Kroatien"],
 };
 function genHLPopQ(){
-  if(!CAPS_POP||CAPS_POP.length<2)return null;
+  if(\!CAPS_POP||CAPS_POP.length<2)return null;
   const pool=CAPS_POP.filter(x=>x.pop>500000);if(pool.length<2)return null;
   const ai=~~(rng()*pool.length);let bi=~~(rng()*pool.length);while(bi===ai)bi=~~(rng()*pool.length);
   const a=pool[ai],b=pool[bi];
@@ -1591,7 +1591,7 @@ function genHLPopQ(){
   return{type:"hl_pop",prompt:t("q_hl_pop",{a:a.c}),nameA:a.c,valA:fmt(a.pop),nameB:b.c,valB:fmt(b.pop),ans,opts:["higher","lower"],lid:b.c,cc:ccFromCountry(b.c)};
 }
 function genHLRiverQ(){
-  if(!RIVERS_REAL||RIVERS_REAL.length<2)return null;
+  if(\!RIVERS_REAL||RIVERS_REAL.length<2)return null;
   const pool=RIVERS_REAL.filter(r=>r.len>100);if(pool.length<2)return null;
   const ai=~~(rng()*pool.length);let bi=~~(rng()*pool.length);while(bi===ai)bi=~~(rng()*pool.length);
   const a=pool[ai],b=pool[bi];
@@ -1599,7 +1599,7 @@ function genHLRiverQ(){
   return{type:"hl_river",prompt:t("q_hl_river",{a:a.n}),nameA:a.n,valA:a.len+" km",nameB:b.n,valB:b.len+" km",ans,opts:["higher","lower"],lid:b.n,cc:ccFromCountry(b.c)};
 }
 function genHLAreaQ(){
-  if(!AREA_DATA||AREA_DATA.length<2)return null;
+  if(\!AREA_DATA||AREA_DATA.length<2)return null;
   const ai=~~(rng()*AREA_DATA.length);let bi=~~(rng()*AREA_DATA.length);while(bi===ai)bi=~~(rng()*AREA_DATA.length);
   const a=AREA_DATA[ai],b=AREA_DATA[bi];
   const fmt=(x)=>x>=1e6?(x/1e6).toFixed(2)+" Mio. km²":(x/1000).toFixed(0)+" Tsd. km²";
@@ -1607,9 +1607,9 @@ function genHLAreaQ(){
   return{type:"hl_area",prompt:t("q_hl_area",{a:a.c}),nameA:a.c,valA:fmt(a.area),nameB:b.c,valB:fmt(b.area),ans,opts:["higher","lower"],lid:b.c,cc:ccFromCountry(b.c)};
 }
 function genNeighborQ(){
-  const nb=NEIGHBORS;const valid=Object.keys(nb).filter(c=>nb[c]&&nb[c].length>=2);if(!valid.length)return null;
+  const nb=NEIGHBORS;const valid=Object.keys(nb).filter(c=>nb[c]&&nb[c].length>=2);if(\!valid.length)return null;
   const country=valid[~~(rng()*valid.length)];const neighborList=nb[country];
-  const allC=Object.keys(nb);const nonNb=allC.filter(c=>c!==country&&!neighborList.includes(c));if(!nonNb.length)return null;
+  const allC=Object.keys(nb);const nonNb=allC.filter(c=>c\!==country&&\!neighborList.includes(c));if(\!nonNb.length)return null;
   const type2=rng()>.5;
   if(type2&&neighborList.length>=2){
     const ans=nonNb[~~(rng()*nonNb.length)];
@@ -1638,7 +1638,7 @@ function mpLeave(){
 
 /* Send a broadcast on the current channel */
 function mpSend(event,payload){
-  if(!S.mp?.channel)return;
+  if(\!S.mp?.channel)return;
   S.mp.channel.send({type:"broadcast",event,payload});
 }
 
@@ -1673,7 +1673,7 @@ function mpCountdown(seed,mode){
 
 /* HOST: create room */
 function mpCreate(){
-  if(!sb){showToast("Supabase nicht verbunden!");return;}
+  if(\!sb){showToast("Supabase nicht verbunden\!");return;}
   const code=mpCode();
   let channel;
   try{
@@ -1714,8 +1714,8 @@ function mpCreate(){
 
 /* GUEST: join room */
 function mpJoin(code){
-  if(!sb){showToast("Supabase nicht verbunden!");return;}
-  if(!code||code.length<4){showToast("Bitte gültigen Code eingeben!");return;}
+  if(\!sb){showToast("Supabase nicht verbunden\!");return;}
+  if(\!code||code.length<4){showToast("Bitte gültigen Code eingeben\!");return;}
   const uc=code.toUpperCase().trim();
   let channel;
   try{
@@ -1767,7 +1767,7 @@ function renderMultiplayerLobby(){
   const mp=S.mp;
 
   /* ── Phase: initial (no room yet) ────────────────────────── */
-  if(!mp){
+  if(\!mp){
     const joinInput=S._mpJoinCode||"";
     return`<div class="scr">
       <div style="text-align:center;margin-bottom:1.4rem;padding-top:.5rem">
@@ -1827,7 +1827,7 @@ function renderMultiplayerLobby(){
       <button class="mp-back-btn" style="margin-bottom:.5rem" onclick="mpLeave()">\u2b05\ufe0f Abbrechen</button>
       <div style="clear:both;padding-top:.5rem"></div>
       <div style="font-size:2.5rem;margin:.6rem 0">\u{1F7E2}</div>
-      <h2 style="font-size:1.2rem;font-weight:900;color:var(--text);margin-bottom:.3rem">Gegner gefunden!</h2>
+      <h2 style="font-size:1.2rem;font-weight:900;color:var(--text);margin-bottom:.3rem">Gegner gefunden\!</h2>
       <p style="color:var(--text3);font-size:.8rem;margin-bottom:1.2rem">Gegner: <strong>${esc(mp.oppName||"Unbekannt")}</strong></p>
       <div style="display:flex;gap:12px;justify-content:center;margin-bottom:1.4rem">
         <div style="background:var(--bg2);border:2px solid ${myR?"#10b981":"var(--border)"};border-radius:12px;padding:.75rem 1.2rem;min-width:100px">
@@ -1841,7 +1841,7 @@ function renderMultiplayerLobby(){
         </div>
       </div>
       ${myR?`<div style="color:var(--text3);font-size:.82rem">Warte auf ${esc(mp.oppName||"Gegner")}…</div>`
-           :`<button class="btn-p" style="width:100%;font-size:1.1rem" onclick="mpReady()">\u{1F3C1} Bereit!</button>`}
+           :`<button class="btn-p" style="width:100%;font-size:1.1rem" onclick="mpReady()">\u{1F3C1} Bereit\!</button>`}
     </div>`;
   }
 
@@ -1878,12 +1878,12 @@ function loadUnlocked(){return _gqLoad("gq_unlocked",["pure_geo"]);}
 function saveUnlocked(arr){_gqSave("gq_unlocked",arr);}
 function isCategoryUnlocked(catId){return true;/* TEST MODE — all categories unlocked */}
 function buyCategory(catId){
-  if(!sb||!sbUser?.id){showToast("Bitte einloggen!"); return;}
+  if(!sb||!sbUser?.id){showToast("Bitte einloggen\!"); return;}
   const cat=MODE_CATS[catId];if(!cat)return;
   const coins=sbProfile?.geo_coins||0;
-  if(coins<cat.cost){showToast("Zu wenig GeoCoins!");return;}
+  if(coins<cat.cost){showToast("Zu wenig GeoCoins\!");return;}
   if(sbProfile)sbProfile.geo_coins=coins-cat.cost;
-  const arr=loadUnlocked();if(!arr.includes(catId))arr.push(catId);saveUnlocked(arr);
+  const arr=loadUnlocked();if(\!arr.includes(catId))arr.push(catId);saveUnlocked(arr);
   if(sb&&sbUser){sb.from("profiles").update({geo_coins:coins-cat.cost}).eq("id",sbUser.id).then(()=>{},()=>{});}
   showConfetti();S.lockModal=null;render();
 }
@@ -1892,7 +1892,7 @@ function showConfetti(){
   for(let i=0;i<60;i++){const d=document.createElement("div");d.className="confetti-piece";d.style.left=Math.random()*100+"vw";d.style.background=colors[i%colors.length];d.style.animationDelay=Math.random()*1.5+"s";d.style.borderRadius=Math.random()>.5?"50%":"2px";document.body.appendChild(d);setTimeout(()=>d.remove(),3000);}
 }
 function renderLockModal(catId){
-  const cat=MODE_CATS[catId];if(!cat)return"";
+  const cat=MODE_CATS[catId];if(\!cat)return"";
   const coins=sbProfile?.geo_coins||0;const enough=coins>=cat.cost;
   return`<div class="modal-overlay" onclick="if(event.target===this){S.lockModal=null;render()}">
     <div class="modal-box">
@@ -1904,8 +1904,8 @@ function renderLockModal(catId){
         <div style="font-size:1.8rem;font-weight:900;color:#fbbf24">\u{1F4B0} ${cat.cost.toLocaleString()}</div>
         <div style="font-size:.7rem;color:${enough?"#34d399":"#f87171"};margin-top:4px">${enough?"Du hast genug Coins \u2713":"Du hast nur "+coins+" Coins"}</div>
       </div>
-      ${sbProfile?.is_premium?`<div style="color:#34d399;font-size:.82rem;margin-bottom:.85rem">\u{1F451} Premium: Diese Kategorie ist kostenlos!</div>`:""}
-      <button class="btn-p" onclick="buyCategory('${catId}')" ${(!enough&&!sbProfile?.is_premium)?"disabled":""}>
+      ${sbProfile?.is_premium?`<div style="color:#34d399;font-size:.82rem;margin-bottom:.85rem">\u{1F451} Premium: Diese Kategorie ist kostenlos\!</div>`:""}
+      <button class="btn-p" onclick="buyCategory('${catId}')" ${(\!enough&&\!sbProfile?.is_premium)?"disabled":""}>
         ${sbProfile?.is_premium?"Kostenlos freischalten":"\u{1F4B0} "+cat.cost+" Coins ausgeben"}
       </button>
       <button class="btn-g" style="margin-bottom:0" onclick="S.payModal=true;S.lockModal=null;render()">\u{1F4B3} GeoCoins kaufen</button>
@@ -1920,25 +1920,30 @@ function savePU(d){_gqSave("gq_pu",d);}
 function getPUCount(type){return(loadPU()[type]||0);}
 function addPU(type,qty){const d=loadPU();d[type]=(d[type]||0)+qty;savePU(d);}
 function useFiveO(){
-  if(S.sel!==null||S.half_removed)return;
-  const pu=loadPU();if(!(pu.five0>0)){showToast("Kein 50/50-Joker mehr!");return;}
+  if(S.sel\!==null||S.half_removed)return;
+  const pu=loadPU();if(\!(pu.five0>0)){showToast("Kein 50/50-Joker mehr\!");return;}
   pu.five0--;savePU(pu);
-  const wrong=S.q.opts.filter(o=>o!==S.q.ans);
+  const wrong=S.q.opts.filter(o=>o\!==S.q.ans);
   const toRemove=sh([...wrong]).slice(0,2);
-  S.q.opts=S.q.opts.filter(o=>o===S.q.ans||!toRemove.includes(o));
+  S.q.opts=S.q.opts.filter(o=>o===S.q.ans||\!toRemove.includes(o));
   S.half_removed=true;render();
 }
 function useFreeze(){
   if(S.freezeActive)return;
-  const pu=loadPU();if(!(pu.freeze>0)){showToast("Kein Zeit-Stopp mehr!");return;}
+  const pu=loadPU();
+  if(\!(pu.freeze>0)){showToast("Kein Zeit-Stopp mehr\!");return;}
+  if(S.ph\!=="playing"&&S.ph\!=="feedback")return;
   pu.freeze--;savePU(pu);
   clearInterval(tIv);S.freezeActive=true;
   const bar=document.querySelector(".tbar");if(bar)bar.classList.add("frozen");
   render();
   setTimeout(()=>{
+    if(S.ph\!=="playing"&&S.ph\!=="feedback"){S.freezeActive=false;return;}
     S.freezeActive=false;
     const b2=document.querySelector(".tbar");if(b2)b2.classList.remove("frozen");
-    tIv=setInterval(()=>{S.tm--;if(S.tm===3)soundWarn();if(S.tm<=0){clearInterval(tIv);answer(null);}else render();},1000);
+    if(S.ph==="playing"&&S.sel===null){
+      tIv=setInterval(()=>{S.tm--;if(S.tm===3)soundWarn();if(S.tm<=0){clearInterval(tIv);answer(null);}else render();},1000);
+    }
   },10000);
 }
 
@@ -1969,13 +1974,13 @@ if(sbOK){
 }
 
 async function initAuth(){
-  if(!sb)return;
+  if(\!sb)return;
   const{data:{session}}=await sb.auth.getSession();
   if(session){sbUser=session.user;await loadProfile();}
-  else{const{data,error}=await sb.auth.signInAnonymously();if(!error){sbUser=data.user;await loadProfile();}}
+  else{const{data,error}=await sb.auth.signInAnonymously();if(\!error){sbUser=data.user;await loadProfile();}}
 }
 async function loadProfile(){
-  if(!sb||!sbUser)return;
+  if(\!sb||\!sbUser)return;
   const{data}=await sb.from("profiles").select("*").eq("id",sbUser.id).single();
   sbProfile=data;
   /* Admin privileges handled server-side via Supabase trigger */
@@ -2030,7 +2035,16 @@ async function doRegister(){
   S.authLoading=true;S.authError="";render();
   try{
     const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{username:uname}}});
-    if(error){S.authError=error.message;S.authLoading=false;render();return;}
+    if(error){
+      const _em=error.message||"";
+      S.authError=
+        _em.includes("already registered")||_em.includes("already been registered")?"Diese E-Mail ist bereits registriert.":
+        _em.includes("Password should be")||_em.includes("password")?"Passwort zu schwach (mind. 6 Zeichen).":
+        _em.includes("valid email")||_em.includes("invalid format")||_em.includes("Unable to validate email")?"Bitte eine gültige E-Mail-Adresse eingeben.":
+        _em.includes("rate limit")||_em.includes("too many")?"Zu viele Versuche. Bitte kurz warten.":
+        _em||"Registrierung fehlgeschlagen.";
+      S.authLoading=false;render();return;
+    }
     const uid=data.user?.id;
     if(!uid){S.authError="Registrierung fehlgeschlagen.";S.authLoading=false;render();return;}
     // Save username locally immediately
@@ -2052,7 +2066,11 @@ async function doRegister(){
     }
     render();
   }catch(err){
-    S.authError=err.message||"Unbekannter Fehler.";
+    const _em=err.message||"";
+    S.authError=
+      _em.includes("already registered")||_em.includes("already been registered")?"Diese E-Mail ist bereits registriert.":
+      _em.includes("valid email")||_em.includes("invalid format")?"Bitte eine gültige E-Mail-Adresse eingeben.":
+      _em||"Unbekannter Fehler.";
     S.authLoading=false;
     render();
   }
@@ -2106,7 +2124,7 @@ async function saveSession(mode,score,bs,correct,durationMs){
   if(sbProfile){sbProfile.total_score=(sbProfile.total_score||0)+score;sbProfile.games_played=(sbProfile.games_played||0)+1;}
 }
 async function fetchLeaderboard(mode){
-  if(!sb)return[];
+  if(\!sb)return[];
   const{data}=await sb.from("leaderboard_weekly").select("*").eq("mode",mode).order("rank",{ascending:true}).limit(30);
   return data||[];
 }
@@ -2121,10 +2139,10 @@ function checkMastery(){
   const newlyUnlocked=[];
   const seen=new Set();
   answers.forEach(a=>{
-    if(!a.cc||!a.correct)return;
-    if(!mastery[a.cc])mastery[a.cc]={v:0,p:0};
+    if(\!a.cc||\!a.correct)return;
+    if(\!mastery[a.cc])mastery[a.cc]={v:0,p:0};
     mastery[a.cc].v++;
-    if(isPerfect&&!seen.has(a.cc)){mastery[a.cc].p++;seen.add(a.cc);}
+    if(isPerfect&&\!seen.has(a.cc)){mastery[a.cc].p++;seen.add(a.cc);}
   });
   if(isPerfect){
     const uniqueCC=[...new Set(answers.filter(a=>a.correct&&a.cc).map(a=>a.cc))];
@@ -2140,7 +2158,7 @@ function checkMastery(){
   saveMastery(mastery);S.newStamps=newlyUnlocked;
 }
 function syncStampSupabase(cc,perfect){
-  if(!sb||!sbUser)return;
+  if(\!sb||\!sbUser)return;
   sb.rpc("upsert_stamp",{p_user_id:sbUser.id,p_country_code:cc,p_perfect:perfect}).then(()=>{},()=>{});
 }
 
@@ -2148,12 +2166,12 @@ function syncStampSupabase(cc,perfect){
 let audioCtx=null,soundOn=true;
 const SVG_VOL_ON=`<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
 const SVG_VOL_OFF=`<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
-function toggleSound(){soundOn=!soundOn;document.getElementById("soundBtn").innerHTML=soundOn?SVG_VOL_ON:SVG_VOL_OFF;}
-function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();return audioCtx;}
-function playTone(f,type,dur,vol=0.2){if(!soundOn)return;try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.setValueAtTime(f,c.currentTime);g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);o.start(c.currentTime);o.stop(c.currentTime+dur);}catch(e){}}
+function toggleSound(){soundOn=\!soundOn;document.getElementById("soundBtn").innerHTML=soundOn?SVG_VOL_ON:SVG_VOL_OFF;}
+function getCtx(){if(\!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();return audioCtx;}
+function playTone(f,type,dur,vol=0.2){if(\!soundOn)return;try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.setValueAtTime(f,c.currentTime);g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);o.start(c.currentTime);o.stop(c.currentTime+dur);}catch(e){}}
 function soundCorrect(){[523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,"sine",.18,.2),i*60));}
 function soundWrong(){playTone(300,"sawtooth",.15,.18);setTimeout(()=>playTone(220,"sawtooth",.2,.15),80);}
-function soundStreak(l){if(!soundOn)return;if(l>=10)[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,"sine",.25,.2),i*55));else if(l>=5)[523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,"triangle",.2,.18),i*60));else[523,659].forEach((f,i)=>setTimeout(()=>playTone(f,"sine",.15,.15),i*70));}
+function soundStreak(l){if(\!soundOn)return;if(l>=10)[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,"sine",.25,.2),i*55));else if(l>=5)[523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,"triangle",.2,.18),i*60));else[523,659].forEach((f,i)=>setTimeout(()=>playTone(f,"sine",.15,.15),i*70));}
 function soundWarn(){playTone(440,"square",.08,.1);}
 function soundOver(){[392,330,262].forEach((f,i)=>setTimeout(()=>playTone(f,"sawtooth",.3,.2),i*120));}
 function soundStamp(){[880,1047,1320].forEach((f,i)=>setTimeout(()=>playTone(f,"sine",.15,.15),i*80));}
@@ -2236,67 +2254,67 @@ function showToast(msg){
   document.body.appendChild(el);setTimeout(()=>el.remove(),2200);
 }
 function distractors(pool,matchFn,excludeFn,keyFn,n=2){
-  const pref=pool.filter(x=>matchFn(x)&&!excludeFn(x));
-  const dp=pref.length>=n?pref:pool.filter(x=>!excludeFn(x));
+  const pref=pool.filter(x=>matchFn(x)&&\!excludeFn(x));
+  const dp=pref.length>=n?pref:pool.filter(x=>\!excludeFn(x));
   const seen=new Set(),dis=[];
-  for(const x of sh([...dp])){const k=keyFn(x);if(k!==undefined&&!seen.has(k)){seen.add(k);dis.push(k);if(dis.length===n)break;}}
-  if(dis.length<n){for(const x of sh([...pool])){const k=keyFn(x);if(!excludeFn(x)&&!seen.has(k)){seen.add(k);dis.push(k);if(dis.length===n)break;}}}
+  for(const x of sh([...dp])){const k=keyFn(x);if(k\!==undefined&&\!seen.has(k)){seen.add(k);dis.push(k);if(dis.length===n)break;}}
+  if(dis.length<n){for(const x of sh([...pool])){const k=keyFn(x);if(\!excludeFn(x)&&\!seen.has(k)){seen.add(k);dis.push(k);if(dis.length===n)break;}}}
   return dis;
 }
 
 /* GENERATORS */
 function genCityQ(){
   const pf=S.diff==="hardcore"?0:200000;
-  const pool=CITIES.filter(c=>c.pop>=pf&&c.id!==S.lid);
+  const pool=CITIES.filter(c=>c.pop>=pf&&c.id\!==S.lid);
   if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.sub===cor.sub||x.cont===cor.cont,x=>x.c===cor.c,x=>x.c);
   return{type:"city",prompt:t("q_city"),subj:cor.n,ans:cor.c,opts:sh([cor.c,...dis]),meta:cor.cont+" \u00b7 "+(cor.pop/1e6).toFixed(1)+" Mio.",lid:cor.id,cc:cor.cc};
 }
 function genFlagQ(){
-  const pool=COUNTRIES.filter(x=>x.cc!==S.lid);if(pool.length<3)return null;
+  const pool=COUNTRIES.filter(x=>x.cc\!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.sr===cor.sr||x.ct===cor.ct,x=>x.c===cor.c,x=>x.c);
   return{type:"flag",prompt:t("q_flag"),subj:cor.cc,ans:cor.c,opts:sh([cor.c,...dis]),meta:cor.ct,lid:cor.cc,cc:cor.cc};
 }
 function genCapitalQ(){
-  const pool=CAPITALS.filter(x=>x.capital!==S.lid);if(pool.length<3)return null;
+  const pool=CAPITALS.filter(x=>x.capital\!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.country===cor.country,x=>x.country);
   return{type:"capital",prompt:t("q_capital"),subj:cor.capital,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.capital,cc:cor.cc};
 }
 function genRiverQ(){
-  const pool=RIVERS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=RIVERS.filter(x=>x.name\!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"river",prompt:t("q_river"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genLandmarkQ(){
-  const pool=LANDMARKS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=LANDMARKS.filter(x=>x.name\!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"landmark",prompt:t("q_landmark"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genParkQ(){
-  const pool=NATIONAL_PARKS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=NATIONAL_PARKS.filter(x=>x.name\!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"park",prompt:t("q_park"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genUnescoQ(){
-  const pool=UNESCO_SITES.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=UNESCO_SITES.filter(x=>x.name\!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"unesco",prompt:t("q_unesco"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genCitymarkQ(){
-  const pool=CITY_LANDMARKS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=CITY_LANDMARKS.filter(x=>x.name\!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(CITY_LANDMARKS,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.city===cor.city,x=>x.city);
   return{type:"citymark",prompt:t("q_citymark"),subj:cor.name,ans:cor.city,opts:sh([cor.city,...dis]),meta:cor.country,lid:cor.name,cc:cor.cc};
 }
 function genSubwayQ(){
-  const pool=SUBWAYS.filter(x=>x.city!==S.lid);if(pool.length<3)return null;
+  const pool=SUBWAYS.filter(x=>x.city\!==S.lid);if(pool.length<3)return null;
   const t=Math.floor(rng()*2);
   const cor=pool[~~(rng()*pool.length)];
   const dis3=distractors(pool,x=>x.country===cor.country||x.cc===cor.cc,x=>x.city===cor.city,x=>t===0?x.km:x.lines,2);
@@ -2306,27 +2324,27 @@ function genSubwayQ(){
   return{type:"subway",prompt,subj:cor.city,ans:String(ansVal),opts:sh([String(ansVal),...dis3.map(String)]),meta:cor.country+" \u00b7 "+suffix.trim(),lid:cor.city,cc:cor.cc};
 }
 function genFlagselQ(){
-  const pool=COUNTRIES.filter(x=>x.cc!==S.lid);if(pool.length<4)return null;
+  const pool=COUNTRIES.filter(x=>x.cc\!==S.lid);if(pool.length<4)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.sr===cor.sr||x.ct===cor.ct,x=>x.cc===cor.cc,x=>x.cc,3);
   return{type:"flagsel",prompt:t("q_flagsel"),subj:cor.c,ans:cor.cc,opts:sh([cor.cc,...dis]),meta:cor.ct,lid:cor.cc,cc:cor.cc};
 }
 function genRcapitalQ(){
-  const pool=CAPITALS.filter(x=>x.country!==S.lid);if(pool.length<3)return null;
+  const pool=CAPITALS.filter(x=>x.country\!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.capital===cor.capital,x=>x.capital);
   return{type:"rcapital",prompt:t("q_rcapital"),subj:cor.country,ans:cor.capital,opts:sh([cor.capital,...dis]),meta:cor.continent,lid:cor.country,cc:cor.cc};
 }
 function genRcityQ(){
-  const pool=COUNTRIES.filter(x=>x.c!==S.lid);if(pool.length<3)return null;
+  const pool=COUNTRIES.filter(x=>x.c\!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
-  const cc2=CITIES.filter(c=>c.c===cor.c);if(!cc2.length)return genRcityQ();
+  const cc2=CITIES.filter(c=>c.c===cor.c);if(\!cc2.length)return genRcityQ();
   const corCity=cc2[~~(rng()*cc2.length)];
   const dis=distractors(CITIES,x=>x.sub===corCity.sub||x.cont===corCity.cont,x=>x.c===cor.c,x=>x.n);
   return{type:"rcity",prompt:t("q_rcity"),subj:cor.c,ans:corCity.n,opts:sh([corCity.n,...dis]),meta:cor.ct,lid:cor.c,cc:cor.cc};
 }
 function genRriverQ(){
-  const ctries=[...new Set(RIVERS.map(r=>r.country))].filter(c=>c!==S.lid);if(!ctries.length)return null;
+  const ctries=[...new Set(RIVERS.map(r=>r.country))].filter(c=>c\!==S.lid);if(\!ctries.length)return null;
   const corC=ctries[~~(rng()*ctries.length)];
   const cRivers=RIVERS.filter(r=>r.country===corC);
   const cor=cRivers[~~(rng()*cRivers.length)];
@@ -2334,29 +2352,29 @@ function genRriverQ(){
   return{type:"rriver",prompt:t("q_rriver"),subj:corC,ans:cor.name,opts:sh([cor.name,...dis]),meta:cor.continent,lid:corC,cc:cor.cc};
 }
 function genFoodQ(){
-  if(!FOOD_DATA.length)return null;
+  if(\!FOOD_DATA.length)return null;
   const idx=~~(rng()*FOOD_DATA.length);const item=FOOD_DATA[idx];
   const corC=item.country;
-  const dis=FOOD_DATA.filter(f=>f.country!==corC).map(f=>f.country);
+  const dis=FOOD_DATA.filter(f=>f.country\!==corC).map(f=>f.country);
   const uniq=[...new Set(dis)];const picked=sh(uniq).slice(0,3);
   return{type:"food",prompt:t("q_food"),subj:item.dish,emoji:item.emoji,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
 }
 function genBrandQ(){
-  if(!BRANDS_DATA.length)return null;
+  if(\!BRANDS_DATA.length)return null;
   const idx=~~(rng()*BRANDS_DATA.length);const item=BRANDS_DATA[idx];
   const corC=item.country;
-  const sameSub=BRANDS_DATA.filter(b=>b.sub===item.sub&&b.country!==corC).map(b=>b.country);
-  const fallback=BRANDS_DATA.filter(b=>b.country!==corC).map(b=>b.country);
+  const sameSub=BRANDS_DATA.filter(b=>b.sub===item.sub&&b.country\!==corC).map(b=>b.country);
+  const fallback=BRANDS_DATA.filter(b=>b.country\!==corC).map(b=>b.country);
   const pool=[...new Set(sameSub.length>=3?sameSub:fallback)];
   const picked=sh(pool).slice(0,3);
   return{type:"brand",prompt:t("q_brand"),subj:item.brand,industry:item.industry,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
 }
 function genCurrencyQ(){
-  if(!CURRENCIES_DATA.length)return null;
+  if(\!CURRENCIES_DATA.length)return null;
   const idx=~~(rng()*CURRENCIES_DATA.length);const item=CURRENCIES_DATA[idx];
   const corC=item.country;
-  const sameSub=CURRENCIES_DATA.filter(c=>c.sub===item.sub&&c.country!==corC).map(c=>c.country);
-  const fallback=CURRENCIES_DATA.filter(c=>c.country!==corC).map(c=>c.country);
+  const sameSub=CURRENCIES_DATA.filter(c=>c.sub===item.sub&&c.country\!==corC).map(c=>c.country);
+  const fallback=CURRENCIES_DATA.filter(c=>c.country\!==corC).map(c=>c.country);
   const pool=[...new Set(sameSub.length>=3?sameSub:fallback)];
   const picked=sh(pool).slice(0,3);
   return{type:"currency",prompt:t("q_currency"),subj:item.currency,symbol:item.symbol,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
@@ -2367,17 +2385,17 @@ function genOutlineQ(){
   const sh2=arr=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=~~(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
   const idx=~~(rng()*pool.length);const item=pool[idx];
   const corC=item.c;const corCC=item.cc;
-  const dis=pool.filter(c=>c.cc!==corCC).map(c=>c.c);
+  const dis=pool.filter(c=>c.cc\!==corCC).map(c=>c.c);
   const picked=sh2(dis).slice(0,3);
   return{type:"outline",prompt:t("q_outline"),subj:corCC,ans:corC,opts:sh2([corC,...picked]),lid:corCC,cc:corCC};
 }
 /* EU-KENNZEICHEN GENERATORS (Phase 23B) — smart same-country distractors */
 function genPlateQ(hardcore){
   const pool=PLATES_DATA;
-  if(!pool||pool.length<5)return null;
+  if(\!pool||pool.length<5)return null;
   const cor=pool[~~(rng()*pool.length)];
-  const sameCountry=pool.filter(p=>p.country===cor.country&&p.region!==cor.region);
-  const disPool=sameCountry.length>=3?sameCountry:pool.filter(p=>p.region!==cor.region);
+  const sameCountry=pool.filter(p=>p.country===cor.country&&p.region\!==cor.region);
+  const disPool=sameCountry.length>=3?sameCountry:pool.filter(p=>p.region\!==cor.region);
   const picked=sh([...disPool]).slice(0,3).map(p=>p.region);
   const opts=sh([cor.region,...picked]);
   const cc_map={Deutschland:"de",Österreich:"at",Schweiz:"ch",Polen:"pl",Frankreich:"fr",Italien:"it",Rumänien:"ro"};
@@ -2399,9 +2417,9 @@ function genPlateQ(hardcore){
 const MAP_COUNTRIES=[{"cc":"fj","name":"Fiji"},{"cc":"tz","name":"Tanzania"},{"cc":"ca","name":"Canada"},{"cc":"us","name":"United States of America"},{"cc":"kz","name":"Kazakhstan"},{"cc":"uz","name":"Uzbekistan"},{"cc":"pg","name":"Papua New Guinea"},{"cc":"id","name":"Indonesia"},{"cc":"ar","name":"Argentina"},{"cc":"cl","name":"Chile"},{"cc":"cd","name":"Dem. Rep. Congo"},{"cc":"so","name":"Somalia"},{"cc":"ke","name":"Kenya"},{"cc":"sd","name":"Sudan"},{"cc":"td","name":"Chad"},{"cc":"ht","name":"Haiti"},{"cc":"do","name":"Dominican Rep."},{"cc":"ru","name":"Russia"},{"cc":"bs","name":"Bahamas"},{"cc":"no","name":"Norway"},{"cc":"za","name":"South Africa"},{"cc":"ls","name":"Lesotho"},{"cc":"mx","name":"Mexico"},{"cc":"uy","name":"Uruguay"},{"cc":"br","name":"Brazil"},{"cc":"bo","name":"Bolivia"},{"cc":"pe","name":"Peru"},{"cc":"co","name":"Colombia"},{"cc":"pa","name":"Panama"},{"cc":"cr","name":"Costa Rica"},{"cc":"ni","name":"Nicaragua"},{"cc":"hn","name":"Honduras"},{"cc":"sv","name":"El Salvador"},{"cc":"gt","name":"Guatemala"},{"cc":"bz","name":"Belize"},{"cc":"ve","name":"Venezuela"},{"cc":"gy","name":"Guyana"},{"cc":"sr","name":"Suriname"},{"cc":"fr","name":"France"},{"cc":"ec","name":"Ecuador"},{"cc":"jm","name":"Jamaica"},{"cc":"cu","name":"Cuba"},{"cc":"zw","name":"Zimbabwe"},{"cc":"bw","name":"Botswana"},{"cc":"na","name":"Namibia"},{"cc":"sn","name":"Senegal"},{"cc":"ml","name":"Mali"},{"cc":"mr","name":"Mauritania"},{"cc":"bj","name":"Benin"},{"cc":"ne","name":"Niger"},{"cc":"ng","name":"Nigeria"},{"cc":"cm","name":"Cameroon"},{"cc":"tg","name":"Togo"},{"cc":"gh","name":"Ghana"},{"cc":"ci","name":"Côte d'Ivoire"},{"cc":"gn","name":"Guinea"},{"cc":"gw","name":"Guinea-Bissau"},{"cc":"lr","name":"Liberia"},{"cc":"sl","name":"Sierra Leone"},{"cc":"bf","name":"Burkina Faso"},{"cc":"cf","name":"Central African Rep."},{"cc":"cg","name":"Congo"},{"cc":"ga","name":"Gabon"},{"cc":"gq","name":"Eq. Guinea"},{"cc":"zm","name":"Zambia"},{"cc":"mw","name":"Malawi"},{"cc":"mz","name":"Mozambique"},{"cc":"sz","name":"eSwatini"},{"cc":"ao","name":"Angola"},{"cc":"bi","name":"Burundi"},{"cc":"il","name":"Israel"},{"cc":"lb","name":"Lebanon"},{"cc":"mg","name":"Madagascar"},{"cc":"ps","name":"Palestine"},{"cc":"gm","name":"Gambia"},{"cc":"tn","name":"Tunisia"},{"cc":"dz","name":"Algeria"},{"cc":"jo","name":"Jordan"},{"cc":"ae","name":"United Arab Emirates"},{"cc":"qa","name":"Qatar"},{"cc":"kw","name":"Kuwait"},{"cc":"iq","name":"Iraq"},{"cc":"om","name":"Oman"},{"cc":"vu","name":"Vanuatu"},{"cc":"kh","name":"Cambodia"},{"cc":"th","name":"Thailand"},{"cc":"la","name":"Laos"},{"cc":"mm","name":"Myanmar"},{"cc":"vn","name":"Vietnam"},{"cc":"kp","name":"North Korea"},{"cc":"kr","name":"South Korea"},{"cc":"mn","name":"Mongolia"},{"cc":"in","name":"India"},{"cc":"bd","name":"Bangladesh"},{"cc":"bt","name":"Bhutan"},{"cc":"np","name":"Nepal"},{"cc":"pk","name":"Pakistan"},{"cc":"af","name":"Afghanistan"},{"cc":"tj","name":"Tajikistan"},{"cc":"kg","name":"Kyrgyzstan"},{"cc":"tm","name":"Turkmenistan"},{"cc":"ir","name":"Iran"},{"cc":"sy","name":"Syria"},{"cc":"am","name":"Armenia"},{"cc":"se","name":"Sweden"},{"cc":"by","name":"Belarus"},{"cc":"ua","name":"Ukraine"},{"cc":"pl","name":"Poland"},{"cc":"at","name":"Austria"},{"cc":"hu","name":"Hungary"},{"cc":"md","name":"Moldova"},{"cc":"ro","name":"Romania"},{"cc":"lt","name":"Lithuania"},{"cc":"lv","name":"Latvia"},{"cc":"ee","name":"Estonia"},{"cc":"de","name":"Germany"},{"cc":"bg","name":"Bulgaria"},{"cc":"gr","name":"Greece"},{"cc":"tr","name":"Turkey"},{"cc":"al","name":"Albania"},{"cc":"hr","name":"Croatia"},{"cc":"ch","name":"Switzerland"},{"cc":"lu","name":"Luxembourg"},{"cc":"be","name":"Belgium"},{"cc":"nl","name":"Netherlands"},{"cc":"pt","name":"Portugal"},{"cc":"es","name":"Spain"},{"cc":"ie","name":"Ireland"},{"cc":"nz","name":"New Zealand"},{"cc":"au","name":"Australia"},{"cc":"lk","name":"Sri Lanka"},{"cc":"cn","name":"China"},{"cc":"tw","name":"Taiwan"},{"cc":"it","name":"Italy"},{"cc":"dk","name":"Denmark"},{"cc":"gb","name":"United Kingdom"},{"cc":"is","name":"Iceland"},{"cc":"az","name":"Azerbaijan"},{"cc":"ge","name":"Georgia"},{"cc":"ph","name":"Philippines"},{"cc":"my","name":"Malaysia"},{"cc":"bn","name":"Brunei"},{"cc":"si","name":"Slovenia"},{"cc":"fi","name":"Finland"},{"cc":"sk","name":"Slovakia"},{"cc":"cz","name":"Czechia"},{"cc":"er","name":"Eritrea"},{"cc":"jp","name":"Japan"},{"cc":"py","name":"Paraguay"},{"cc":"ye","name":"Yemen"},{"cc":"sa","name":"Saudi Arabia"},{"cc":"cy","name":"Cyprus"},{"cc":"ma","name":"Morocco"},{"cc":"eg","name":"Egypt"},{"cc":"ly","name":"Libya"},{"cc":"et","name":"Ethiopia"},{"cc":"dj","name":"Djibouti"},{"cc":"ug","name":"Uganda"},{"cc":"rw","name":"Rwanda"},{"cc":"ba","name":"Bosnia and Herz."},{"cc":"mk","name":"Macedonia"},{"cc":"rs","name":"Serbia"},{"cc":"me","name":"Montenegro"},{"cc":"tt","name":"Trinidad and Tobago"},{"cc":"ss","name":"S. Sudan"}];
 
 function genMapGuessQ(){
-  if(!MAP_COUNTRIES.length)return null;
+  if(\!MAP_COUNTRIES.length)return null;
   const idx=~~(Math.random()*MAP_COUNTRIES.length);
-  const co=MAP_COUNTRIES[idx];if(!co)return null;
+  const co=MAP_COUNTRIES[idx];if(\!co)return null;
   return{type:"map_guess",prompt:t("q_map_guess"),subj:co.name,
     ans:co.name,opts:[],meta:"",lid:co.cc,cc:co.cc};
 }
@@ -2436,21 +2454,21 @@ function nextRound(){
   }else{S.rd=nr;lq();}
 }
 function lq(){
-  if(!S.queueExtra)S.queueExtra=[];
-  if(!S.askedLids)S.askedLids=new Set();
+  if(\!S.queueExtra)S.queueExtra=[];
+  if(\!S.askedLids)S.askedLids=new Set();
   const dur=(S.diff==="hardcore"||S.diff==="survival")?8:12;
   /* Try up to 25 times to get a question whose lid hasn't appeared this round */
   let q=null,_att=0;
   while(_att<25){
     const _c=(GEN[S.mode]||genCityQ)();
-    if(_c&&!S.askedLids.has(_c.lid)){q=_c;break;}
+    if(_c&&\!S.askedLids.has(_c.lid)){q=_c;break;}
     _att++;
   }
   /* Fallback: accept any valid question if pool is exhausted */
-  if(!q)q=(GEN[S.mode]||genCityQ)()||null;
+  if(\!q)q=(GEN[S.mode]||genCityQ)()||null;
   /* Duolingo casual: once normal round exhausted, pull retries */
-  if(!q&&S.diff==="casual"&&S.queueExtra.length>0)q=S.queueExtra.shift();
-  if(!q){S.ph="menu";render();return;}
+  if(\!q&&S.diff==="casual"&&S.queueExtra.length>0)q=S.queueExtra.shift();
+  if(\!q){S.ph="menu";render();return;}
   S.askedLids.add(q.lid);
   S.q=q;S.tm=dur;S.dur=dur;S.sel=null;S.ok=null;S.ph="playing";
   S.half_removed=false;S.freezeActive=false;
@@ -2464,7 +2482,7 @@ function answerByIdx(i){
   answer(S.q.opts[i]);
 }
 function answer(a){
-  if(S.sel!==null)return;clr();
+  if(S.sel\!==null)return;clr();
   const ok=a===S.q.ans;
   S.sel=a||"__t";S.ok=ok;
   if(S.q.cc)S.sessionAnswers.push({cc:S.q.cc,correct:ok});
@@ -2486,7 +2504,7 @@ function answer(a){
       return;
     }
     /* Duolingo casual: queue wrong question for retry */
-    if(S.diff==="casual"&&!S.q._retry){if(!S.queueExtra)S.queueExtra=[];S.queueExtra.push({...S.q,_retry:true});}
+    if(S.diff==="casual"&&\!S.q._retry){if(\!S.queueExtra)S.queueExtra=[];S.queueExtra.push({...S.q,_retry:true});}
   }
   /* Phase 43: collect plate with code::country key */
   if(ok&&(S.mode==="plate_casual"||S.mode==="plate_hard")&&S.q.subj){
@@ -2494,7 +2512,7 @@ function answer(a){
     const _pc=PLATES_DATA.find(p=>p.code===_code);
     if(_pc){
       const _key=collKey(_code,_pc.country);
-      if(!S.collectedPlates.includes(_key)){
+      if(\!S.collectedPlates.includes(_key)){
         S.collectedPlates.push(_key);saveCollectedPlates(S.collectedPlates);
         const _allR=PLATES_DATA.filter(p=>p.code===_code&&p.country===_pc.country);
         showToast("⭐ Neu: "+_code+" — "+_pc.region+(_allR.length>1?" +"+(_allR.length-1)+" weitere":"")+"!");
@@ -2509,9 +2527,9 @@ function answer(a){
   }
   fTo=setTimeout(()=>{
     const nr=S.rd+1;
-    if(S.diff!=="survival"&&nr>=ROUNDS){
+    if(S.diff\!=="survival"&&nr>=ROUNDS){
       S.ph="gameover";S.scoreSaved=false;S.convModal=true;soundOver();checkMastery();
-      if(S.isDailyRun&&!isDailyDone()){
+      if(S.isDailyRun&&\!isDailyDone()){
         markDailyDone(S.sc);
         if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;
         if(sb&&sbUser)sb.from("profiles").update({geo_coins:(sbProfile?.geo_coins||0)}).eq("id",sbUser.id).then(()=>{},()=>{});
@@ -2544,13 +2562,13 @@ function showStampToast(cc){
 }
 function showCopyToast(){
   const old=document.getElementById("copy-toast");if(old)old.remove();
-  const el=document.createElement("div");el.id="copy-toast";el.className="copy-toast";el.textContent="\u2713 In Zwischenablage kopiert!";
+  const el=document.createElement("div");el.id="copy-toast";el.className="copy-toast";el.textContent="\u2713 In Zwischenablage kopiert\!";
   document.body.appendChild(el);setTimeout(()=>el.remove(),2500);
 }
 function shareResult(){
   const grade=S.sc>=2800?"S":S.sc>=2200?"A":S.sc>=1500?"B":S.sc>=800?"C":"D";
   const stars="\u{1F525}".repeat(Math.min(5,Math.ceil(S.correct/2)));
-  const text=`\u{1F30D} GeoQuest: ${S.sc.toLocaleString()} Punkte! ${stars}\n${S.correct}/${ROUNDS} richtig \u2022 Streak: ${S.bs}\u00d7\nKannst du das toppen? \u{1F3C6}`;
+  const text=`\u{1F30D} GeoQuest: ${S.sc.toLocaleString()} Punkte\! ${stars}\n${S.correct}/${ROUNDS} richtig \u2022 Streak: ${S.bs}\u00d7\nKannst du das toppen? \u{1F3C6}`;
   navigator.clipboard.writeText(text).then(showCopyToast).catch(()=>{});
 }
 function updateHdrGuest(){
@@ -2639,7 +2657,7 @@ function getRarity(code){
 }
 function rarityLabel(r){return{common:"\u{1F7E2} Common",rare:"\u{1F535} Rare",epic:"\u{1F7E3} Epic",legendary:"\u{1F7E1} Legendary"}[r]||r;}
 function rarityColor(r){return{common:"#10b981",rare:"#3b82f6",epic:"#8b5cf6",legendary:"#f59e0b"}[r]||"#999";}
-function isDailyDone(){try{return!!JSON.parse(localStorage.getItem(getDailyKey())||"null");}catch(e){return false;}}
+function isDailyDone(){try{return\!\!JSON.parse(localStorage.getItem(getDailyKey())||"null");}catch(e){return false;}}
 function markDailyDone(score){try{localStorage.setItem(getDailyKey(),JSON.stringify({score,ts:Date.now()}));}catch(e){}}
 function getDailySeed(){
   const d=new Date().toISOString().slice(0,10).replace(/-/g,"");
@@ -2669,7 +2687,7 @@ function renderDailyHero(){
       <div style="display:flex;align-items:center;gap:12px">
         <div style="font-size:2rem">\u{1F3C6}</div>
         <div>
-          <div class="dh-title">Daily Challenge erledigt!</div>
+          <div class="dh-title">Daily Challenge erledigt\!</div>
           <div class="dh-sub" style="color:var(--text2)">Score: <b>${stored?.score?.toLocaleString()||"?"}</b> \u00b7 Neue Challenge in <span style="font-family:monospace;color:#f59e0b">${cd}</span></div>
         </div>
       </div>
@@ -2694,11 +2712,11 @@ function duellPct(a,b){const mx=Math.max(a,b,1);return Math.round(a/mx*100);}
 
 function render(){
   updateHdrGuest();
-  const app=document.getElementById("app");if(!app)return;
+  const app=document.getElementById("app");if(\!app)return;
 
   /* Onboarding gate */
   const ob=loadOb();
-  if(!ob||!ob.done){
+  if(\!ob||\!ob.done){
     if(S.obStep<0)S.obStep=0;
     app.innerHTML=renderOnboarding(S.obStep);return;
   }
@@ -2707,11 +2725,11 @@ function render(){
   if(S.lockModal){app.innerHTML=renderLockModal(S.lockModal);return;}
 
   /* Challenge welcome */
-  if(CHALLENGE&&S.ph==="menu"&&!S.challengeStarted){
+  if(CHALLENGE&&S.ph==="menu"&&\!S.challengeStarted){
     const ml=MODES.find(m=>m.id===CHALLENGE.mode)?.title||CHALLENGE.mode;
     app.innerHTML=`<div class="scr"><div style="background:var(--bg2);border-radius:20px;padding:1.5rem;text-align:center;margin-top:2rem">
       <div style="font-size:2rem;margin-bottom:.5rem">\u{1F3C6}</div>
-      <div style="font-weight:900;font-size:1.2rem;margin-bottom:4px">Herausforderung!</div>
+      <div style="font-weight:900;font-size:1.2rem;margin-bottom:4px">Herausforderung\!</div>
       <div style="color:var(--text2);font-size:.82rem;margin-bottom:.85rem">Modus: ${ml}</div>
       <div style="background:var(--bg3);border-radius:12px;padding:.85rem;margin-bottom:1rem">
         <div style="color:var(--text3);font-size:.7rem;margin-bottom:3px">ZU SCHLAGEN</div>
@@ -2761,17 +2779,17 @@ function render(){
     const g=S.sc>=2800?"S":S.sc>=2200?"A":S.sc>=1500?"B":S.sc>=800?"C":"D";
     const gc={S:"#fbbf24",A:"#34d399",B:"#60a5fa",C:"#fb923c",D:"#f87171"}[g];
     const ml=MODES.find(m=>m.id===S.mode)?.title||"";const mm=isSurv?2:S.diff==="hardcore"?3:1;
-    const isGuest=sbOK&&!sbProfile?.username;
+    const isGuest=sbOK&&\!sbProfile?.username;
     const mastery=loadMastery();const totalStamps=Object.values(mastery).filter(m=>getMasteryRank(m.v,m.p)).length;
     const stampBanners=S.newStamps.map(({cc,rank})=>{
       const cn=COUNTRIES.find(c=>c.cc===cc)?.c||cc.toUpperCase();
       const rl={gold:"\u{1F947} Gold-Stempel",silver:"\u{1F948} Silber-Stempel",bronze:"\u{1F949} Bronze-Stempel"}[rank]||"Stempel";
-      return`<div class="new-stamp-banner"><img src="https://flagcdn.com/w40/${cc}.png" style="width:28px;height:auto;border-radius:3px" onerror="this.style.display='none'"><div><div style="color:#34d399;font-weight:900;font-size:.88rem">NEUER STEMPEL!</div><div style="color:var(--text2);font-size:.78rem">${rl} \u2022 ${cn}</div></div></div>`;
+      return`<div class="new-stamp-banner"><img src="https://flagcdn.com/w40/${cc}.png" style="width:28px;height:auto;border-radius:3px" onerror="this.style.display='none'"><div><div style="color:#34d399;font-weight:900;font-size:.88rem">NEUER STEMPEL\!</div><div style="color:var(--text2);font-size:.78rem">${rl} \u2022 ${cn}</div></div></div>`;
     }).join("");
     const survivalPanel=isSurv?`
       ${isNewRecord?`<div style="background:linear-gradient(135deg,#7f1d1d,#991b1b);border:2px solid #ef4444;border-radius:12px;padding:.85rem;text-align:center;margin-bottom:.75rem">
         <div style="font-size:1.6rem">\ud83c\udfc6</div>
-        <div style="color:#fca5a5;font-weight:900;font-size:.9rem">NEUER REKORD!</div>
+        <div style="color:#fca5a5;font-weight:900;font-size:.9rem">NEUER REKORD\!</div>
         <div style="color:#fef2f2;font-size:1.5rem;font-weight:900">${survived} Runden</div>
       </div>`:""}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.85rem">
@@ -2793,9 +2811,9 @@ function render(){
           <div style="background:var(--bg3);border-radius:12px;padding:.75rem .5rem;text-align:center"><div style="font-size:1.3rem;font-weight:900;color:#fb923c">${S.bs}\u00d7</div><div style="font-size:.64rem;color:var(--text3)">Streak</div></div>
           <div style="background:var(--bg3);border-radius:12px;padding:.75rem .5rem;text-align:center"><div style="font-size:1.3rem;font-weight:900;color:#fbbf24">${isSurv?survived:~~(S.sc/ROUNDS)}</div><div style="font-size:.64rem;color:var(--text3)">${isSurv?"Runden":"\u00d8/Rd"}</div></div>
         </div>
-        ${S.isDailyRun&&!isDailyDone()?`<div style="background:linear-gradient(135deg,#052e16,#064e3b);border:1.5px solid #10b981;border-radius:12px;padding:.75rem;text-align:center;margin-bottom:.75rem">
+        ${S.isDailyRun&&\!isDailyDone()?`<div style="background:linear-gradient(135deg,#052e16,#064e3b);border:1.5px solid #10b981;border-radius:12px;padding:.75rem;text-align:center;margin-bottom:.75rem">
           <div style="font-size:1.4rem">\u{1F3C6}</div>
-          <div style="color:#34d399;font-weight:900;font-size:.9rem">Daily Challenge!</div>
+          <div style="color:#34d399;font-weight:900;font-size:.9rem">Daily Challenge\!</div>
           <div style="color:#fbbf24;font-size:1rem;font-weight:900">+100 GeoCoins</div>
         </div>`:""}
         ${sbOK?`<div style="font-size:.76rem;color:${S.scoreSaved?"#34d399":"var(--text3)"}">${S.scoreSaved?"\u2713 Score gespeichert":"Speichere \u2026"}</div>`:""}
@@ -2842,7 +2860,7 @@ function render(){
   /* PLAYING / FEEDBACK */
   const{sc,st,bs,rd,tm,q,sel,ok,pts,mode,diff}=S;
   if(!q){S.ph="menu";S.q=null;render();return;}  /* guard: q not yet set */
-  const col=tc(),p=pct(),t=tier(st);
+  const col=tc(),p=pct(),_tr=tier(st);
   let qBody="";
   if(q.type==="flag"){
     qBody=`<div class="qprompt">${q.prompt}</div><div class="qflag"><img src="https://flagcdn.com/w160/${q.subj}.png" alt="Flagge" onerror="this.style.display='none'"></div>${sel!==null?`<div class="qmeta">${q.meta||""}</div>`:""}`;
@@ -2858,15 +2876,15 @@ function render(){
     qBody=`<div class="qprompt">${q.prompt}</div>
       <div style="text-align:center;margin:8px 0 10px">
         <div class="plate-badge">${q.subj}</div>
-        ${q.type==="plate_casual"&&q.meta&&sel!==null?`<div style="color:var(--text3);font-size:.75rem;margin-top:6px">${q.meta}</div>`:""}
+        ${q.type==="plate_casual"&&q.meta&&sel\!==null?`<div style="color:var(--text3);font-size:.75rem;margin-top:6px">${q.meta}</div>`:""}
       </div>`;
   }else if(q.type==="hl_pop"||q.type==="hl_river"||q.type==="hl_area"){
     /* Higher/Lower card + dedicated answer buttons (clean "higher"/"lower" keys) */
-    const revB=sel!==null;
+    const revB=sel\!==null;
     const hlIcon=q.type==="hl_pop"?"\u{1F465}":q.type==="hl_river"?"\u{1F4A7}":"\u{1F5FA}";
     const hlFbH=sel===null?"":ok&&q.ans==="higher"?"ok":"ng";
     const hlFbL=sel===null?"":ok&&q.ans==="lower"?"ok":"ng";
-    const hlDis=sel!==null?"disabled":"";
+    const hlDis=sel\!==null?"disabled":"";
     qBody=`<div class="qprompt">${hlIcon} ${q.prompt}</div>
       <div class="hl-wrap">
         <div class="hl-card hl-known">
@@ -2880,14 +2898,14 @@ function render(){
         </div>
       </div>
       <div class="hl-btn-row">
-        <button class="hl-btn hl-higher${sel!==null?(q.ans==="higher"?" ok":(sel==="higher"?" ng":" dm")):""}" ${hlDis} onclick="answer('higher')">${t("hl_higher")}</button>
-        <button class="hl-btn hl-lower${sel!==null?(q.ans==="lower"?" ok":(sel==="lower"?" ng":" dm")):""}" ${hlDis} onclick="answer('lower')">${t("hl_lower")}</button>
+        <button class="hl-btn hl-higher${sel\!==null?(q.ans==="higher"?" ok":(sel==="higher"?" ng":" dm")):""}" ${hlDis} onclick="answer('higher')">${t("hl_higher")}</button>
+        <button class="hl-btn hl-lower${sel\!==null?(q.ans==="lower"?" ok":(sel==="lower"?" ng":" dm")):""}" ${hlDis} onclick="answer('lower')">${t("hl_lower")}</button>
       </div>`;
   }else if(q.type==="curr_real"){
     /* Show country name; hide currency name (meta) until answered */
     qBody=`<div class="qprompt">${q.prompt}</div>
       <div class="qmain">${q.subj}</div>
-      ${sel!==null?`<div class="qmeta">${q.meta||""}</div>`:""}`;
+      ${sel\!==null?`<div class="qmeta">${q.meta||""}</div>`:""}`;
   }else if(q.type==="neighbor"){
     qBody=`<div class="qprompt" style="font-size:1rem">${q.prompt}</div>
       <div style="text-align:center;margin:10px 0 6px">
@@ -2899,14 +2917,14 @@ function render(){
   }
   /* After-answer reveal for plate casual */
   let plateReveal="";
-  if(sel!==null&&(q.type==="plate_casual"||q.type==="plate_hard")){
+  if(sel\!==null&&(q.type==="plate_casual"||q.type==="plate_hard")){
     const pc=PLATES_DATA.find(p=>p.code===q.subj);
     if(pc)plateReveal=`<div style="text-align:center;color:var(--text2);font-size:.8rem;margin-top:4px">${pc.region} \u00b7 ${pc.country}${pc.state?" \u00b7 "+pc.state:""}</div>`;
   }
   /* Phase 34: Map-Guesser — early return, D3 map replaces answer buttons */
   if(q.type==="map_guess"){
     const mapFb=sel===null?"":ok
-      ?`<div class="fb ok">\u2713 Richtig! +${pts}</div>`
+      ?`<div class="fb ok">\u2713 Richtig\! +${pts}</div>`
       :`<div class="fb ng">\u2717 Falsch \u2192 ${q.ans}</div>`;
     app.innerHTML=`<div class="scr map-scr">
       <div class="hud">
@@ -2927,7 +2945,7 @@ function render(){
       <div class="map-prompt">\u{1F5FA} Finde: <strong>${esc(q.subj)}</strong></div>
       <div id="gq-map-svg" class="map-container"></div>
       ${mapFb}
-      ${sel!==null?`<button class="btn-p map-weiter" onclick="clr();nextRound()">Weiter \u2192</button>`:""}
+      ${sel\!==null?`<button class="btn-p map-weiter" onclick="clr();nextRound()">Weiter \u2192</button>`:""}
     </div>`;
     requestAnimationFrame(()=>drawWorldMap(q.ans,sel,ok));
     return;
@@ -2936,7 +2954,7 @@ function render(){
   const topBar=`<div class="scr"><div class="hud"><div style="display:flex;gap:8px;align-items:center"><div class="pill"><div class="hlbl">SCORE</div><div class="hval">${sc.toLocaleString()}</div></div>${st>0?`<div class="pill-s"><div class="hlbl" style="color:#fb923c">STREAK</div><div class="hval-s">×${st}</div></div>`:""}</div><div style="display:flex;align-items:center;gap:8px">${diff==="survival"?`<div style="text-align:right"><div class="hlbl" style="color:#ef4444">💀 SURVIVAL</div><div style="color:var(--text);font-weight:700;font-size:.9rem">${rd+1}<span style="color:var(--text3)">∞</span></div></div>`:`<div style="text-align:right"><div class="hlbl" style="color:var(--text3)">RUNDE</div><div style="color:var(--text);font-weight:700;font-size:.9rem">${rd+1}<span style="color:var(--text3)">/${ROUNDS}</span></div></div>`}<button class="btn-cancel" onclick="clr();S.ph='menu';S.tab='home';render()">×</button></div></div><div class="tbar${S.freezeActive?" frozen":""}"><div class="tfill" style="width:${p}%;background:${col}"></div></div>`;
   let answerHtml="";
   if(q.type==="flagsel"){
-    const fb2=q.opts.map(cc=>{let cls="btn-flag";if(sel!==null){if(cc===q.ans)cls+=" ok";else if(cc===sel)cls+=" ng";else cls+=" dm";}const flagEmoji=cc.toUpperCase().replace(/./g,c=>String.fromCodePoint(c.charCodeAt(0)+127397));
+    const fb2=q.opts.map(cc=>{let cls="btn-flag";if(sel\!==null){if(cc===q.ans)cls+=" ok";else if(cc===sel)cls+=" ng";else cls+=" dm";}const flagEmoji=cc.toUpperCase().replace(/./g,c=>String.fromCodePoint(c.charCodeAt(0)+127397));
       return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${cc}')"><img src="https://flagcdn.com/w120/${cc}.png" alt="${cc}" onerror="this.outerHTML='<span class=flag-fb>'+flagEmoji+'</span>'"></button>`;}).join("");
     answerHtml=`<div class="flag-grid">${fb2}</div>`;
   }else{
@@ -2962,15 +2980,15 @@ function render(){
           <button class="${moreCls}" ${pcDis} onclick="answer('more')">${t("hl_more")}</button>
           <button class="${lessCls}" ${pcDis} onclick="answer('less')">${t("hl_less")}</button>
         </div>
-        ${sel!==null?`<div class="meta-line">${q.meta||""}</div>`:""}
-        ${sel!==null?`<button class="btn-p" onclick="nextRound()">Weiter →</button>`:""}
+        ${sel\!==null?`<div class="meta-line">${q.meta||""}</div>`:""}
+        ${sel\!==null?`<button class="btn-p" onclick="nextRound()">Weiter →</button>`:""}
       </div>`;
       app.innerHTML=pcHtml;return;
     }
     if(q.type==="hl_pop"||q.type==="hl_river"||q.type==="hl_area"){
       answerHtml="";
     }else{
-      const btns=q.opts.map((o,i)=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answerByIdx(${i})">${esc(displayCountry(o))}${mk}</button>`;}).join("");
+      const btns=q.opts.map((o,i)=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel\!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answerByIdx(${i})">${esc(displayCountry(o))}${mk}</button>`;}).join("");
       answerHtml=`<div class="answers">${btns}</div>`;
     }
   }
@@ -2979,8 +2997,8 @@ function render(){
   /* Power-up bar (Phase 26) */
   const pu=loadPU();
   const puBar=`<div class="pu-bar">
-    <button class="pu-btn${S.half_removed?" pu-used":""}" onclick="useFiveO()" title="50/50-Joker (${pu.five0||0} \u00fcbrig)">\u2702 50/50 <span style="font-size:.62rem">(${pu.five0||0})</span></button>
-    <button class="pu-btn${S.freezeActive?" freeze-on":""}" onclick="useFreeze()" title="Zeit-Stopp (${pu.freeze||0} \u00fcbrig)">\u{1F9CA} Freeze <span style="font-size:.62rem">(${pu.freeze||0})</span></button>
+    <button class="pu-btn${S.half_removed?" pu-used":""}" onclick="useFiveO()" ${(S.half_removed||(pu.five0||0)===0)?"disabled":""} title="50/50-Joker (${pu.five0||0} \u00fcbrig)">\u2702 50/50 <span style="font-size:.62rem">(${pu.five0||0})</span></button>
+    <button class="pu-btn${S.freezeActive?" freeze-on":""}" onclick="useFreeze()" ${(S.freezeActive||(pu.freeze||0)===0)?"disabled":""} title="Zeit-Stopp (${pu.freeze||0} \u00fcbrig)">\u{1F9CA} Freeze <span style="font-size:.62rem">(${pu.freeze||0})</span></button>
   </div>`;
   app.innerHTML=`<div class="scr">
     <div class="hud">
@@ -2996,7 +3014,7 @@ function render(){
       </div>
     </div>
     ${S.mpOpponent?`<div class="duell-bar-wrap"><div class="duell-lbl duell-you">Ich<span class="duell-score">${sc.toLocaleString()}</span></div><div class="duell-track"><div class="duell-fill-you" style="width:${duellPct(sc,S.mpOppScore||0)}%"></div><div class="duell-fill-opp" style="width:${duellPct(S.mpOppScore||0,sc)}%"></div></div><div class="duell-lbl duell-opp"><span class="duell-score">${(S.mpOppScore||0).toLocaleString()}</span>${esc(S.mpOpponent.slice(0,8))}</div></div>`:""}
-    ${st>=3?`<div style="text-align:center;font-size:.76rem;font-weight:700;color:#fb923c;margin-bottom:6px">${t.l}</div>`:""}
+    ${st>=3?`<div style="text-align:center;font-size:.76rem;font-weight:700;color:#fb923c;margin-bottom:6px">${_tr.l}</div>`:""}
     <div class="tbar${S.freezeActive?" frozen":""}"><div class="tfill" style="width:${p}%;background:${col}"></div></div>
     <div class="qcard">${qBody}<div class="qtimer" style="color:${col}">${tm}</div></div>
     ${sel===null?puBar:""}
@@ -3009,17 +3027,17 @@ function render(){
 /* Phase 35: draw single-country D3 silhouette for outline mode */
 function drawCountryOutline(cc,targetId){
   const el=document.getElementById(targetId);
-  if(!el)return;
-  if(typeof d3==='undefined'||typeof topojson==='undefined'||!window.WORLD_TOPO){
+  if(\!el)return;
+  if(typeof d3==='undefined'||typeof topojson==='undefined'||\!window.WORLD_TOPO){
     el.innerHTML='<span style="font-size:3rem">'+cc.toUpperCase()+'</span>';
     return;
   }
   const countries=topojson.feature(window.WORLD_TOPO,window.WORLD_TOPO.objects.countries);
   /* Map cc to TopoJSON name via MAP_COUNTRIES */
   const entry=MAP_COUNTRIES.find(x=>x.cc===cc);
-  if(!entry){el.innerHTML='<span style="font-size:1rem;color:var(--text3)">?</span>';return;}
+  if(\!entry){el.innerHTML='<span style="font-size:1rem;color:var(--text3)">?</span>';return;}
   const feat=countries.features.find(f=>f.properties.name===entry.name);
-  if(!feat){el.innerHTML='<span style="font-size:1rem;color:var(--text3)">?</span>';return;}
+  if(\!feat){el.innerHTML='<span style="font-size:1rem;color:var(--text3)">?</span>';return;}
   const W=el.clientWidth||200,H=el.clientHeight||140;
   const proj=d3.geoMercator().fitSize([W,H],feat);
   const path=d3.geoPath().projection(proj);
@@ -3037,11 +3055,11 @@ function drawCountryOutline(cc,targetId){
 /* Phase 34 — D3 World Map component */
 function drawWorldMap(targetName,sel,ok){
   const container=document.getElementById('gq-map-svg');
-  if(!container||typeof d3==='undefined'||typeof topojson==='undefined'){
+  if(\!container||typeof d3==='undefined'||typeof topojson==='undefined'){
     if(container)container.innerHTML='<p style="color:var(--text3);text-align:center;padding:2rem">'+t('map_unavail')+'</p>';
     return;
   }
-  if(!window.WORLD_TOPO){
+  if(\!window.WORLD_TOPO){
     container.innerHTML='<p style="color:var(--text3);text-align:center;padding:2rem">'+t('map_loading')+'</p>';
     return;
   }
@@ -3060,7 +3078,7 @@ function drawWorldMap(targetName,sel,ok){
   /* Zoom + pan */
   const zoom=d3.zoom().scaleExtent([1,10])
     .on('zoom',ev=>{
-      if(sel!==null)return; /* lock zoom during feedback so user sees the result */
+      if(sel\!==null)return; /* lock zoom during feedback so user sees the result */
       g.attr('transform',ev.transform);
     });
   svg.call(zoom);
@@ -3078,9 +3096,9 @@ function drawWorldMap(targetName,sel,ok){
     .attr('data-n',d=>d.properties.name)
     .attr('fill',d=>{
       const n=d.properties.name;
-      if(sel!==null){
+      if(sel\!==null){
         if(n===targetName)return'#10b981';
-        if(n===sel&&!ok)return'#ef4444';
+        if(n===sel&&\!ok)return'#ef4444';
         return'#d1d5db';
       }
       return'var(--bg3,#e2e8f0)';
@@ -3088,21 +3106,21 @@ function drawWorldMap(targetName,sel,ok){
     .attr('stroke','var(--border,#94a3b8)')
     .attr('stroke-width',.35)
     .on('mouseover',function(_,d){
-      if(sel!==null)return;
+      if(sel\!==null)return;
       d3.select(this).attr('fill','#93c5fd');
     })
     .on('mouseout',function(_,d){
-      if(sel!==null)return;
+      if(sel\!==null)return;
       d3.select(this).attr('fill','var(--bg3,#e2e8f0)');
     })
     .on('click',function(ev,d){
-      if(sel!==null)return;
+      if(sel\!==null)return;
       ev.stopPropagation();
       answer(d.properties.name);
     });
 
   /* Pulse correct country after feedback */
-  if(sel!==null){
+  if(sel\!==null){
     const cp=g.selectAll('path.ctry').filter(d=>d.properties.name===targetName);
     let n=ok?2:4;
     function pulse(){
@@ -3167,7 +3185,7 @@ function isCollected(code,country){return S.collectedPlates.includes(collKey(cod
 
 /* Migrate old plain-code format → code::country */
 function migrateCollectedPlates(){
-  if(!PLATES_DATA.length)return;
+  if(\!PLATES_DATA.length)return;
   let changed=false;
   S.collectedPlates=S.collectedPlates.map(entry=>{
     if(entry.includes("::"))return entry; /* already new format */
@@ -3190,7 +3208,7 @@ function getUniquePlatesForCountry(country){
   /* Returns [{code, mainRegion, extraCount}] — one entry per unique code */
   const codeMap={};
   PLATES_DATA.filter(p=>p.country===country).forEach(p=>{
-    if(!codeMap[p.code])codeMap[p.code]={code:p.code,mainRegion:p.region,count:0};
+    if(\!codeMap[p.code])codeMap[p.code]={code:p.code,mainRegion:p.region,count:0};
     codeMap[p.code].count++;
   });
   return Object.values(codeMap).sort((a,b)=>a.code.localeCompare(b.code));
@@ -3206,11 +3224,11 @@ function totalUniquePlates(){
 /* ── Spotter ─────────────────────────────────────────────────────────────*/
 function spotterCollect(){
   const code=(S.spotterInput||"").toUpperCase().trim();
-  if(!code){S.spotterMsg="Bitte Kennzeichen eingeben!";S.spotterOk=null;render();return;}
-  const country=S.spotterCountry&&S.spotterCountry!=="all"?S.spotterCountry:null;
+  if(\!code){S.spotterMsg="Bitte Kennzeichen eingeben\!";S.spotterOk=null;render();return;}
+  const country=S.spotterCountry&&S.spotterCountry\!=="all"?S.spotterCountry:null;
   /* Find matching plates filtered by country if set */
   const candidates=PLATES_DATA.filter(p=>p.code===code&&(country===null||p.country===country));
-  if(!candidates.length){
+  if(\!candidates.length){
     /* Check if code exists in other countries */
     const elsewhere=PLATES_DATA.filter(p=>p.code===code);
     if(elsewhere.length){
@@ -3229,7 +3247,7 @@ function spotterCollect(){
   }else{
     S.collectedPlates.push(key);saveCollectedPlates(S.collectedPlates);
     const extras=candidates.length-1;
-    S.spotterMsg="\u{1F389} Neu: "+code+" — "+mainPlate.region+(extras?" +"+extras+" weitere":"")+"!";
+    S.spotterMsg="\u{1F389} Neu: "+code+" — "+mainPlate.region+(extras?" +"+extras+" weitere":"")+"\!";
     S.spotterOk=true;soundStamp();
   }
   S.spotterInput="";render();
@@ -3248,9 +3266,9 @@ function renderRealPlate(code,region,extra){
 
 /* ── Collection Screen ───────────────────────────────────────────────────*/
 function renderCollectionScreen(){
-  if(!PLATES_DATA.length)return`<div class="panel" style="text-align:center;padding:2rem"><div style="font-size:2rem">⏳</div><p style="color:var(--text3);margin-top:.5rem">Kennzeichen-Daten werden geladen…</p></div>`;
+  if(\!PLATES_DATA.length)return`<div class="panel" style="text-align:center;padding:2rem"><div style="font-size:2rem">⏳</div><p style="color:var(--text3);margin-top:.5rem">Kennzeichen-Daten werden geladen…</p></div>`;
   /* Run migration once per session */
-  if(!window._platesMigrated){window._platesMigrated=true;migrateCollectedPlates();}
+  if(\!window._platesMigrated){window._platesMigrated=true;migrateCollectedPlates();}
 
   const coll=S.collectedPlates;
   const total=totalUniquePlates();
@@ -3333,7 +3351,7 @@ function renderCollectionScreen(){
           :`<div style="color:var(--text3);font-size:.75rem;text-align:center;padding:.5rem 0">${t("album_empty_country",{country:displayCountry(country)})}</div>`}
       </div>`;
     }).join("");
-    if(!listContent)listContent=`<div style="text-align:center;padding:2rem;color:var(--text3)">${t("album_empty").replace("\n","<br>")}</div>`;
+    if(\!listContent)listContent=`<div style="text-align:center;padding:2rem;color:var(--text3)">${t("album_empty").replace("\n","<br>")}</div>`;
   }
 
   const mapContent=view==="map"?`<div id="album-map-svg" class="album-map-container"></div>`:"";
@@ -3347,7 +3365,7 @@ function renderCollectionScreen(){
 /* ── Trophy Map ──────────────────────────────────────────────────────────*/
 function drawAlbumMap(){
   const el=document.getElementById("album-map-svg");
-  if(!el||typeof d3==="undefined"||typeof topojson==="undefined"||!window.WORLD_TOPO)return;
+  if(\!el||typeof d3==="undefined"||typeof topojson==="undefined"||\!window.WORLD_TOPO)return;
 
   const coll=S.collectedPlates;
   /* Collected countries (EN) → unique codes collected there */
@@ -3355,9 +3373,9 @@ function drawAlbumMap(){
   coll.forEach(key=>{
     const {code,country}=parseCollKey(key);
     const en=plateCountryToEn(country);
-    if(!collByCountryEn[en])collByCountryEn[en]=[];
+    if(\!collByCountryEn[en])collByCountryEn[en]=[];
     /* Only add unique codes */
-    if(!collByCountryEn[en].includes(code))collByCountryEn[en].push(code);
+    if(\!collByCountryEn[en].includes(code))collByCountryEn[en].push(code);
   });
   const collCountrySet=new Set(Object.keys(collByCountryEn));
 
@@ -3397,7 +3415,7 @@ function drawAlbumMap(){
     const name=d.properties.name;
     const c=geoPath.centroid(d);
     return{name,c,codes:collByCountryEn[name]||[]};
-  }).filter(d=>d.c&&!isNaN(d.c[0])&&!isNaN(d.c[1]));
+  }).filter(d=>d.c&&\!isNaN(d.c[0])&&\!isNaN(d.c[1]));
 
   /* Drop shadow filter */
   const defs=svg.append("defs");
@@ -3480,15 +3498,15 @@ function renderHomeTab(){
   const chips=FILTERS.map(f=>`<span class="chip${S.filter===f.id?" active":""}" onclick="S.filter='${f.id}';render()">${f.lbl}</span>`).join("");
   function catSection(catId){
     const cat=MODE_CATS[catId];const unlocked=isCategoryUnlocked(catId);
-    if(!catMatchesFilter(catId))return"";
+    if(\!catMatchesFilter(catId))return"";
     const catModes=MODES.filter(m=>cat.modes.includes(m.id));
     const cards=catModes.map(m=>{
       const active=S.mode===m.id;
-      return`<div class="mode-card${active?" active":""}${!unlocked?" locked-card":""}" onclick="${unlocked?"startGame('"+m.id+"')":"S.lockModal='"+catId+"';render()"}" role="button">
+      return`<div class="mode-card${active?" active":""}${\!unlocked?" locked-card":""}" onclick="${unlocked?"startGame('"+m.id+"')":"S.lockModal='"+catId+"';render()"}" role="button">
         <span class="mode-icon">${m.icon}</span><div class="mode-title">${m.title}</div>
       </div>`;
     }).join("");
-    const lockOverlay=!unlocked?`<div class="cat-lock-overlay" onclick="S.lockModal='${catId}';render()">
+    const lockOverlay=\!unlocked?`<div class="cat-lock-overlay" onclick="S.lockModal='${catId}';render()">
       <div style="text-align:center">
         <div style="font-size:2rem;margin-bottom:6px">\u{1F512}</div>
         <div style="color:var(--text);font-weight:900;font-size:.88rem">${cat.label}</div>
@@ -3497,7 +3515,7 @@ function renderHomeTab(){
       </div>
     </div>`:"";
     return`<div style="margin-bottom:.75rem">
-      <div class="cat-header"><div class="cat-title">${cat.icon} ${cat.label.toUpperCase()}</div>${!unlocked?`<span style="color:#f59e0b;font-size:.65rem;font-weight:700">\u{1F4B0} ${cat.cost.toLocaleString()} Coins</span>`:`<span style="color:#10b981;font-size:.65rem">\u2713 Freigeschaltet</span>`}</div>
+      <div class="cat-header"><div class="cat-title">${cat.icon} ${cat.label.toUpperCase()}</div>${\!unlocked?`<span style="color:#f59e0b;font-size:.65rem;font-weight:700">\u{1F4B0} ${cat.cost.toLocaleString()} Coins</span>`:`<span style="color:#10b981;font-size:.65rem">\u2713 Freigeschaltet</span>`}</div>
       <div style="position:relative"><div class="mode-grid" style="opacity:${unlocked?1:.4}">${cards}</div>${lockOverlay}</div>
     </div>`;
   }
@@ -3543,11 +3561,11 @@ function renderHomeTab(){
 function renderLernenTab(){
   const pool=(()=>{
     let p=PLATES_DATA;
-    if(S.fcCountry!=="all")p=p.filter(x=>x.country===S.fcCountry);
+    if(S.fcCountry\!=="all")p=p.filter(x=>x.country===S.fcCountry);
     if(S.fcSearch.trim())p=p.filter(x=>x.code.toLowerCase().includes(S.fcSearch.toLowerCase())||x.region.toLowerCase().includes(S.fcSearch.toLowerCase()));
     return p;
   })();
-  if(!pool.length)return`<div class="panel" style="text-align:center;padding:2rem"><div style="font-size:2rem">\u{1F50D}</div><p style="color:var(--text3);margin-top:.5rem">Keine Karten gefunden.</p></div>`;
+  if(\!pool.length)return`<div class="panel" style="text-align:center;padding:2rem"><div style="font-size:2rem">\u{1F50D}</div><p style="color:var(--text3);margin-top:.5rem">Keine Karten gefunden.</p></div>`;
   const idx=Math.min(S.fcIdx,pool.length-1);
   const card=pool[idx];
   const countries=[...new Set(PLATES_DATA.map(p=>p.country))].sort();
@@ -3560,7 +3578,7 @@ function renderLernenTab(){
       </select>
     </div>
     <div style="text-align:center;color:var(--text3);font-size:.72rem;margin-bottom:.65rem">${idx+1} / ${pool.length} Karten</div>
-    <div class="flashcard${S.fcFlipped?" flipped":""}" onclick="S.fcFlipped=!S.fcFlipped;render()">
+    <div class="flashcard${S.fcFlipped?" flipped":""}" onclick="S.fcFlipped=\!S.fcFlipped;render()">
       <div class="fc-front">
         <div class="fc-label">KENNZEICHEN</div>
         <div class="fc-plate">${card.code}</div>
@@ -3606,14 +3624,14 @@ function renderStatsTab(){
   }).join("");
 
   /* Stats bars */
-  if(!history.length){
+  if(\!history.length){
     return`<div class="panel" style="text-align:center"><div style="font-size:2rem">\u{1F4CA}</div><p style="color:var(--text3);font-size:.85rem;margin-top:.5rem">Noch keine Spielhistorie.</p></div>
     <div class="panel"><div style="color:var(--text3);font-size:.65rem;font-weight:700;letter-spacing:1px;margin-bottom:.5rem">ACHIEVEMENTS</div><div class="ach-grid">${achHtml}</div></div>
     <div class="panel"><div style="color:var(--text3);font-size:.65rem;font-weight:700;letter-spacing:1px;margin-bottom:.5rem">MASTERY MAP \u2014 ${totalStamps} L\u00e4nder</div><div class="mastery-tiles">${tileHtml}</div></div>`;
   }
   const modeAcc={};
-  history.forEach(g=>{if(!modeAcc[g.mode])modeAcc[g.mode]={c:0,t:0};modeAcc[g.mode].c+=g.correct;modeAcc[g.mode].t+=g.rounds;});
-  const modeBars=MODES.map(m=>{const s=modeAcc[m.id];if(!s||!s.t)return"";const p=Math.round(s.c/s.t*100);return`<div class="stat-bar-row"><div class="stat-bar-lbl">${m.icon} ${m.title.slice(0,11)}</div><div class="stat-bar-track"><div class="stat-bar-fill ${p<50?"low":p<80?"mid":""}" style="width:${p}%"></div></div><div class="stat-bar-pct">${p}%</div></div>`;}).filter(Boolean).join("");
+  history.forEach(g=>{if(\!modeAcc[g.mode])modeAcc[g.mode]={c:0,t:0};modeAcc[g.mode].c+=g.correct;modeAcc[g.mode].t+=g.rounds;});
+  const modeBars=MODES.map(m=>{const s=modeAcc[m.id];if(\!s||\!s.t)return"";const p=Math.round(s.c/s.t*100);return`<div class="stat-bar-row"><div class="stat-bar-lbl">${m.icon} ${m.title.slice(0,11)}</div><div class="stat-bar-track"><div class="stat-bar-fill ${p<50?"low":p<80?"mid":""}" style="width:${p}%"></div></div><div class="stat-bar-pct">${p}%</div></div>`;}).filter(Boolean).join("");
   const last10=history.slice(0,10).reverse();
   const maxSc=Math.max(...last10.map(g=>g.score),1);
   const W=300,H=72;
@@ -3621,7 +3639,7 @@ function renderStatsTab(){
   const svgDots=last10.map((g,i)=>{const x=last10.length>1?i*(W/(last10.length-1)):W/2;const y=H-(g.score/maxSc)*(H-12)-6;return`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#10b981"/><text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="middle" fill="var(--text3)" font-size="9">${g.score>=1000?(g.score/1000).toFixed(1)+"k":g.score}</text>`;}).join("");
   const lineChart=last10.length>=2?`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:72px;margin-bottom:.75rem"><polyline fill="none" stroke="#10b981" stroke-width="2.5" stroke-linejoin="round" points="${svgPts}"/>${svgDots}</svg>`:`<p style="color:var(--text3);font-size:.8rem;text-align:center;margin-bottom:.75rem">Mind. 2 Spiele f\u00fcr Verlauf.</p>`;
   const ccAcc={};
-  history.forEach(g=>{(g.answers||[]).forEach(a=>{if(!a.cc)return;if(!ccAcc[a.cc])ccAcc[a.cc]={c:0,t:0};ccAcc[a.cc].t++;if(a.correct)ccAcc[a.cc].c++;});});
+  history.forEach(g=>{(g.answers||[]).forEach(a=>{if(\!a.cc)return;if(\!ccAcc[a.cc])ccAcc[a.cc]={c:0,t:0};ccAcc[a.cc].t++;if(a.correct)ccAcc[a.cc].c++;});});
 
   return`<div class="panel" style="text-align:center;padding:.85rem 1rem">
     <div style="font-size:2rem">\u{1F4D4}</div>
@@ -3776,8 +3794,8 @@ function renderMehrTab(){
 /* LEADERBOARD helper (used from home) */
 function renderLeaderboard(lbData,lbLoading,mode){
   if(lbLoading)return`<div style="text-align:center;color:var(--text3);padding:1.5rem">Laden \u2026</div>`;
-  if(!sbOK)return`<div class="panel"><p style="color:var(--text3);font-size:.85rem">Verf\u00fcgbar nach Supabase-Setup.</p></div>`;
-  if(!lbData.length)return`<div class="panel"><p style="color:var(--text3);font-size:.85rem">Noch keine Eintr\u00e4ge.</p></div>`;
+  if(\!sbOK)return`<div class="panel"><p style="color:var(--text3);font-size:.85rem">Verf\u00fcgbar nach Supabase-Setup.</p></div>`;
+  if(\!lbData.length)return`<div class="panel"><p style="color:var(--text3);font-size:.85rem">Noch keine Eintr\u00e4ge.</p></div>`;
   const n=lbData.length;
   return`<div style="display:flex;gap:5px;margin-bottom:.75rem;flex-wrap:wrap">${MODES.map(m=>`<button onclick="S.mode='${m.id}';showLeaderboard()" style="flex:1;min-width:36px;background:${mode===m.id?"#10b981":"var(--bg3)"};color:${mode===m.id?"#fff":"var(--text2)"};border:1px solid var(--border);border-radius:7px;padding:.3rem .2rem;font-size:.8rem;font-weight:700;cursor:pointer">${m.icon}</button>`).join("")}</div>
     ${lbData.map((r,i)=>{const rc=i===0?"gold":i===1?"silver":i===2?"bronze":"";const isMe=sbUser&&r.user_id===sbUser.id;const isPromo=i<5;const isRel=i>=n-5;let cls="lb-row";if(isMe)cls+=" me";else if(isPromo)cls+=" promo";else if(isRel)cls+=" relg";return`<div class="${cls}"><span class="lb-rank ${rc}">${r.rank}</span><span class="lb-name">${esc(r.username||"Anonym")}${isMe?`<span style="color:#34d399;font-size:.7rem;margin-left:4px">Du</span>`:""}</span><span class="lb-score">${Number(r.best_score||0).toLocaleString()}</span></div>`;}).join("")}`;
@@ -3800,7 +3818,7 @@ function renderOnboarding(step){
   if(step===0)return`<div class="ob-overlay"><div class="ob-card">
     <div class="ob-emoji">\u{1F30D}</div>
     <div class="ob-title">Willkommen bei GeoQuest</div>
-    <div class="ob-sub">Das Geografie-Quiz \u2014 sammle Stempel, steige in der Liga auf!</div>
+    <div class="ob-sub">Das Geografie-Quiz \u2014 sammle Stempel, steige in der Liga auf\!</div>
     <div class="ob-dots">${dots}</div>
     <p style="color:var(--text3);font-size:.7rem;font-weight:700;letter-spacing:1px;margin-bottom:.6rem">SPRACHE / LANGUAGE</p>
     <div class="ob-lang-grid">
@@ -3833,7 +3851,7 @@ function renderOnboarding(step){
       <div class="ob-mode-row"><div class="ob-mode-icon">\u{1F687}</div><div><div style="color:var(--text);font-weight:700;font-size:.83rem">U-Bahn-Netz</div><div class="ob-mode-desc">Linien und km der Metros.</div></div></div>
       <div style="color:var(--text3);font-size:.7rem;text-align:center;margin-top:4px">\u2026 und 16 weitere Modi</div>
     </div>
-    <button class="btn-p" onclick="finishOb()">\u{1F680} Los geht's!</button>
+    <button class="btn-p" onclick="finishOb()">\u{1F680} Los geht's\!</button>
     <button class="btn-g" style="margin-bottom:0" onclick="S.obStep=1;render()">\u2190 Zur\u00fcck</button>
   </div></div>`;
 }
@@ -3853,10 +3871,10 @@ function renderChallengeResult(ch,myScore,mode){
   const myWin=myScore>ch.oppScore,tie=myScore===ch.oppScore;
   const ml=MODES.find(m=>m.id===mode)?.title||mode;
   return`<div class="ch-overlay"><div class="ch-card">
-    <div style="font-size:1.5rem;font-weight:900;color:var(--text);margin-bottom:4px">${myWin?"\u{1F3C6} Gewonnen!":tie?"\u{1F91D} Unentschieden":"\u{1F614} Knapp verpasst"}</div>
+    <div style="font-size:1.5rem;font-weight:900;color:var(--text);margin-bottom:4px">${myWin?"\u{1F3C6} Gewonnen\!":tie?"\u{1F91D} Unentschieden":"\u{1F614} Knapp verpasst"}</div>
     <div style="color:var(--text3);font-size:.75rem;margin-bottom:.85rem">${ml}</div>
     <div class="ch-vs">
-      <div class="ch-score-box"><div style="color:var(--text3);font-size:.65rem;margin-bottom:3px">Gegner</div><div style="font-size:1.6rem;font-weight:900;color:${!myWin&&!tie?"#34d399":"var(--text)"}">${ch.oppScore.toLocaleString()}</div></div>
+      <div class="ch-score-box"><div style="color:var(--text3);font-size:.65rem;margin-bottom:3px">Gegner</div><div style="font-size:1.6rem;font-weight:900;color:${\!myWin&&\!tie?"#34d399":"var(--text)"}">${ch.oppScore.toLocaleString()}</div></div>
       <div style="color:var(--text3);font-weight:900;font-size:1.1rem">VS</div>
       <div class="ch-score-box"><div style="color:#34d399;font-size:.65rem;margin-bottom:3px">Du</div><div style="font-size:1.6rem;font-weight:900;color:${myWin?"#34d399":tie?"#fbbf24":"var(--text)"}">${myScore.toLocaleString()}</div></div>
     </div>
@@ -3867,15 +3885,15 @@ function renderChallengeResult(ch,myScore,mode){
 
 /* PAYMENT (Phase 17) */
 async function processMockPayment(productId){
-  const p=PAY_PRODUCTS.find(x=>x.id===productId);if(!p)return;
-  if(p.pu&&p.pu_qty){addPU(p.pu,p.pu_qty);S.payModal=false;render();showToast("✓ "+p.name+" hinzugefügt!");return;}
+  const p=PAY_PRODUCTS.find(x=>x.id===productId);if(\!p)return;
+  if(p.pu&&p.pu_qty){addPU(p.pu,p.pu_qty);S.payModal=false;render();showToast("✓ "+p.name+" hinzugefügt\!");return;}
   if(sbOK&&sbUser){
     const upd={geo_coins:(sbProfile?.geo_coins||0)+p.coins};
     if(p.premium){const u=new Date();u.setMonth(u.getMonth()+(p.months||1));upd.is_premium=true;upd.premium_until=u.toISOString();}
     await sb.from("profiles").update(upd).eq("id",sbUser.id);
     if(sbProfile)Object.assign(sbProfile,upd);
   }
-  S.payModal=false;render();showToast("✓ "+p.name+" aktiviert!");
+  S.payModal=false;render();showToast("✓ "+p.name+" aktiviert\!");
 }
 function renderPayModal(){
   const prem=sbProfile?.is_premium;
@@ -3905,7 +3923,7 @@ async function loadGameData(){
   const prog=(p)=>{const el=document.getElementById('gq-prog');if(el)el.style.width=p+'%';};
   const msg=(t)=>{const el=document.getElementById('gq-ld-msg');if(el)el.textContent=t;};
 
-  function sv(b,f){const x=b[f];if(!x)return '';return x.value!==undefined?x.value:x;}
+  function sv(b,f){const x=b[f];if(\!x)return '';return x.value\!==undefined?x.value:x;}
 
   function parsePlates(json){
     const arr=json&&json.results&&json.results.bindings?json.results.bindings:json;
@@ -3917,7 +3935,7 @@ async function loadGameData(){
     arr.forEach(b=>{
       const c=sv(b,'countryLabel'),n=sv(b,'currencyLabel'),iso=sv(b,'isoCode');
       const k=c+'|'+iso;
-      if(iso&&iso.length===3&&!seen.has(k)){seen.add(k);out.push({c,n,iso});}
+      if(iso&&iso.length===3&&\!seen.has(k)){seen.add(k);out.push({c,n,iso});}
     });
     return out;
   }
@@ -3926,7 +3944,7 @@ async function loadGameData(){
     const caps={};
     arr.forEach(b=>{
       const c=sv(b,'countryLabel'),cap=sv(b,'capitalLabel'),pop=parseInt(sv(b,'population'))||0;
-      if(!caps[c]||pop>caps[c].pop)caps[c]={c,cap,pop};
+      if(\!caps[c]||pop>caps[c].pop)caps[c]={c,cap,pop};
     });
     return Object.values(caps);
   }
@@ -3936,7 +3954,7 @@ async function loadGameData(){
     arr.forEach(b=>{
       const n=sv(b,'riverLabel'),c=sv(b,'countryLabel'),key=n+'|'+c;
       const len=Math.round(parseFloat(sv(b,'length')||0)/1000);
-      if(!seen.has(key)&&len>0){seen.add(key);out.push({n,c,len});}
+      if(\!seen.has(key)&&len>0){seen.add(key);out.push({n,c,len});}
     });
     return out;
   }
@@ -3946,12 +3964,12 @@ async function loadGameData(){
     arr.forEach(b=>{
       const c=sv(b,'countryLabel')||sv(b,'country');
       const nb=sv(b,'neighborLabel')||sv(b,'neighbor')||sv(b,'neighbors');
-      if(!c)return;
-      if(!map[c])map[c]=[];
+      if(\!c)return;
+      if(\!map[c])map[c]=[];
       if(nb&&nb.trim()){
         /* neighbors field may be comma-separated list or single value */
         const parts=nb.split(',').map(s=>s.trim()).filter(Boolean);
-        parts.forEach(p=>{if(!map[c].includes(p))map[c].push(p);});
+        parts.forEach(p=>{if(\!map[c].includes(p))map[c].push(p);});
       }
     });
     return map;
@@ -3962,9 +3980,9 @@ async function loadGameData(){
     arr.forEach(b=>{
       const c=sv(b,'countryLabel')||sv(b,'country');
       const a=parseFloat(sv(b,'area')||sv(b,'areaValue')||0);
-      if(!c||!a)return;
+      if(\!c||\!a)return;
       /* keep smallest area per country (filters historical empires) */
-      if(!best[c]||a<best[c])best[c]=a;
+      if(\!best[c]||a<best[c])best[c]=a;
     });
     return Object.entries(best)
       .filter(([,a])=>a>100&&a<2e7)
@@ -3976,7 +3994,7 @@ async function loadGameData(){
     try{
       msg(label);
       const r=await fetch(url);
-      if(!r.ok)throw new Error(r.status+' '+url);
+      if(\!r.ok)throw new Error(r.status+' '+url);
       const j=await r.json();
       prog(pct);
       return j;
@@ -4007,7 +4025,7 @@ async function loadGameData(){
   prog(100);
   const loaded=[PLATES_DATA.length,'plates',CURR_REAL.length,'curr',CAPS_POP.length,'caps',RIVERS_REAL.length,'rivers',Object.keys(NEIGHBORS).length,'nb',AREA_DATA.length,'areas'];
   console.log('GeoQuest data:',loaded.join(' '));
-  if(!PLATES_DATA.length||!CURR_REAL.length||!CAPS_POP.length){
+  if(\!PLATES_DATA.length||\!CURR_REAL.length||\!CAPS_POP.length){
     /* core files missing — show toast after render but still render */
     setTimeout(()=>showToast('Fehler beim Laden einiger Datensätze.'),800);
   }
@@ -4019,8 +4037,8 @@ if("serviceWorker"in navigator){
   try{
     const swSrc=`const CACHE='gq-v4';
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.add(self.location.href)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>{if(r)return r;return fetch(e.request).then(res=>{if(res.ok){const rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));}return res;}).catch(()=>caches.match(e.request)||new Response('Offline',{status:503}));}));});`;
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k\!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{if(e.request.method\!=='GET')return;e.respondWith(caches.match(e.request).then(r=>{if(r)return r;return fetch(e.request).then(res=>{if(res.ok){const rc=res.clone();caches.open(CACHE).then(c=>c.put(e.request,rc));}return res;}).catch(()=>caches.match(e.request)||new Response('Offline',{status:503}));}));});`;
     const blob=new Blob([swSrc],{type:"application/javascript"});
     navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:"./"}).catch(()=>{});
   }catch(e){}
@@ -4076,7 +4094,7 @@ function showLocationBanner(c){
     +`<button class="gq-loc-btn-yes" onclick="locationBannerYes('${c.replace(/'/g,"\\'")}');document.getElementById('gq-loc-toast')?.remove()">${t('loc_adapt')}</button>`;
   document.body.appendChild(el);
   const _tid=setTimeout(()=>{
-    const t=document.getElementById('gq-loc-toast');if(!t)return;
+    const t=document.getElementById('gq-loc-toast');if(\!t)return;
     t.classList.add('hiding');
     setTimeout(()=>t?.remove(),300);
   },7000);
@@ -4088,13 +4106,13 @@ async function detectUserCountry(){
     const tid=setTimeout(()=>ctrl.abort(),6000);
     const res=await fetch('https://ipapi.co/json/',{signal:ctrl.signal,cache:'no-store'});
     clearTimeout(tid);
-    if(!res.ok)return;
+    if(\!res.ok)return;
     const d=await res.json();
     const enName=d.country_name||'';
     const deCountry=_GQ_IP_DE_MAP[enName]||enName;
-    if(!deCountry)return;
+    if(\!deCountry)return;
     /* Only show banner if country exists in PLATES_DATA (sanity check) */
-    const known=!PLATES_DATA.length||PLATES_DATA.some(p=>p.country===deCountry);
+    const known=\!PLATES_DATA.length||PLATES_DATA.some(p=>p.country===deCountry);
     const last=localStorage.getItem('geoquest_last_detected_country');
     localStorage.setItem('geoquest_last_detected_country',deCountry);
     /* Auto-set language unless user manually chose one */
