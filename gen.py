@@ -1268,7 +1268,7 @@ let S={
   collectedPlates:loadCollectedPlates(),
   ligaData:[],ligaLoading:false,
   titleShop:false,
-  spotterInput:"",spotterMsg:"",spotterOk:null,
+  spotterInput:"",spotterMsg:"",spotterOk:null,albumView:"list",albumCountry:"all",
   collFilter:"all",collRarity:"all",collSearch:"",
 };
 let tIv=null,fTo=null,toastTo=null;
@@ -2115,7 +2115,26 @@ function renderBottomNav(){
 }
 
 
-/* ─── Phase 37-40: Kennzeichen-Album ─────────────────────────────────── */
+/* ─── Phase 41: Kennzeichen-Album (Redesign) ─────────────────────────── */
+
+/* Country name normaliser: PLATES_DATA may use English or German country names;
+   TopoJSON uses English. We try both via simple lookup. */
+const PLATE_COUNTRY_EN={
+  "Deutschland":"Germany","Österreich":"Austria","Frankreich":"France",
+  "Italien":"Italy","Spanien":"Spain","Polen":"Poland","Tschechien":"Czechia",
+  "Ungarn":"Hungary","Schweiz":"Switzerland","Belgien":"Belgium",
+  "Niederlande":"Netherlands","Dänemark":"Denmark","Schweden":"Sweden",
+  "Norwegen":"Norway","Finnland":"Finland","Portugal":"Portugal",
+  "Griechenland":"Greece","Rumänien":"Romania","Bulgarien":"Bulgaria",
+  "Kroatien":"Croatia","Slowenien":"Slovenia","Slowakei":"Slovakia",
+  "Luxemburg":"Luxembourg","Irland":"Ireland","Litauen":"Lithuania",
+  "Lettland":"Latvia","Estland":"Estonia","Zypern":"Cyprus","Malta":"Malta",
+  "Vereinigtes Königreich":"United Kingdom","Russland":"Russia",
+  "Türkei":"Turkey","Ukraine":"Ukraine","Serbien":"Serbia",
+  "Bosnien und Herzegowina":"Bosnia and Herzegovina"
+};
+function plateCountryToEn(c){return PLATE_COUNTRY_EN[c]||c;}
+
 function spotterCollect(){
   const code=(S.spotterInput||"").toUpperCase().trim();
   if(\!code){S.spotterMsg="Bitte Kennzeichen eingeben\!";S.spotterOk=null;render();return;}
@@ -2125,84 +2144,184 @@ function spotterCollect(){
     S.spotterMsg="\u{1F4CB} "+code+" ist bereits in deiner Sammlung\!";S.spotterOk=null;
   }else{
     S.collectedPlates.push(code);saveCollectedPlates(S.collectedPlates);
-    const r=getRarity(code);
-    S.spotterMsg="\u{1F389} Neu gesammelt: "+plate.region+" ("+rarityLabel(r)+")\!";
-    S.spotterOk=true;soundStamp();
+    S.spotterMsg="\u{1F389} Neu: "+plate.region+"!";S.spotterOk=true;soundStamp();
   }
   S.spotterInput="";render();
 }
-function renderSpotterSection(){
-  const val=S.spotterInput||"";
-  const msg=S.spotterMsg||"";
-  const msgCol=S.spotterOk===true?"#10b981":S.spotterOk===false?"#ef4444":"#f59e0b";
-  return`<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:1.2rem;margin-bottom:1rem">
-    <div style="font-weight:900;font-size:1rem;margin-bottom:.4rem">\u{1F697} Roadtrip-Spotter</div>
-    <div style="color:var(--text3);font-size:.76rem;margin-bottom:.7rem">Kennzeichen gesehen? Direkt eintragen\!</div>
-    <div style="display:flex;gap:8px;margin-bottom:.45rem">
-      <input type="text" maxlength="5" placeholder="z.B. MÜ" value="${esc(val)}"
-        oninput="S.spotterInput=this.value.toUpperCase();this.value=this.value.toUpperCase();S.spotterMsg='';render()"
-        style="flex:1;font-size:1.5rem;font-weight:900;text-align:center;letter-spacing:4px;text-transform:uppercase;padding:.45rem">
-      <button class="btn-p" style="width:auto;padding:.45rem 1.1rem;font-size:.95rem;margin-bottom:0" onclick="spotterCollect()">Sammeln \u{1F50D}</button>
+
+function renderRealPlate(code,region){
+  return`<div class="real-plate">
+    <div class="rp-eu-strip"><span class="rp-stars">★</span></div>
+    <div class="rp-body">
+      <div class="rp-code">${esc(code)}</div>
+      ${region?`<div class="rp-region">${esc(region)}</div>`:""}
     </div>
-    ${msg?`<div style="font-size:.8rem;font-weight:700;text-align:center;color:${msgCol};padding:.3rem 0">${msg}</div>`:""}
   </div>`;
 }
+
 function renderCollectionScreen(){
-  if(\!PLATES_DATA.length)return`<div class="panel" style="text-align:center;padding:2rem"><div style="font-size:2rem">⏳</div><p style="color:var(--text3)">Kennzeichen-Daten werden geladen…</p></div>`;
+  if(\!PLATES_DATA.length)return`<div class="panel" style="text-align:center;padding:2rem"><div style="font-size:2rem">⏳</div><p style="color:var(--text3);margin-top:.5rem">Kennzeichen-Daten werden geladen…</p></div>`;
   const coll=S.collectedPlates;
   const total=PLATES_DATA.length;
   const pct=Math.round(coll.length/Math.max(total,1)*100);
-  const cF=S.collFilter||"all",rF=S.collRarity||"all",sQ=(S.collSearch||"").toLowerCase().trim();
-  let pool=[...PLATES_DATA];
-  if(cF\!=="all")pool=pool.filter(p=>p.country===cF);
-  if(rF\!=="all")pool=pool.filter(p=>getRarity(p.code)===rF);
-  if(sQ)pool=pool.filter(p=>p.code.toLowerCase().includes(sQ)||(p.region||"").toLowerCase().includes(sQ));
-  pool.sort((a,b)=>a.code.localeCompare(b.code));
   const countries=[...new Set(PLATES_DATA.map(p=>p.country))].sort();
-  /* achievements: full country coverage */
-  const achs=[];
-  countries.forEach(c=>{
-    const cp=PLATES_DATA.filter(p=>p.country===c);
-    if(cp.length>0&&cp.every(p=>coll.includes(p.code)))achs.push(c);
-  });
-  return`<div>
-    ${renderSpotterSection()}
-    <div class="coll-header">
-      <span class="coll-title">\u{1F4D4} Kennzeichen-Album</span>
-      <span class="coll-sub">${coll.length}&thinsp;/&thinsp;${total} gesammelt</span>
+  const view=S.albumView||"list";
+  const acF=S.albumCountry||"all";
+
+  /* Spotter */
+  const spotVal=S.spotterInput||"";
+  const spotMsg=S.spotterMsg||"";
+  const spotCol=S.spotterOk===true?"#10b981":S.spotterOk===false?"#ef4444":"#f59e0b";
+  const spotter=`<div class="album-spotter">
+    <div class="album-spotter-title">\u{1F697} Roadtrip-Spotter</div>
+    <div class="album-spotter-sub">Kennzeichen gesehen? Sofort eintragen\!</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" maxlength="5" placeholder="z.B. MÜ" value="${esc(spotVal)}"
+        oninput="S.spotterInput=this.value.toUpperCase();this.value=this.value.toUpperCase();S.spotterMsg='';render()"
+        class="spotter-input">
+      <button class="btn-p" style="width:auto;padding:.5rem 1.1rem;margin-bottom:0;font-size:.95rem" onclick="spotterCollect()">\u{1F50D} Sammeln</button>
+    </div>
+    ${spotMsg?`<div style="font-size:.82rem;font-weight:700;text-align:center;color:${spotCol};padding:.35rem 0">${spotMsg}</div>`:""}
+  </div>`;
+
+  /* Progress bar */
+  const progressBar=`<div class="album-progress-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+      <span style="font-weight:900;font-size:1rem">\u{1F4D4} Kennzeichen-Album</span>
+      <span style="font-size:.78rem;color:var(--text3)">${coll.length}&thinsp;/&thinsp;${total}</span>
     </div>
     <div class="coll-progress-wrap"><div class="coll-progress-bar" style="width:${pct}%"></div></div>
-    <div style="text-align:right;font-size:.68rem;color:var(--text3);margin-bottom:.7rem">${pct}% vollständig</div>
-    ${achs.length?`<div style="margin-bottom:.8rem;display:flex;flex-wrap:wrap;gap:4px">${achs.map(c=>`<span class="coll-ach">\u{1F3C6} ${c}-Experte</span>`).join("")}</div>`:""}
-    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.65rem">
-      <input type="text" placeholder="Suche…" value="${S.collSearch||""}"
-        oninput="S.collSearch=this.value;render()" style="flex:1;min-width:80px;font-size:.8rem;padding:.35rem .5rem">
-      <select style="background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:.3rem .45rem;font-size:.76rem" onchange="S.collFilter=this.value;render()">
-        <option value="all" ${cF==="all"?"selected":""}>Alle Länder</option>
-        ${countries.map(c=>`<option value="${esc(c)}" ${cF===c?"selected":""}>${esc(c)}</option>`).join("")}
-      </select>
-      <select style="background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:.3rem .45rem;font-size:.76rem" onchange="S.collRarity=this.value;render()">
-        <option value="all" ${rF==="all"?"selected":""}>Alle</option>
-        <option value="common" ${rF==="common"?"selected":""}>\u{1F7E2} Common</option>
-        <option value="rare" ${rF==="rare"?"selected":""}>\u{1F535} Rare</option>
-        <option value="epic" ${rF==="epic"?"selected":""}>\u{1F7E3} Epic</option>
-        <option value="legendary" ${rF==="legendary"?"selected":""}>\u{1F7E1} Legendary</option>
-      </select>
-    </div>
-    <div style="font-size:.68rem;color:var(--text3);margin-bottom:.4rem">${pool.length} Kennzeichen</div>
-    <div class="coll-grid">
-      ${pool.map(p=>{
-        const got=coll.includes(p.code);
-        const r=getRarity(p.code);const col=rarityColor(r);
-        return`<div class="coll-item${got?"":" coll-locked"}" title="${esc((p.region||"")+(p.country?" · "+p.country:""))}">
-          <div class="coll-plate" style="${got?"border-color:"+col+";color:"+col:""}">
-            ${got?"":"\u{1F512} "}${esc(p.code)}</div>
-          <div class="coll-region">${got?esc(p.region||""):"???"}</div>
-          <div class="coll-dot" style="background:${got?col:"#555"}"></div>
-        </div>`;
-      }).join("")}
-    </div>
+    <div style="text-align:right;font-size:.65rem;color:var(--text3);margin-top:2px">${pct}% vollständig</div>
   </div>`;
+
+  /* Achievements */
+  const achs=countries.filter(c=>{
+    const cp=PLATES_DATA.filter(p=>p.country===c);
+    return cp.length>0&&cp.every(p=>coll.includes(p.code));
+  });
+  const achBar=achs.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.7rem">${achs.map(c=>`<span class="coll-ach">\u{1F3C6} ${esc(c)}-Experte</span>`).join("")}</div>`:"";
+
+  /* View toggle + country filter */
+  const controls=`<div style="display:flex;gap:6px;margin-bottom:.7rem;align-items:center">
+    <button class="view-toggle-btn${view==="list"?" active":""}" onclick="S.albumView='list';render()">\u{1F4DD} Liste</button>
+    <button class="view-toggle-btn${view==="map"?" active":""}" onclick="S.albumView='map';render()">\u{1F5FA} Karte</button>
+    <select style="margin-left:auto;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:.3rem .5rem;font-size:.76rem" onchange="S.albumCountry=this.value;render()">
+      <option value="all" ${acF==="all"?"selected":""}>Alle Länder</option>
+      ${countries.map(c=>`<option value="${esc(c)}" ${acF===c?"selected":""}>${esc(c)}</option>`).join("")}
+    </select>
+  </div>`;
+
+  /* LIST VIEW — performance-safe: group by country, only render collected plates */
+  let listContent="";
+  if(view==="list"){
+    const showCountries=acF==="all"?countries:[acF];
+    listContent=showCountries.map(c=>{
+      const countryPlates=PLATES_DATA.filter(p=>p.country===c);
+      const collectedHere=countryPlates.filter(p=>coll.includes(p.code));
+      if(acF==="all"&&collectedHere.length===0)return""; /* skip empty countries unless filtered */
+      const cPct=Math.round(collectedHere.length/Math.max(countryPlates.length,1)*100);
+      return`<div class="album-country-section">
+        <div class="album-country-header">
+          <span style="font-weight:900;font-size:.88rem">${esc(c)}</span>
+          <span style="font-size:.72rem;color:var(--text3)">${collectedHere.length}&thinsp;/&thinsp;${countryPlates.length}</span>
+        </div>
+        <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-bottom:.6rem">
+          <div style="height:100%;width:${cPct}%;background:#10b981;border-radius:2px"></div>
+        </div>
+        ${collectedHere.length?`<div class="real-plate-grid">${collectedHere.map(p=>renderRealPlate(p.code,p.region)).join("")}</div>`
+          :`<div style="color:var(--text3);font-size:.75rem;text-align:center;padding:.5rem 0">Noch keine Kennzeichen aus ${esc(c)} gesammelt.</div>`}
+      </div>`;
+    }).join("");
+    if(\!listContent)listContent=`<div style="text-align:center;padding:2rem;color:var(--text3)">Noch nichts gesammelt – spiele EU-Kennzeichen oder benutze den Spotter!</div>`;
+  }
+
+  /* MAP VIEW */
+  const mapContent=view==="map"?`<div id="album-map-svg" class="album-map-container"></div>`:"";
+
+  const html=`<div>
+    ${spotter}
+    ${progressBar}
+    ${achBar}
+    ${controls}
+    ${listContent}
+    ${mapContent}
+  </div>`;
+
+  /* After render: draw map */
+  if(view==="map"){
+    requestAnimationFrame(()=>drawAlbumMap());
+  }
+  return html;
+}
+
+function drawAlbumMap(){
+  const el=document.getElementById("album-map-svg");
+  if(\!el||typeof d3==="undefined"||typeof topojson==="undefined"||\!window.WORLD_TOPO)return;
+  const coll=S.collectedPlates;
+  /* build set of EN country names that have collected plates */
+  const collCountrySet=new Set();
+  coll.forEach(code=>{
+    const p=PLATES_DATA.find(x=>x.code===code);
+    if(p)collCountrySet.add(plateCountryToEn(p.country));
+  });
+  /* country→collected plates lookup for popup */
+  const countryPlatesMap={};
+  coll.forEach(code=>{
+    const p=PLATES_DATA.find(x=>x.code===code);
+    if(\!p)return;
+    const en=plateCountryToEn(p.country);
+    if(\!countryPlatesMap[en])countryPlatesMap[en]=[];
+    countryPlatesMap[en].push(p);
+  });
+
+  const W=el.clientWidth||(window.innerWidth||360);
+  const H=Math.min(W*0.56,260);
+  const proj=d3.geoNaturalEarth1().scale(W/6.3).translate([W/2,H/2]);
+  const path=d3.geoPath().projection(proj);
+  const countries=topojson.feature(window.WORLD_TOPO,window.WORLD_TOPO.objects.countries);
+
+  const svg=d3.select(el).html("").append("svg")
+    .attr("width","100%").attr("height",H)
+    .style("border-radius","12px").style("background","var(--bg3)");
+  const g=svg.append("g");
+
+  g.selectAll("path").data(countries.features)
+    .join("path")
+    .attr("d",path)
+    .attr("fill",d=>{
+      const name=d.properties&&d.properties.name;
+      return collCountrySet.has(name)?"#10b981":"var(--bg4)";
+    })
+    .attr("stroke","var(--bg2)").attr("stroke-width",.5)
+    .style("cursor",d=>(d.properties&&collCountrySet.has(d.properties.name))?"pointer":"default")
+    .on("click",function(ev,d){
+      const name=d.properties&&d.properties.name;
+      if(\!name||\!collCountrySet.has(name))return;
+      const plates=countryPlatesMap[name]||[];
+      /* remove old popup */
+      d3.select(el).selectAll(".map-popup").remove();
+      /* show popup */
+      const [mx,my]=d3.pointer(ev,el);
+      const popW=Math.min(220,W-20);
+      const px=Math.min(mx,W-popW-8);
+      const py=Math.max(my-40,4);
+      const pop=d3.select(el).append("div")
+        .attr("class","map-popup")
+        .style("left",px+"px").style("top",py+"px").style("max-width",popW+"px");
+      pop.append("div").attr("class","map-popup-title").text(name+" ("+plates.length+")");
+      const grid=pop.append("div").attr("class","map-popup-grid");
+      plates.slice(0,12).forEach(p=>{
+        const item=grid.append("div").attr("class","real-plate real-plate-sm");
+        item.append("div").attr("class","rp-eu-strip").append("span").attr("class","rp-stars").text("★");
+        const body=item.append("div").attr("class","rp-body");
+        body.append("div").attr("class","rp-code").text(p.code);
+      });
+      if(plates.length>12)pop.append("div").style("font-size",".68rem").style("color","var(--text3)").style("margin-top","4px").text("+"+(plates.length-12)+" weitere");
+      pop.append("button").attr("class","map-popup-close").text("✕").on("click",function(){d3.select(el).selectAll(".map-popup").remove();});
+    });
+
+  /* Pan/zoom */
+  svg.call(d3.zoom().scaleExtent([1,8]).on("zoom",ev=>{g.attr("transform",ev.transform);}));
 }
 
 /* HOME TAB */
@@ -2257,14 +2376,18 @@ function renderHomeTab(){
         <div style="margin-left:auto;background:#7c3aed;color:#fff;border-radius:20px;padding:.3rem .85rem;font-size:.76rem;font-weight:700">▶ Spielen</div>
       </div>
     </div>
-    <div class="album-shortcut" onclick="S.tab='album';render()">
-      <span>\u{1F4D4} Kennzeichen-Album</span>
-      <span class="album-shortcut-count">${S.collectedPlates.length} gesammelt</span>
-    </div>
     <div class="filter-bar">${chips}</div>
     ${catSection("pure_geo")}
     ${catSection("lifestyle")}
     ${catSection("eu_plates")}
+    <div class="album-entry-btn" onclick="S.tab='album';render()">
+      <span style="font-size:1.3rem">\u{1F4D4}</span>
+      <div style="flex:1">
+        <div style="font-weight:900;font-size:.9rem;color:#fff">Mein Kennzeichen-Album & Spotter</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.75);margin-top:1px">${S.collectedPlates.length} von ${PLATES_DATA.length||"?"} Kennzeichen gesammelt</div>
+      </div>
+      <span style="color:rgba(255,255,255,.6);font-size:1rem">→</span>
+    </div>
     ${catSection("hl_compare")}
     ${catSection("neighbors")}
     <div class="diff-toggle">
