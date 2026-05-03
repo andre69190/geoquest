@@ -487,7 +487,7 @@ de:{
   q_neighbor:"Welches Land grenzt an…?",q_neighbor_not:"Grenzt NICHT an…?",
   q_plates_casual:"Woher kommt dieses Kennzeichen?",q_plates_hard:"Region erkennen — kein Tipp!",
   q_river_real:"Durch welches Land fließt dieser Fluss?",q_map_guess:"Finde das Land auf der Karte",
-  fb_correct:"✓ Richtig! +{pts}",fb_wrong:"✗ Falsch → {ans}",fb_time:"⏱ Zeit! → {ans}"
+  fb_correct:"✓ Richtig! +{pts}",fb_wrong:"✗ Falsch → {ans}",fb_time:"⏱ Zeit! → {ans}",
   plates_more:"+{n} weitere",pct_complete:"{pct}% vollständig",
   spotter_dup:"📋 {code} ({country}) bereits gesammelt!",
   map_unavail:"Karte nicht verfügbar",map_loading:"Kartendaten werden geladen…",
@@ -523,7 +523,7 @@ en:{
   q_neighbor:"Which country borders…?",q_neighbor_not:"Does NOT border…?",
   q_plates_casual:"Which country has this plate?",q_plates_hard:"Identify the region — no hint!",
   q_river_real:"Which country does this river flow through?",q_map_guess:"Find the country on the map",
-  fb_correct:"✓ Correct! +{pts}",fb_wrong:"✗ Wrong → {ans}",fb_time:"⏱ Time! → {ans}"
+  fb_correct:"✓ Correct! +{pts}",fb_wrong:"✗ Wrong → {ans}",fb_time:"⏱ Time! → {ans}",
   plates_more:"+{n} more",pct_complete:"{pct}% complete",
   spotter_dup:"📋 {code} ({country}) already collected!",
   map_unavail:"Map not available",map_loading:"Loading map data…",
@@ -559,7 +559,7 @@ pl:{
   q_neighbor:"Który kraj graniczy z…?",q_neighbor_not:"NIE graniczy z…?",
   q_plates_casual:"Do jakiego kraju należy ta tablica?",q_plates_hard:"Jaki region ma tę tablicę?",
   q_river_real:"Przez jaki kraj płynie ta rzeka?",q_map_guess:"Znajdź kraj na mapie",
-  fb_correct:"✓ Dobrze! +{pts}",fb_wrong:"✗ Błąd → {ans}",fb_time:"⏱ Czas! → {ans}"
+  fb_correct:"✓ Dobrze! +{pts}",fb_wrong:"✗ Błąd → {ans}",fb_time:"⏱ Czas! → {ans}",
   plates_more:"+{n} więcej",pct_complete:"{pct}% ukończono",
   spotter_dup:"📋 {code} ({country}) już zebrane!",
   map_unavail:"Mapa niedostępna",map_loading:"Ładowanie mapy…",
@@ -595,7 +595,7 @@ fr:{
   q_neighbor:"Quel pays borde… ?",q_neighbor_not:"Ne borde PAS… ?",
   q_plates_casual:"De quel pays est cette plaque ?",q_plates_hard:"Identifier la région — aucun indice !",
   q_river_real:"Dans quel pays coule ce fleuve ?",q_map_guess:"Trouver le pays sur la carte",
-  fb_correct:"✓ Correct ! +{pts}",fb_wrong:"✗ Faux → {ans}",fb_time:"⏱ Temps ! → {ans}"
+  fb_correct:"✓ Correct ! +{pts}",fb_wrong:"✗ Faux → {ans}",fb_time:"⏱ Temps ! → {ans}",
   plates_more:"+{n} de plus",pct_complete:"{pct}% terminé",
   spotter_dup:"📋 {code} ({country}) déjà collecté !",
   map_unavail:"Carte non disponible",map_loading:"Chargement de la carte…",
@@ -631,7 +631,7 @@ es:{
   q_neighbor:"¿Qué país limita con…?",q_neighbor_not:"¿NO limita con…?",
   q_plates_casual:"¿De qué país es esta matrícula?",q_plates_hard:"Identificar la región — ¡sin pista!",
   q_river_real:"¿Por qué país pasa este río?",q_map_guess:"Encuentra el país en el mapa",
-  fb_correct:"✓ ¡Correcto! +{pts}",fb_wrong:"✗ Incorrecto → {ans}",fb_time:"⏱ ¡Tiempo! → {ans}"
+  fb_correct:"✓ ¡Correcto! +{pts}",fb_wrong:"✗ Incorrecto → {ans}",fb_time:"⏱ ¡Tiempo! → {ans}",
   plates_more:"+{n} más",pct_complete:"{pct}% completado",
   spotter_dup:"📋 {code} ({country}) ya coleccionado!",
   map_unavail:"Mapa no disponible",map_loading:"Cargando mapa…",
@@ -667,7 +667,7 @@ it:{
   q_neighbor:"Quale paese confina con…?",q_neighbor_not:"NON confina con…?",
   q_plates_casual:"Da quale paese viene questa targa?",q_plates_hard:"Identificare la regione — nessun indizio!",
   q_river_real:"Attraverso quale paese scorre questo fiume?",q_map_guess:"Trova il paese sulla mappa",
-  fb_correct:"✓ Corretto! +{pts}",fb_wrong:"✗ Sbagliato → {ans}",fb_time:"⏱ Tempo! → {ans}"
+  fb_correct:"✓ Corretto! +{pts}",fb_wrong:"✗ Sbagliato → {ans}",fb_time:"⏱ Tempo! → {ans}",
   plates_more:"+{n} altri",pct_complete:"{pct}% completato",
   spotter_dup:"📋 {code} ({country}) già raccolto!",
   map_unavail:"Mappa non disponibile",map_loading:"Caricamento mappa…",
@@ -703,7 +703,7 @@ nl:{
   q_neighbor:"Welk land grenst aan…?",q_neighbor_not:"Grenst NIET aan…?",
   q_plates_casual:"Uit welk land komt dit kenteken?",q_plates_hard:"Identificeer de regio — geen hint!",
   q_river_real:"Door welk land stroomt deze rivier?",q_map_guess:"Vind het land op de kaart",
-  fb_correct:"✓ Correct! +{pts}",fb_wrong:"✗ Fout → {ans}",fb_time:"⏱ Tijd! → {ans}"
+  fb_correct:"✓ Correct! +{pts}",fb_wrong:"✗ Fout → {ans}",fb_time:"⏱ Tijd! → {ans}",
   plates_more:"+{n} meer",pct_complete:"{pct}% voltooid",
   spotter_dup:"📋 {code} ({country}) al verzameld!",
   map_unavail:"Kaart niet beschikbaar",map_loading:"Kaart laden…",
@@ -739,7 +739,7 @@ pt:{
   q_neighbor:"Qual país faz fronteira com…?",q_neighbor_not:"NÃO faz fronteira com…?",
   q_plates_casual:"De qual país é esta placa?",q_plates_hard:"Identificar a região — sem dica!",
   q_river_real:"Por qual país corre este rio?",q_map_guess:"Encontre o país no mapa",
-  fb_correct:"✓ Correto! +{pts}",fb_wrong:"✗ Errado → {ans}",fb_time:"⏱ Tempo! → {ans}"
+  fb_correct:"✓ Correto! +{pts}",fb_wrong:"✗ Errado → {ans}",fb_time:"⏱ Tempo! → {ans}",
   plates_more:"+{n} mais",pct_complete:"{pct}% completo",
   spotter_dup:"📋 {code} ({country}) já coletado!",
   map_unavail:"Mapa não disponível",map_loading:"Carregando mapa…",
@@ -775,7 +775,7 @@ ro:{
   q_neighbor:"Ce țară se învecinează cu…?",q_neighbor_not:"NU se învecinează cu…?",
   q_plates_casual:"Din ce țară este această plăcuță?",q_plates_hard:"Identificați regiunea — fără indiciu!",
   q_river_real:"Prin ce țară curge acest râu?",q_map_guess:"Găsește țara pe hartă",
-  fb_correct:"✓ Corect! +{pts}",fb_wrong:"✗ Greșit → {ans}",fb_time:"⏱ Timp! → {ans}"
+  fb_correct:"✓ Corect! +{pts}",fb_wrong:"✗ Greșit → {ans}",fb_time:"⏱ Timp! → {ans}",
   plates_more:"+{n} mai mult",pct_complete:"{pct}% complet",
   spotter_dup:"📋 {code} ({country}) deja colectat!",
   map_unavail:"Hartă indisponibilă",map_loading:"Se êncarcă harta…",
@@ -811,7 +811,7 @@ hu:{
   q_neighbor:"Melyik ország határos…-val?",q_neighbor_not:"NEM határos…-val?",
   q_plates_casual:"Melyik ország rendszáma ez?",q_plates_hard:"Azonosítsa a régiót — nincs tipp!",
   q_river_real:"Melyik országon folyik át ez a folyó?",q_map_guess:"Keresse meg az országot a térképen",
-  fb_correct:"✓ Helyes! +{pts}",fb_wrong:"✗ Rossz → {ans}",fb_time:"⏱ Idő! → {ans}"
+  fb_correct:"✓ Helyes! +{pts}",fb_wrong:"✗ Rossz → {ans}",fb_time:"⏱ Idő! → {ans}",
   plates_more:"+{n} több",pct_complete:"{pct}% kész",
   spotter_dup:"📋 {code} ({country}) már összegyűjtve!",
   map_unavail:"Térkép nem elérhető",map_loading:"Térkép betöltése…",
@@ -847,7 +847,7 @@ cs:{
   q_neighbor:"Která země sousedí s…?",q_neighbor_not:"NESOUSEDÍ s…?",
   q_plates_casual:"Ze které země je tato SPZ?",q_plates_hard:"Určete region — žádná nápověda!",
   q_river_real:"Přes kterou zemi teče tato řeka?",q_map_guess:"Najdi zemi na mapě",
-  fb_correct:"✓ Správně! +{pts}",fb_wrong:"✗ Chybně → {ans}",fb_time:"⏱ Čas! → {ans}"
+  fb_correct:"✓ Správně! +{pts}",fb_wrong:"✗ Chybně → {ans}",fb_time:"⏱ Čas! → {ans}",
   plates_more:"+{n} dalších",pct_complete:"{pct}% hotovo",
   spotter_dup:"📋 {code} ({country}) již sbíráno!",
   map_unavail:"Mapa není k dispozici",map_loading:"Načítání mapy…",
@@ -883,7 +883,7 @@ sk:{
   q_neighbor:"Ktorá krajina susedí s…?",q_neighbor_not:"NESUSEDÍ s…?",
   q_plates_casual:"Z ktorej krajiny je táto EČV?",q_plates_hard:"Identifikujte región — žiadna nápoveda!",
   q_river_real:"Cez ktorú krajinu tečie táto rieka?",q_map_guess:"Nájdi krajinu na mape",
-  fb_correct:"✓ Správne! +{pts}",fb_wrong:"✗ Nesprávne → {ans}",fb_time:"⏱ Čas! → {ans}"
+  fb_correct:"✓ Správne! +{pts}",fb_wrong:"✗ Nesprávne → {ans}",fb_time:"⏱ Čas! → {ans}",
   plates_more:"+{n} ďalších",pct_complete:"{pct}% hotovo",
   spotter_dup:"📋 {code} ({country}) už zozbierané!",
   map_unavail:"Mapa nie je dostupná",map_loading:"Načítávanie mapy…",
@@ -919,7 +919,7 @@ hr:{
   q_neighbor:"Koja država graniči s…?",q_neighbor_not:"NE graniči s…?",
   q_plates_casual:"Iz koje države je ova registracija?",q_plates_hard:"Identificirajte regiju — nema naznake!",
   q_river_real:"Kroz koju državu teče ova rijeka?",q_map_guess:"Pronađi državu na karti",
-  fb_correct:"✓ Točno! +{pts}",fb_wrong:"✗ Pogrešno → {ans}",fb_time:"⏱ Kraj vremena! → {ans}"
+  fb_correct:"✓ Točno! +{pts}",fb_wrong:"✗ Pogrešno → {ans}",fb_time:"⏱ Kraj vremena! → {ans}",
   plates_more:"+{n} više",pct_complete:"{pct}% dovršeno",
   spotter_dup:"📋 {code} ({country}) već skupljeno!",
   map_unavail:"Karta nije dostupna",map_loading:"Učitavanje karte…",
@@ -955,7 +955,7 @@ sl:{
   q_neighbor:"Katera država meji na…?",q_neighbor_not:"NE meji na…?",
   q_plates_casual:"Iz katere države je ta tablica?",q_plates_hard:"Identificirajte regijo — brez namiga!",
   q_river_real:"Skozi katero državo teče ta reka?",q_map_guess:"Poišči državo na karti",
-  fb_correct:"✓ Pravilno! +{pts}",fb_wrong:"✗ Napačno → {ans}",fb_time:"⏱ Čas! → {ans}"
+  fb_correct:"✓ Pravilno! +{pts}",fb_wrong:"✗ Napačno → {ans}",fb_time:"⏱ Čas! → {ans}",
   plates_more:"+{n} več",pct_complete:"{pct}% dokončano",
   spotter_dup:"📋 {code} ({country}) že zbrano!",
   map_unavail:"Karta ni na voljo",map_loading:"Nalaganje karte…",
@@ -991,7 +991,7 @@ bg:{
   q_neighbor:"Коя страна граничи с…?",q_neighbor_not:"НЕ граничи с…?",
   q_plates_casual:"От коя страна е тази табела?",q_plates_hard:"Идентифицирайте региона — без подсказка!",
   q_river_real:"През коя страна тече тази река?",q_map_guess:"Намери страната на картата",
-  fb_correct:"✓ Правилно! +{pts}",fb_wrong:"✗ Грешно → {ans}",fb_time:"⏱ Времето изтече! → {ans}"
+  fb_correct:"✓ Правилно! +{pts}",fb_wrong:"✗ Грешно → {ans}",fb_time:"⏱ Времето изтече! → {ans}",
   plates_more:"+{n} oщe",pct_complete:"{pct}% завършено",
   spotter_dup:"📋 {code} ({country}) вечe събрано!",
   map_unavail:"Картата не е достъпна",map_loading:"Зареждане на картата…",
@@ -1027,7 +1027,7 @@ el:{
   q_neighbor:"Ποια χώρα συνορεύει με τη/το…;",q_neighbor_not:"ΔΕΝ συνορεύει με τη/το…;",
   q_plates_casual:"Από ποια χώρα είναι αυτή η πινακίδα;",q_plates_hard:"Αναγνωρίστε την περιοχή — χωρίς υπόδειξη!",
   q_river_real:"Μέσα από ποια χώρα διαρρέει αυτό το ποτάμι;",q_map_guess:"Βρες τη χώρα στον χάρτη",
-  fb_correct:"✓ Σωστό! +{pts}",fb_wrong:"✗ Λάθος → {ans}",fb_time:"⏱ Τέλος χρόνου! → {ans}"
+  fb_correct:"✓ Σωστό! +{pts}",fb_wrong:"✗ Λάθος → {ans}",fb_time:"⏱ Τέλος χρόνου! → {ans}",
   plates_more:"+{n} ακόμα",pct_complete:"{pct}% ολοκληρώθηκε",
   spotter_dup:"📋 {code} ({country}) ήδη συλλέχθηκε!",
   map_unavail:"Χάρτης μη διαθέσιμος",map_loading:"Φόρτωση χάρτη…",
@@ -1063,7 +1063,7 @@ da:{
   q_neighbor:"Hvilket land grænser op til…?",q_neighbor_not:"Grænser IKKE op til…?",
   q_plates_casual:"Fra hvilket land er denne nummerplade?",q_plates_hard:"Identificér regionen — ingen hint!",
   q_river_real:"Gennem hvilket land løber denne flod?",q_map_guess:"Find landet på kortet",
-  fb_correct:"✓ Korrekt! +{pts}",fb_wrong:"✗ Forkert → {ans}",fb_time:"⏱ Tid! → {ans}"
+  fb_correct:"✓ Korrekt! +{pts}",fb_wrong:"✗ Forkert → {ans}",fb_time:"⏱ Tid! → {ans}",
   plates_more:"+{n} mere",pct_complete:"{pct}% fuldført",
   spotter_dup:"📋 {code} ({country}) allerede indsamlet!",
   map_unavail:"Kort ikke tilgængeligt",map_loading:"Indlæser kort…",
@@ -1099,7 +1099,7 @@ sv:{
   q_neighbor:"Vilket land gränsar till…?",q_neighbor_not:"Gränsar INTE till…?",
   q_plates_casual:"Från vilket land är den här skylten?",q_plates_hard:"Identifiera regionen — inget tips!",
   q_river_real:"Genom vilket land flödar den här floden?",q_map_guess:"Hitta landet på kartan",
-  fb_correct:"✓ Rätt! +{pts}",fb_wrong:"✗ Fel → {ans}",fb_time:"⏱ Tid! → {ans}"
+  fb_correct:"✓ Rätt! +{pts}",fb_wrong:"✗ Fel → {ans}",fb_time:"⏱ Tid! → {ans}",
   plates_more:"+{n} till",pct_complete:"{pct}% klart",
   spotter_dup:"📋 {code} ({country}) redan insamlat!",
   map_unavail:"Karta ej tillgänglig",map_loading:"Laddar karta…",
@@ -1135,7 +1135,7 @@ fi:{
   q_neighbor:"Mikä maa rajoittuu…?",q_neighbor_not:"EI rajoitu…?",
   q_plates_casual:"Minkä maan rekisterikilpi tämä on?",q_plates_hard:"Tunnista alue — ei vihjettä!",
   q_river_real:"Minkä maan läpi tämä joki virtaa?",q_map_guess:"Etsi maa kartalta",
-  fb_correct:"✓ Oikein! +{pts}",fb_wrong:"✗ Väärin → {ans}",fb_time:"⏱ Aika! → {ans}"
+  fb_correct:"✓ Oikein! +{pts}",fb_wrong:"✗ Väärin → {ans}",fb_time:"⏱ Aika! → {ans}",
   plates_more:"+{n} lisää",pct_complete:"{pct}% valmis",
   spotter_dup:"📋 {code} ({country}) jo kerätty!",
   map_unavail:"Kartta ei saatavilla",map_loading:"Ladataan karttaa…",
@@ -1171,7 +1171,7 @@ et:{
   q_neighbor:"Milline riik piirneb…?",q_neighbor_not:"EI piirne…?",
   q_plates_casual:"Millisest riigist see numbrimärk on?",q_plates_hard:"Tuvasta piirkond — vihjeta!",
   q_river_real:"Läbi millise riigi see jõgi voolab?",q_map_guess:"Leia riik kaardilt",
-  fb_correct:"✓ Õige! +{pts}",fb_wrong:"✗ Vale → {ans}",fb_time:"⏱ Aeg! → {ans}"
+  fb_correct:"✓ Õige! +{pts}",fb_wrong:"✗ Vale → {ans}",fb_time:"⏱ Aeg! → {ans}",
   plates_more:"+{n} veel",pct_complete:"{pct}% täidetud",
   spotter_dup:"📋 {code} ({country}) juba kogutud!",
   map_unavail:"Kaart pole saadaval",map_loading:"Kaardi laadimine…",
@@ -1207,7 +1207,7 @@ lv:{
   q_neighbor:"Kura valsts robežojas ar…?",q_neighbor_not:"NAV robežas ar…?",
   q_plates_casual:"No kuras valsts ir šī numura zīme?",q_plates_hard:"Identificēt reģionu — bez padoma!",
   q_river_real:"Caur kuru valsti tek šī upe?",q_map_guess:"Atrodi valsti kartē",
-  fb_correct:"✓ Pareizi! +{pts}",fb_wrong:"✗ Nepareizi → {ans}",fb_time:"⏱ Laiks beidzies! → {ans}"
+  fb_correct:"✓ Pareizi! +{pts}",fb_wrong:"✗ Nepareizi → {ans}",fb_time:"⏱ Laiks beidzies! → {ans}",
   plates_more:"+{n} vairāk",pct_complete:"{pct}% pabeigts",
   spotter_dup:"📋 {code} ({country}) jau savākts!",
   map_unavail:"Karte nav pieejama",map_loading:"Karte ielādē…",
@@ -1243,7 +1243,7 @@ lt:{
   q_neighbor:"Kuri šalis ribojasi su…?",q_neighbor_not:"NERIBOJASI su…?",
   q_plates_casual:"Iš kurios šalies yra šis numeris?",q_plates_hard:"Nustatyti regioną — be užuominos!",
   q_river_real:"Per kurią šalį teka ši upė?",q_map_guess:"Rask šalį žemėlapyje",
-  fb_correct:"✓ Teisingai! +{pts}",fb_wrong:"✗ Neteisingai → {ans}",fb_time:"⏱ Laikas! → {ans}"
+  fb_correct:"✓ Teisingai! +{pts}",fb_wrong:"✗ Neteisingai → {ans}",fb_time:"⏱ Laikas! → {ans}",
   plates_more:"+{n} daugiau",pct_complete:"{pct}% baigta",
   spotter_dup:"📋 {code} ({country}) jau surinkta!",
   map_unavail:"Žemėlapis neprieinamas",map_loading:"Kraunamas žemėlapis…",
@@ -1279,7 +1279,7 @@ mt:{
   q_neighbor:"Liema pajjiż jibbordjja ma'…?",q_neighbor_not:"MA jibbordjjax ma'…?",
   q_plates_casual:"Minn liema pajjiż hija din il-pjanċa?",q_plates_hard:"Identifika r-reġjun — l-ebda indikazzjoni!",
   q_river_real:"Minn liema pajjiż jgħaddi dan ix-xmara?",q_map_guess:"Sib il-pajjiż fuq il-mappa",
-  fb_correct:"✓ Korretti! +{pts}",fb_wrong:"✗ Ħażin → {ans}",fb_time:"⏱ Ħin! → {ans}"
+  fb_correct:"✓ Korretti! +{pts}",fb_wrong:"✗ Ħażin → {ans}",fb_time:"⏱ Ħin! → {ans}",
   plates_more:"+{n} aktar",pct_complete:"{pct}% lest",
   spotter_dup:"📋 {code} ({country}) diġà miġbur!",
   map_unavail:"Mappa mhux disponibbli",map_loading:"Qed jġħabbi l-mappa…",
@@ -1315,7 +1315,7 @@ ga:{
   q_neighbor:"Cén tír a bhfuil teorainn le…?",q_neighbor_not:"NÍL teorainn le…?",
   q_plates_casual:"Cén tír ar as an pláta seo?",q_plates_hard:"Aithin an réigiún — gan leid!",
   q_river_real:"Trí cén tír a ritheann an abhainn seo?",q_map_guess:"Aimsigh an tír ar an léarscáil",
-  fb_correct:"✓ Ceart! +{pts}",fb_wrong:"✗ Mícheart → {ans}",fb_time:"⏱ Am! → {ans}"
+  fb_correct:"✓ Ceart! +{pts}",fb_wrong:"✗ Mícheart → {ans}",fb_time:"⏱ Am! → {ans}",
   plates_more:"+{n} níos mó",pct_complete:"{pct}% críochnaithe",
   spotter_dup:"📋 {code} ({country}) bailithe cheana!",
   map_unavail:"Léarscáil nach bhfuil ar fáil",map_loading:"Ag lódáil léarscáil…",
