@@ -461,11 +461,813 @@ const PAY_PRODUCTS = [
 ];
 
 /* LANGUAGE */
+/* ── Phase 47/48: i18n — DE / EN / PL ───────────────────────────────────── */
 const LANG={
-  de:{play:"SPIELEN",again:"NOCHMAL",menu:"Hauptmen\u00fc",board:"Bestenliste",pass:"Reisepass",profile:"Profil",stats:"Statistik",casual:"Casual",hardcore:"Hardcore",rounds:"Runden"},
-  en:{play:"PLAY",again:"PLAY AGAIN",menu:"Main Menu",board:"Leaderboard",pass:"Passport",profile:"Profile",stats:"Stats",casual:"Casual",hardcore:"Hardcore",rounds:"Rounds"},
+de:{
+  play:"SPIELEN",again:"NOCHMAL",menu:"Hauptmenü",board:"Bestenliste",pass:"Reisepass",
+  profile:"Profil",stats:"Statistik",casual:"Casual",hardcore:"Hardcore",rounds:"Runden",
+  btn_collect:"Sammeln",btn_back:"Zurück zum Hauptmenü",btn_next:"Weiter →",
+  btn_again:"Nochmal",btn_menu:"Hauptmenü",btn_adapt:"Anpassen",
+  spotter_title:"\u{1F697} Roadtrip-Spotter",
+  spotter_hint:"Kennzeichen gesehen? Sofort eintragen!",
+  spotter_all:"Alle Länder",spotter_unknown:"Unbekanntes Kennzeichen",
+  spotter_not_in:"nicht in",spotter_but_in:"aber in",
+  album_title:"\u{1F4D4} Kennzeichen-Album",album_list:"\u{1F4DD} Liste",album_map:"\u{1F5FA} Karte",
+  album_empty_country:"Noch nichts aus {country} gesammelt — nutze den Spotter!",
+  album_empty:"Noch nichts gesammelt!\nSpiele EU-Kennzeichen oder benutze den Spotter.",
+  album_codes:"Kürzel",
+  hl_higher:"⬆️ Mehr / Länger / Größer",hl_lower:"⬇️ Weniger / Kürzer / Kleiner",
+  hl_more:"⬆️ Mehr Einwohner",hl_less:"⬇️ Weniger Einwohner",
+  loc_detected:"Du bist in {country}",loc_adapt:"Anpassen",
+  q_city:"In welchem Land liegt diese Stadt?",q_flag:"Welches Land zeigt diese Flagge?",
+  q_capital:"Zu welchem Land gehört diese Hauptstadt?",q_river:"In welchem Land liegt dieser Fluss?",
+  q_landmark:"In welchem Land liegt dieses Wahrzeichen?",q_park:"In welchem Land liegt dieser Nationalpark?",
+  q_unesco:"In welchem Land liegt dieses UNESCO-Welterbe?",q_citymark:"Zu welcher Stadt gehört dieses Wahrzeichen?",
+  q_subway:"In welcher Stadt ist diese U-Bahn?",q_flagsel:"Welche Flagge gehört zu …",
+  q_rcapital:"Was ist die Hauptstadt von …?",q_rcity:"Welche Stadt liegt in …?",
+  q_rriver:"Welcher Fluss fließt durch …?",q_outline:"Welches Land hat diese Form?",
+  q_food:"Aus welchem Land kommt dieses Gericht?",q_brand:"Aus welchem Land kommt diese Marke?",
+  q_currency:"Zu welchem Land gehört diese Währung?",q_curr_real:"Welche Währung hat …",
+  q_pop_compare:"Mehr oder weniger Einwohner?",
+  q_hl_pop:"Mehr Einwohner als {a}?",q_hl_river:"Länger als {a}?",q_hl_area:"Größer als {a}?",
+  q_neighbor:"Welches Land grenzt an…?",q_neighbor_not:"Grenzt NICHT an…?",
+  q_plates_casual:"Woher kommt dieses Kennzeichen?",q_plates_hard:"Region erkennen — kein Tipp!",
+  q_river_real:"Durch welches Land fließt dieser Fluss?",q_map_guess:"Finde das Land auf der Karte",
+  fb_correct:"✓ Richtig! +{pts}",fb_wrong:"✗ Falsch → {ans}",fb_time:"⏱ Zeit! → {ans}"
+},
+en:{
+  play:"PLAY",again:"PLAY AGAIN",menu:"Main Menu",board:"Leaderboard",pass:"Passport",
+  profile:"Profile",stats:"Stats",casual:"Casual",hardcore:"Hardcore",rounds:"Rounds",
+  btn_collect:"Collect",btn_back:"Back to Main Menu",btn_next:"Next →",
+  btn_again:"Play Again",btn_menu:"Main Menu",btn_adapt:"Adapt",
+  spotter_title:"\u{1F697} Road Trip Spotter",
+  spotter_hint:"Spotted a plate? Log it now!",
+  spotter_all:"All Countries",spotter_unknown:"Unknown plate",
+  spotter_not_in:"not in",spotter_but_in:"but found in",
+  album_title:"\u{1F4D4} Plate Collection",album_list:"\u{1F4DD} List",album_map:"\u{1F5FA} Map",
+  album_empty_country:"Nothing from {country} yet — use the Spotter!",
+  album_empty:"Nothing collected yet!\nPlay EU plates or use the Spotter above.",
+  album_codes:"codes",
+  hl_higher:"⬆️ More / Longer / Larger",hl_lower:"⬇️ Less / Shorter / Smaller",
+  hl_more:"⬆️ More Population",hl_less:"⬇️ Less Population",
+  loc_detected:"You are in {country}",loc_adapt:"Adapt",
+  q_city:"In which country is this city?",q_flag:"Which country does this flag belong to?",
+  q_capital:"Which country has this capital?",q_river:"In which country is this river?",
+  q_landmark:"In which country is this landmark?",q_park:"In which country is this national park?",
+  q_unesco:"In which country is this UNESCO site?",q_citymark:"Which city has this landmark?",
+  q_subway:"Which city has this metro?",q_flagsel:"Which flag belongs to…",
+  q_rcapital:"What is the capital of…?",q_rcity:"Which city is in…?",
+  q_rriver:"Which river flows through…?",q_outline:"Which country has this shape?",
+  q_food:"Which country does this dish come from?",q_brand:"Which country does this brand come from?",
+  q_currency:"Which country uses this currency?",q_curr_real:"What currency does…",
+  q_pop_compare:"More or fewer inhabitants?",
+  q_hl_pop:"More inhabitants than {a}?",q_hl_river:"Longer than {a}?",q_hl_area:"Larger than {a}?",
+  q_neighbor:"Which country borders…?",q_neighbor_not:"Does NOT border…?",
+  q_plates_casual:"Which country has this plate?",q_plates_hard:"Identify the region — no hint!",
+  q_river_real:"Which country does this river flow through?",q_map_guess:"Find the country on the map",
+  fb_correct:"✓ Correct! +{pts}",fb_wrong:"✗ Wrong → {ans}",fb_time:"⏱ Time! → {ans}"
+},
+pl:{
+  play:"GRAJ",again:"ZAGRAJ PONOWNIE",menu:"Menu",board:"Ranking",pass:"Paszport",
+  profile:"Profil",stats:"Statystyki",casual:"Zwykły",hardcore:"Trudny",rounds:"Rundy",
+  btn_collect:"Zbierz",btn_back:"Powrót do menu",btn_next:"Dalej →",
+  btn_again:"Zagraj ponownie",btn_menu:"Menu",btn_adapt:"Dostosuj",
+  spotter_title:"\u{1F697} Spotter Podróżnika",
+  spotter_hint:"Widzisz tablicę? Zapisz ją od razu!",
+  spotter_all:"Wszystkie kraje",spotter_unknown:"Nieznana tablica",
+  spotter_not_in:"nie ma w",spotter_but_in:"ale jest w",
+  album_title:"\u{1F4D4} Album Tablic",album_list:"\u{1F4DD} Lista",album_map:"\u{1F5FA} Mapa",
+  album_empty_country:"Nic z {country} jeszcze — użyj Spottera!",
+  album_empty:"Nic jeszcze nie zebrano!\nGraj w tablice EU lub użyj Spottera.",
+  album_codes:"kodów",
+  hl_higher:"⬆️ Więcej / Dłużej / Większy",hl_lower:"⬇️ Mniej / Krócej / Mniejszy",
+  hl_more:"⬆️ Więcej mieszkańców",hl_less:"⬇️ Mniej mieszkańców",
+  loc_detected:"Jesteś w {country}",loc_adapt:"Dostosuj",
+  q_city:"W jakim kraju leży to miasto?",q_flag:"Jakie państwo ma tę flagę?",
+  q_capital:"Do jakiego kraju należy ta stolica?",q_river:"W jakim kraju płynie ta rzeka?",
+  q_landmark:"W jakim kraju jest ta atrakcja?",q_park:"W jakim kraju jest ten park narodowy?",
+  q_unesco:"W jakim kraju jest to dziedzictwo UNESCO?",q_citymark:"Do jakiego miasta należy ta atrakcja?",
+  q_subway:"W jakim mieście jest to metro?",q_flagsel:"Która flaga należy do…",
+  q_rcapital:"Jaka jest stolica …?",q_rcity:"Które miasto leży w …?",
+  q_rriver:"Która rzeka płynie przez …?",q_outline:"Które państwo ma ten kształt?",
+  q_food:"Z jakiego kraju pochodzi to danie?",q_brand:"Z jakiego kraju pochodzi ta marka?",
+  q_currency:"Do jakiego kraju należy ta waluta?",q_curr_real:"Jaką walutę ma…",
+  q_pop_compare:"Więcej czy mniej mieszkańców?",
+  q_hl_pop:"Więcej mieszkańców niż {a}?",q_hl_river:"Dłuższa niż {a}?",q_hl_area:"Większy niż {a}?",
+  q_neighbor:"Który kraj graniczy z…?",q_neighbor_not:"NIE graniczy z…?",
+  q_plates_casual:"Do jakiego kraju należy ta tablica?",q_plates_hard:"Jaki region ma tę tablicę?",
+  q_river_real:"Przez jaki kraj płynie ta rzeka?",q_map_guess:"Znajdź kraj na mapie",
+  fb_correct:"✓ Dobrze! +{pts}",fb_wrong:"✗ Błąd → {ans}",fb_time:"⏱ Czas! → {ans}"
+},
+fr:{
+  play:"JOUER",again:"REJOUER",menu:"Menu principal",board:"Classement",pass:"Passeport",
+  profile:"Profil",stats:"Statistiques",casual:"Casual",hardcore:"Hardcore",rounds:"Manches",
+  btn_collect:"Collecter",btn_back:"Retour au menu",btn_next:"Suivant →",
+  btn_again:"Rejouer",btn_menu:"Menu principal",btn_adapt:"Adapter",
+  spotter_title:"\u{1F697} Spotter de voyage",
+  spotter_hint:"Vu une plaque ? Notez-la !",
+  spotter_all:"Tous les pays",spotter_unknown:"Plaque inconnue",
+  spotter_not_in:"pas dans",spotter_but_in:"mais dans",
+  album_title:"\u{1F4D4} Collection de plaques",album_list:"\u{1F4DD} Liste",album_map:"\u{1F5FA} Carte",
+  album_empty_country:"Rien de {country} encore — utilisez le Spotter !",
+  album_empty:"Rien collecté encore !\nJouez aux plaques UE ou utilisez le Spotter.",
+  album_codes:"codes",
+  hl_higher:"⬆️ Plus / Plus long / Plus grand",hl_lower:"⬇️ Moins / Plus court / Plus petit",
+  hl_more:"⬆️ Plus d'habitants",hl_less:"⬇️ Moins d'habitants",
+  loc_detected:"Vous êtes en {country}",loc_adapt:"Adapter",
+  q_city:"Dans quel pays se trouve cette ville ?",q_flag:"Quel pays a ce drapeau ?",
+  q_capital:"À quel pays appartient cette capitale ?",q_river:"Dans quel pays coule ce fleuve ?",
+  q_landmark:"Dans quel pays se trouve ce monument ?",q_park:"Dans quel pays se trouve ce parc national ?",
+  q_unesco:"Dans quel pays se trouve ce site UNESCO ?",q_citymark:"À quelle ville appartient ce monument ?",
+  q_subway:"Dans quelle ville se trouve ce métro ?",q_flagsel:"Quel drapeau appartient à…",
+  q_rcapital:"Quelle est la capitale de… ?",q_rcity:"Quelle ville est dans… ?",
+  q_rriver:"Quel fleuve traverse… ?",q_outline:"Quel pays a cette forme ?",
+  q_food:"De quel pays vient ce plat ?",q_brand:"De quel pays vient cette marque ?",
+  q_currency:"À quel pays appartient cette monnaie ?",q_curr_real:"Quelle monnaie a…",
+  q_pop_compare:"Plus ou moins d'habitants ?",
+  q_hl_pop:"Plus d'habitants que {a} ?",q_hl_river:"Plus long que {a} ?",q_hl_area:"Plus grand que {a} ?",
+  q_neighbor:"Quel pays borde… ?",q_neighbor_not:"Ne borde PAS… ?",
+  q_plates_casual:"De quel pays est cette plaque ?",q_plates_hard:"Identifier la région — aucun indice !",
+  q_river_real:"Dans quel pays coule ce fleuve ?",q_map_guess:"Trouver le pays sur la carte",
+  fb_correct:"✓ Correct ! +{pts}",fb_wrong:"✗ Faux → {ans}",fb_time:"⏱ Temps ! → {ans}"
+},
+es:{
+  play:"JUGAR",again:"JUGAR DE NUEVO",menu:"Menú principal",board:"Clasificación",pass:"Pasaporte",
+  profile:"Perfil",stats:"Estadísticas",casual:"Casual",hardcore:"Hardcore",rounds:"Rondas",
+  btn_collect:"Coleccionar",btn_back:"Volver al menú",btn_next:"Siguiente →",
+  btn_again:"Jugar de nuevo",btn_menu:"Menú principal",btn_adapt:"Adaptar",
+  spotter_title:"\u{1F697} Spotter de viaje",
+  spotter_hint:"¿Has visto una matrícula? ¡Anótala!",
+  spotter_all:"Todos los países",spotter_unknown:"Matrícula desconocida",
+  spotter_not_in:"no en",spotter_but_in:"pero en",
+  album_title:"\u{1F4D4} Colección de matrículas",album_list:"\u{1F4DD} Lista",album_map:"\u{1F5FA} Mapa",
+  album_empty_country:"Nada de {country} aún — ¡usa el Spotter!",
+  album_empty:"¡Nada recopilado aún!\nJuega a matrículas UE o usa el Spotter.",
+  album_codes:"códigos",
+  hl_higher:"⬆️ Más / Más largo / Más grande",hl_lower:"⬇️ Menos / Más corto / Más pequeño",
+  hl_more:"⬆️ Más habitantes",hl_less:"⬇️ Menos habitantes",
+  loc_detected:"Estás en {country}",loc_adapt:"Adaptar",
+  q_city:"¿En qué país está esta ciudad?",q_flag:"¿Qué país tiene esta bandera?",
+  q_capital:"¿A qué país pertenece esta capital?",q_river:"¿En qué país está este río?",
+  q_landmark:"¿En qué país está este monumento?",q_park:"¿En qué país está este parque nacional?",
+  q_unesco:"¿En qué país está este sitio UNESCO?",q_citymark:"¿A qué ciudad pertenece este monumento?",
+  q_subway:"¿En qué ciudad está este metro?",q_flagsel:"¿Qué bandera pertenece a…",
+  q_rcapital:"¿Cuál es la capital de…?",q_rcity:"¿Qué ciudad está en…?",
+  q_rriver:"¿Qué río atraviesa…?",q_outline:"¿Qué país tiene esta forma?",
+  q_food:"¿De qué país viene este plato?",q_brand:"¿De qué país viene esta marca?",
+  q_currency:"¿A qué país pertenece esta moneda?",q_curr_real:"¿Qué moneda tiene…",
+  q_pop_compare:"¿Más o menos habitantes?",
+  q_hl_pop:"¿Más habitantes que {a}?",q_hl_river:"¿Más largo que {a}?",q_hl_area:"¿Más grande que {a}?",
+  q_neighbor:"¿Qué país limita con…?",q_neighbor_not:"¿NO limita con…?",
+  q_plates_casual:"¿De qué país es esta matrícula?",q_plates_hard:"Identificar la región — ¡sin pista!",
+  q_river_real:"¿Por qué país pasa este río?",q_map_guess:"Encuentra el país en el mapa",
+  fb_correct:"✓ ¡Correcto! +{pts}",fb_wrong:"✗ Incorrecto → {ans}",fb_time:"⏱ ¡Tiempo! → {ans}"
+},
+it:{
+  play:"GIOCA",again:"GIOCA ANCORA",menu:"Menu principale",board:"Classifica",pass:"Passaporto",
+  profile:"Profilo",stats:"Statistiche",casual:"Casual",hardcore:"Hardcore",rounds:"Round",
+  btn_collect:"Colleziona",btn_back:"Torna al menu",btn_next:"Avanti →",
+  btn_again:"Gioca ancora",btn_menu:"Menu principale",btn_adapt:"Adatta",
+  spotter_title:"\u{1F697} Spotter di viaggio",
+  spotter_hint:"Hai visto una targa? Registrala subito!",
+  spotter_all:"Tutti i paesi",spotter_unknown:"Targa sconosciuta",
+  spotter_not_in:"non in",spotter_but_in:"ma in",
+  album_title:"\u{1F4D4} Raccolta targhe",album_list:"\u{1F4DD} Lista",album_map:"\u{1F5FA} Mappa",
+  album_empty_country:"Niente da {country} ancora — usa lo Spotter!",
+  album_empty:"Niente ancora raccolto!\nGioca alle targhe UE o usa lo Spotter.",
+  album_codes:"codici",
+  hl_higher:"⬆️ Di più / Più lungo / Più grande",hl_lower:"⬇️ Di meno / Più corto / Più piccolo",
+  hl_more:"⬆️ Più abitanti",hl_less:"⬇️ Meno abitanti",
+  loc_detected:"Sei in {country}",loc_adapt:"Adatta",
+  q_city:"In quale paese si trova questa città?",q_flag:"Quale paese ha questa bandiera?",
+  q_capital:"A quale paese appartiene questa capitale?",q_river:"In quale paese scorre questo fiume?",
+  q_landmark:"In quale paese si trova questo monumento?",q_park:"In quale paese si trova questo parco nazionale?",
+  q_unesco:"In quale paese si trova questo sito UNESCO?",q_citymark:"A quale città appartiene questo monumento?",
+  q_subway:"In quale città si trova questa metro?",q_flagsel:"Quale bandiera appartiene a…",
+  q_rcapital:"Qual è la capitale di…?",q_rcity:"Quale città si trova in…?",
+  q_rriver:"Quale fiume scorre attraverso…?",q_outline:"Quale paese ha questa forma?",
+  q_food:"Da quale paese viene questo piatto?",q_brand:"Da quale paese viene questo marchio?",
+  q_currency:"A quale paese appartiene questa valuta?",q_curr_real:"Quale valuta ha…",
+  q_pop_compare:"Più o meno abitanti?",
+  q_hl_pop:"Più abitanti di {a}?",q_hl_river:"Più lungo di {a}?",q_hl_area:"Più grande di {a}?",
+  q_neighbor:"Quale paese confina con…?",q_neighbor_not:"NON confina con…?",
+  q_plates_casual:"Da quale paese viene questa targa?",q_plates_hard:"Identificare la regione — nessun indizio!",
+  q_river_real:"Attraverso quale paese scorre questo fiume?",q_map_guess:"Trova il paese sulla mappa",
+  fb_correct:"✓ Corretto! +{pts}",fb_wrong:"✗ Sbagliato → {ans}",fb_time:"⏱ Tempo! → {ans}"
+},
+nl:{
+  play:"SPELEN",again:"OPNIEUW SPELEN",menu:"Hoofdmenu",board:"Ranglijst",pass:"Paspoort",
+  profile:"Profiel",stats:"Statistieken",casual:"Casual",hardcore:"Hardcore",rounds:"Rondes",
+  btn_collect:"Verzamelen",btn_back:"Terug naar menu",btn_next:"Volgende →",
+  btn_again:"Opnieuw spelen",btn_menu:"Hoofdmenu",btn_adapt:"Aanpassen",
+  spotter_title:"\u{1F697} Reisspotter",
+  spotter_hint:"Kenteken gezien? Noteer het nu!",
+  spotter_all:"Alle landen",spotter_unknown:"Onbekend kenteken",
+  spotter_not_in:"niet in",spotter_but_in:"maar in",
+  album_title:"\u{1F4D4} Kentekenalbum",album_list:"\u{1F4DD} Lijst",album_map:"\u{1F5FA} Kaart",
+  album_empty_country:"Nog niets uit {country} — gebruik de Spotter!",
+  album_empty:"Nog niets verzameld!\nSpeel EU-kentekens of gebruik de Spotter.",
+  album_codes:"codes",
+  hl_higher:"⬆️ Meer / Langer / Groter",hl_lower:"⬇️ Minder / Korter / Kleiner",
+  hl_more:"⬆️ Meer inwoners",hl_less:"⬇️ Minder inwoners",
+  loc_detected:"Je bent in {country}",loc_adapt:"Aanpassen",
+  q_city:"In welk land ligt deze stad?",q_flag:"Welk land heeft deze vlag?",
+  q_capital:"Bij welk land hoort deze hoofdstad?",q_river:"In welk land ligt deze rivier?",
+  q_landmark:"In welk land staat dit monument?",q_park:"In welk land ligt dit nationaal park?",
+  q_unesco:"In welk land ligt dit UNESCO-erfgoed?",q_citymark:"Bij welke stad hoort dit monument?",
+  q_subway:"In welke stad is deze metro?",q_flagsel:"Welke vlag hoort bij…",
+  q_rcapital:"Wat is de hoofdstad van…?",q_rcity:"Welke stad ligt in…?",
+  q_rriver:"Welke rivier stroomt door…?",q_outline:"Welk land heeft deze vorm?",
+  q_food:"Uit welk land komt dit gerecht?",q_brand:"Uit welk land komt dit merk?",
+  q_currency:"Bij welk land hoort deze munt?",q_curr_real:"Welke munt heeft…",
+  q_pop_compare:"Meer of minder inwoners?",
+  q_hl_pop:"Meer inwoners dan {a}?",q_hl_river:"Langer dan {a}?",q_hl_area:"Groter dan {a}?",
+  q_neighbor:"Welk land grenst aan…?",q_neighbor_not:"Grenst NIET aan…?",
+  q_plates_casual:"Uit welk land komt dit kenteken?",q_plates_hard:"Identificeer de regio — geen hint!",
+  q_river_real:"Door welk land stroomt deze rivier?",q_map_guess:"Vind het land op de kaart",
+  fb_correct:"✓ Correct! +{pts}",fb_wrong:"✗ Fout → {ans}",fb_time:"⏱ Tijd! → {ans}"
+},
+pt:{
+  play:"JOGAR",again:"JOGAR NOVAMENTE",menu:"Menu principal",board:"Classificação",pass:"Passaporte",
+  profile:"Perfil",stats:"Estatísticas",casual:"Casual",hardcore:"Hardcore",rounds:"Rodadas",
+  btn_collect:"Coletar",btn_back:"Voltar ao menu",btn_next:"Próximo →",
+  btn_again:"Jogar novamente",btn_menu:"Menu principal",btn_adapt:"Adaptar",
+  spotter_title:"\u{1F697} Spotter de viagem",
+  spotter_hint:"Viu uma placa? Registre agora!",
+  spotter_all:"Todos os países",spotter_unknown:"Placa desconhecida",
+  spotter_not_in:"não em",spotter_but_in:"mas em",
+  album_title:"\u{1F4D4} Coleção de placas",album_list:"\u{1F4DD} Lista",album_map:"\u{1F5FA} Mapa",
+  album_empty_country:"Nada de {country} ainda — use o Spotter!",
+  album_empty:"Nada coletado ainda!\nJogue placas UE ou use o Spotter.",
+  album_codes:"códigos",
+  hl_higher:"⬆️ Mais / Mais longo / Maior",hl_lower:"⬇️ Menos / Mais curto / Menor",
+  hl_more:"⬆️ Mais habitantes",hl_less:"⬇️ Menos habitantes",
+  loc_detected:"Você está em {country}",loc_adapt:"Adaptar",
+  q_city:"Em qual país fica esta cidade?",q_flag:"Qual país tem esta bandeira?",
+  q_capital:"A qual país pertence esta capital?",q_river:"Em qual país fica este rio?",
+  q_landmark:"Em qual país fica este monumento?",q_park:"Em qual país fica este parque nacional?",
+  q_unesco:"Em qual país fica este sítio UNESCO?",q_citymark:"A qual cidade pertence este monumento?",
+  q_subway:"Em qual cidade fica este metrô?",q_flagsel:"Qual bandeira pertence a…",
+  q_rcapital:"Qual é a capital de…?",q_rcity:"Qual cidade fica em…?",
+  q_rriver:"Qual rio corre por…?",q_outline:"Qual país tem esta forma?",
+  q_food:"De qual país vem este prato?",q_brand:"De qual país vem esta marca?",
+  q_currency:"A qual país pertence esta moeda?",q_curr_real:"Qual moeda tem…",
+  q_pop_compare:"Mais ou menos habitantes?",
+  q_hl_pop:"Mais habitantes que {a}?",q_hl_river:"Mais longo que {a}?",q_hl_area:"Maior que {a}?",
+  q_neighbor:"Qual país faz fronteira com…?",q_neighbor_not:"NÃO faz fronteira com…?",
+  q_plates_casual:"De qual país é esta placa?",q_plates_hard:"Identificar a região — sem dica!",
+  q_river_real:"Por qual país corre este rio?",q_map_guess:"Encontre o país no mapa",
+  fb_correct:"✓ Correto! +{pts}",fb_wrong:"✗ Errado → {ans}",fb_time:"⏱ Tempo! → {ans}"
+},
+ro:{
+  play:"JOACĂ",again:"JOACĂ DIN NOU",menu:"Meniu principal",board:"Clasament",pass:"Pașaport",
+  profile:"Profil",stats:"Statistici",casual:"Casual",hardcore:"Hardcore",rounds:"Runde",
+  btn_collect:"Colectează",btn_back:"Înapoi la meniu",btn_next:"Următor →",
+  btn_again:"Joacă din nou",btn_menu:"Meniu principal",btn_adapt:"Adaptează",
+  spotter_title:"\u{1F697} Spotter de călătorie",
+  spotter_hint:"Ai văzut o plăcuță? Înregistreaz-o acum!",
+  spotter_all:"Toate țările",spotter_unknown:"Plăcuță necunoscută",
+  spotter_not_in:"nu în",spotter_but_in:"dar în",
+  album_title:"\u{1F4D4} Colecție de plăcuțe",album_list:"\u{1F4DD} Listă",album_map:"\u{1F5FA} Hartă",
+  album_empty_country:"Nimic din {country} încă — folosește Spotter-ul!",
+  album_empty:"Nimic colectat încă!\nJoacă plăcuțe UE sau folosește Spotter-ul.",
+  album_codes:"coduri",
+  hl_higher:"⬆️ Mai mult / Mai lung / Mai mare",hl_lower:"⬇️ Mai puțin / Mai scurt / Mai mic",
+  hl_more:"⬆️ Mai mulți locuitori",hl_less:"⬇️ Mai puțini locuitori",
+  loc_detected:"Ești în {country}",loc_adapt:"Adaptează",
+  q_city:"În ce țară se află acest oraș?",q_flag:"Ce țară are acest steag?",
+  q_capital:"Cărui țări aparține această capitală?",q_river:"În ce țară curge acest râu?",
+  q_landmark:"În ce țară se află acest monument?",q_park:"În ce țară se află acest parc național?",
+  q_unesco:"În ce țară se află acest sit UNESCO?",q_citymark:"Cărui oraș aparține acest monument?",
+  q_subway:"În ce oraș se află acest metrou?",q_flagsel:"Ce steag aparține lui…",
+  q_rcapital:"Care este capitala lui…?",q_rcity:"Ce oraș se află în…?",
+  q_rriver:"Ce râu curge prin…?",q_outline:"Ce țară are această formă?",
+  q_food:"Din ce țară vine acest preparat?",q_brand:"Din ce țară vine acest brand?",
+  q_currency:"Cărui țări aparține această monedă?",q_curr_real:"Ce monedă are…",
+  q_pop_compare:"Mai mulți sau mai puțini locuitori?",
+  q_hl_pop:"Mai mulți locuitori decât {a}?",q_hl_river:"Mai lung decât {a}?",q_hl_area:"Mai mare decât {a}?",
+  q_neighbor:"Ce țară se învecinează cu…?",q_neighbor_not:"NU se învecinează cu…?",
+  q_plates_casual:"Din ce țară este această plăcuță?",q_plates_hard:"Identificați regiunea — fără indiciu!",
+  q_river_real:"Prin ce țară curge acest râu?",q_map_guess:"Găsește țara pe hartă",
+  fb_correct:"✓ Corect! +{pts}",fb_wrong:"✗ Greșit → {ans}",fb_time:"⏱ Timp! → {ans}"
+},
+hu:{
+  play:"JÁTÉK",again:"ÚJRA JÁTSZANI",menu:"Főmenü",board:"Rangsor",pass:"Útlevél",
+  profile:"Profil",stats:"Statisztikák",casual:"Könnyű",hardcore:"Nehéz",rounds:"Körök",
+  btn_collect:"Gyűjt",btn_back:"Vissza a főmenübe",btn_next:"Tovább →",
+  btn_again:"Újra játszani",btn_menu:"Főmenü",btn_adapt:"Módosít",
+  spotter_title:"\u{1F697} Utazó Spotter",
+  spotter_hint:"Rendszámot láttál? Jegyezd fel azonnal!",
+  spotter_all:"Összes ország",spotter_unknown:"Ismeretlen rendszám",
+  spotter_not_in:"nem szerepel",spotter_but_in:"de szerepel",
+  album_title:"\u{1F4D4} Rendszám Album",album_list:"\u{1F4DD} Lista",album_map:"\u{1F5FA} Térkép",
+  album_empty_country:"Még semmi {country}-ból — használd a Spotter-t!",
+  album_empty:"Még semmi összegyűjtve!\nJátssz EU rendszámokat vagy használd a Spotter-t.",
+  album_codes:"kódok",
+  hl_higher:"⬆️ Több / Hosszabb / Nagyobb",hl_lower:"⬇️ Kevesebb / Rövidebb / Kisebb",
+  hl_more:"⬆️ Több lakos",hl_less:"⬇️ Kevesebb lakos",
+  loc_detected:"Jelenleg itt tartózkodik: {country}",loc_adapt:"Módosít",
+  q_city:"Melyik országban van ez a város?",q_flag:"Melyik ország zászlaja ez?",
+  q_capital:"Melyik ország fővárosa ez?",q_river:"Melyik országban folyik ez a folyó?",
+  q_landmark:"Melyik országban van ez az emlékmű?",q_park:"Melyik országban van ez a nemzeti park?",
+  q_unesco:"Melyik országban van ez az UNESCO-helyszín?",q_citymark:"Melyik városhoz tartozik ez az emlékmű?",
+  q_subway:"Melyik városban van ez a metró?",q_flagsel:"Melyik zászló tartozik…-hoz",
+  q_rcapital:"Mi a fővárosa…-nak?",q_rcity:"Melyik város van…-ban?",
+  q_rriver:"Melyik folyó folyik át…-on?",q_outline:"Melyik ország van ebben az alakban?",
+  q_food:"Melyik országból származik ez az étel?",q_brand:"Melyik országból származik ez a márka?",
+  q_currency:"Melyik ország pénzneme ez?",q_curr_real:"Melyik pénzneme van…-nak",
+  q_pop_compare:"Több vagy kevesebb lakos?",
+  q_hl_pop:"Több lakos, mint {a}?",q_hl_river:"Hosszabb, mint {a}?",q_hl_area:"Nagyobb, mint {a}?",
+  q_neighbor:"Melyik ország határos…-val?",q_neighbor_not:"NEM határos…-val?",
+  q_plates_casual:"Melyik ország rendszáma ez?",q_plates_hard:"Azonosítsa a régiót — nincs tipp!",
+  q_river_real:"Melyik országon folyik át ez a folyó?",q_map_guess:"Keresse meg az országot a térképen",
+  fb_correct:"✓ Helyes! +{pts}",fb_wrong:"✗ Rossz → {ans}",fb_time:"⏱ Idő! → {ans}"
+},
+cs:{
+  play:"HRÁT",again:"HRÁT ZNOVU",menu:"Hlavní menu",board:"Žebříček",pass:"Pas",
+  profile:"Profil",stats:"Statistiky",casual:"Casual",hardcore:"Hardcore",rounds:"Kola",
+  btn_collect:"Sbírat",btn_back:"Zpět do menu",btn_next:"Další →",
+  btn_again:"Hrát znovu",btn_menu:"Hlavní menu",btn_adapt:"Přizpůsobit",
+  spotter_title:"\u{1F697} Cestovní Spotter",
+  spotter_hint:"Viděl jsi SPZ? Zapiš ji hned!",
+  spotter_all:"Všechny země",spotter_unknown:"Neznámá SPZ",
+  spotter_not_in:"není v",spotter_but_in:"ale je v",
+  album_title:"\u{1F4D4} Album SPZ",album_list:"\u{1F4DD} Seznam",album_map:"\u{1F5FA} Mapa",
+  album_empty_country:"Zatím nic z {country} — použij Spotter!",
+  album_empty:"Zatím nic neshromážděno!\nHraj EU SPZ nebo použij Spotter.",
+  album_codes:"kódy",
+  hl_higher:"⬆️ Více / Delší / Větší",hl_lower:"⬇️ Méně / Kratší / Menší",
+  hl_more:"⬆️ Více obyvatel",hl_less:"⬇️ Méně obyvatel",
+  loc_detected:"Jsi v {country}",loc_adapt:"Přizpůsobit",
+  q_city:"Ve které zemi leží toto město?",q_flag:"Která země má tuto vlajku?",
+  q_capital:"Které zemi patří toto hlavní město?",q_river:"Ve které zemi teče tato řeka?",
+  q_landmark:"Ve které zemi se nachází tato památka?",q_park:"Ve které zemi se nachází tento národní park?",
+  q_unesco:"Ve které zemi se nachází toto UNESCO dědictví?",q_citymark:"Ke kterému městu patří tato památka?",
+  q_subway:"Ve kterém městě je toto metro?",q_flagsel:"Která vlajka patří k…",
+  q_rcapital:"Jaké je hlavní město…?",q_rcity:"Které město leží v…?",
+  q_rriver:"Která řeka protéká…?",q_outline:"Která země má tento tvar?",
+  q_food:"Ze které země pochází toto jídlo?",q_brand:"Ze které země pochází tato značka?",
+  q_currency:"Které zemi patří tato měna?",q_curr_real:"Jakou měnu má…",
+  q_pop_compare:"Více nebo méně obyvatel?",
+  q_hl_pop:"Více obyvatel než {a}?",q_hl_river:"Delší než {a}?",q_hl_area:"Větší než {a}?",
+  q_neighbor:"Která země sousedí s…?",q_neighbor_not:"NESOUSEDÍ s…?",
+  q_plates_casual:"Ze které země je tato SPZ?",q_plates_hard:"Určete region — žádná nápověda!",
+  q_river_real:"Přes kterou zemi teče tato řeka?",q_map_guess:"Najdi zemi na mapě",
+  fb_correct:"✓ Správně! +{pts}",fb_wrong:"✗ Chybně → {ans}",fb_time:"⏱ Čas! → {ans}"
+},
+sk:{
+  play:"HRAŤ",again:"HRAŤ ZNOVA",menu:"Hlavné menu",board:"Rebríček",pass:"Pas",
+  profile:"Profil",stats:"Štatistiky",casual:"Casual",hardcore:"Hardcore",rounds:"Kolá",
+  btn_collect:"Zbierať",btn_back:"Späť do menu",btn_next:"Ďalej →",
+  btn_again:"Hrať znova",btn_menu:"Hlavné menu",btn_adapt:"Prispôsobiť",
+  spotter_title:"\u{1F697} Cestovný Spotter",
+  spotter_hint:"Videl si EČV? Zaznač ju hneď!",
+  spotter_all:"Všetky krajiny",spotter_unknown:"Neznáma EČV",
+  spotter_not_in:"nie je v",spotter_but_in:"ale je v",
+  album_title:"\u{1F4D4} Album EČV",album_list:"\u{1F4DD} Zoznam",album_map:"\u{1F5FA} Mapa",
+  album_empty_country:"Zatiaľ nič z {country} — použi Spotter!",
+  album_empty:"Zatiaľ nič nezbierane!\nHraj EÚ EČV alebo použi Spotter.",
+  album_codes:"kódy",
+  hl_higher:"⬆️ Viac / Dlhší / Väčší",hl_lower:"⬇️ Menej / Kratší / Menší",
+  hl_more:"⬆️ Viac obyvateľov",hl_less:"⬇️ Menej obyvateľov",
+  loc_detected:"Si v {country}",loc_adapt:"Prispôsobiť",
+  q_city:"V ktorej krajine leží toto mesto?",q_flag:"Ktorá krajina má túto vlajku?",
+  q_capital:"Ktorej krajine patrí toto hlavné mesto?",q_river:"V ktorej krajine tečie táto rieka?",
+  q_landmark:"V ktorej krajine sa nachádza táto pamiatka?",q_park:"V ktorej krajine sa nachádza tento národný park?",
+  q_unesco:"V ktorej krajine sa nachádza toto UNESCO dedičstvo?",q_citymark:"Ktorému mestu patrí táto pamiatka?",
+  q_subway:"V ktorom meste je toto metro?",q_flagsel:"Ktorá vlajka patrí k…",
+  q_rcapital:"Aké je hlavné mesto…?",q_rcity:"Ktoré mesto leží v…?",
+  q_rriver:"Ktorá rieka preteká cez…?",q_outline:"Ktorá krajina má tento tvar?",
+  q_food:"Z ktorej krajiny pochádza toto jedlo?",q_brand:"Z ktorej krajiny pochádza táto značka?",
+  q_currency:"Ktorej krajine patrí táto mena?",q_curr_real:"Akú menu má…",
+  q_pop_compare:"Viac alebo menej obyvateľov?",
+  q_hl_pop:"Viac obyvateľov ako {a}?",q_hl_river:"Dlhší ako {a}?",q_hl_area:"Väčší ako {a}?",
+  q_neighbor:"Ktorá krajina susedí s…?",q_neighbor_not:"NESUSEDÍ s…?",
+  q_plates_casual:"Z ktorej krajiny je táto EČV?",q_plates_hard:"Identifikujte región — žiadna nápoveda!",
+  q_river_real:"Cez ktorú krajinu tečie táto rieka?",q_map_guess:"Nájdi krajinu na mape",
+  fb_correct:"✓ Správne! +{pts}",fb_wrong:"✗ Nesprávne → {ans}",fb_time:"⏱ Čas! → {ans}"
+},
+hr:{
+  play:"IGRAJ",again:"IGRAJ PONOVO",menu:"Glavni izbornik",board:"Ljestvica",pass:"Putovnica",
+  profile:"Profil",stats:"Statistike",casual:"Casual",hardcore:"Hardcore",rounds:"Runde",
+  btn_collect:"Sakupi",btn_back:"Natrag na izbornik",btn_next:"Sljedeće →",
+  btn_again:"Igraj ponovo",btn_menu:"Glavni izbornik",btn_adapt:"Prilagodi",
+  spotter_title:"\u{1F697} Putni Spotter",
+  spotter_hint:"Vidio registraciju? Zabilježi odmah!",
+  spotter_all:"Sve države",spotter_unknown:"Nepoznata registracija",
+  spotter_not_in:"nije u",spotter_but_in:"ali je u",
+  album_title:"\u{1F4D4} Album registracija",album_list:"\u{1F4DD} Popis",album_map:"\u{1F5FA} Karta",
+  album_empty_country:"Još ništa iz {country} — koristi Spotter!",
+  album_empty:"Još ništa skupljeno!\nIgraj EU registracije ili koristi Spotter.",
+  album_codes:"kodovi",
+  hl_higher:"⬆️ Više / Duže / Veće",hl_lower:"⬇️ Manje / Kraće / Manje",
+  hl_more:"⬆️ Više stanovnika",hl_less:"⬇️ Manje stanovnika",
+  loc_detected:"Nalazite se u {country}",loc_adapt:"Prilagodi",
+  q_city:"U kojoj se državi nalazi ovaj grad?",q_flag:"Koja država ima ovu zastavu?",
+  q_capital:"Kojoj državi pripada ovaj glavni grad?",q_river:"U kojoj državi teče ova rijeka?",
+  q_landmark:"U kojoj se državi nalazi ovaj spomenik?",q_park:"U kojoj se državi nalazi ovaj nacionalni park?",
+  q_unesco:"U kojoj se državi nalazi ovo UNESCO nasljeđe?",q_citymark:"Kojemu gradu pripada ovaj spomenik?",
+  q_subway:"U kojemu gradu je ovaj metro?",q_flagsel:"Koja zastava pripada…",
+  q_rcapital:"Koji je glavni grad…?",q_rcity:"Koji grad se nalazi u…?",
+  q_rriver:"Koja rijeka teče kroz…?",q_outline:"Koja država ima ovaj oblik?",
+  q_food:"Iz koje države dolazi ovo jelo?",q_brand:"Iz koje države dolazi ovaj brand?",
+  q_currency:"Kojoj državi pripada ova valuta?",q_curr_real:"Koju valutu ima…",
+  q_pop_compare:"Više ili manje stanovnika?",
+  q_hl_pop:"Više stanovnika od {a}?",q_hl_river:"Duže od {a}?",q_hl_area:"Veće od {a}?",
+  q_neighbor:"Koja država graniči s…?",q_neighbor_not:"NE graniči s…?",
+  q_plates_casual:"Iz koje države je ova registracija?",q_plates_hard:"Identificirajte regiju — nema naznake!",
+  q_river_real:"Kroz koju državu teče ova rijeka?",q_map_guess:"Pronađi državu na karti",
+  fb_correct:"✓ Točno! +{pts}",fb_wrong:"✗ Pogrešno → {ans}",fb_time:"⏱ Kraj vremena! → {ans}"
+},
+sl:{
+  play:"IGRAJ",again:"IGRAJ ZNOVA",menu:"Glavni meni",board:"Lestvica",pass:"Potni list",
+  profile:"Profil",stats:"Statistike",casual:"Casual",hardcore:"Hardcore",rounds:"Runde",
+  btn_collect:"Zberi",btn_back:"Nazaj v meni",btn_next:"Naprej →",
+  btn_again:"Igraj znova",btn_menu:"Glavni meni",btn_adapt:"Prilagodi",
+  spotter_title:"\u{1F697} Potovalni Spotter",
+  spotter_hint:"Si videl tablico? Zapiši jo takoj!",
+  spotter_all:"Vse države",spotter_unknown:"Neznana tablica",
+  spotter_not_in:"ni v",spotter_but_in:"ampak je v",
+  album_title:"\u{1F4D4} Album tablic",album_list:"\u{1F4DD} Seznam",album_map:"\u{1F5FA} Karta",
+  album_empty_country:"Še nič iz {country} — uporabi Spotter!",
+  album_empty:"Še nič zbrano!\nIgraj EU tablice ali uporabi Spotter.",
+  album_codes:"kode",
+  hl_higher:"⬆️ Več / Daljši / Večji",hl_lower:"⬇️ Manj / Krajši / Manjši",
+  hl_more:"⬆️ Več prebivalcev",hl_less:"⬇️ Manj prebivalcev",
+  loc_detected:"Ste v {country}",loc_adapt:"Prilagodi",
+  q_city:"V kateri državi leži to mesto?",q_flag:"Katera država ima to zastavo?",
+  q_capital:"Kateri državi pripada to glavno mesto?",q_river:"V kateri državi teče ta reka?",
+  q_landmark:"V kateri državi se nahaja ta znamenitost?",q_park:"V kateri državi se nahaja ta narodni park?",
+  q_unesco:"V kateri državi se nahaja ta UNESCO dediščina?",q_citymark:"Kateremu mestu pripada ta znamenitost?",
+  q_subway:"V katerem mestu je ta metro?",q_flagsel:"Katera zastava pripada…",
+  q_rcapital:"Kakšno je glavno mesto…?",q_rcity:"Katero mesto leži v…?",
+  q_rriver:"Katera reka teče skozi…?",q_outline:"Katera država ima to obliko?",
+  q_food:"Iz katere države prihaja ta jed?",q_brand:"Iz katere države prihaja ta znamka?",
+  q_currency:"Kateri državi pripada ta valuta?",q_curr_real:"Kakšno valuto ima…",
+  q_pop_compare:"Več ali manj prebivalcev?",
+  q_hl_pop:"Več prebivalcev kot {a}?",q_hl_river:"Daljši kot {a}?",q_hl_area:"Večji kot {a}?",
+  q_neighbor:"Katera država meji na…?",q_neighbor_not:"NE meji na…?",
+  q_plates_casual:"Iz katere države je ta tablica?",q_plates_hard:"Identificirajte regijo — brez namiga!",
+  q_river_real:"Skozi katero državo teče ta reka?",q_map_guess:"Poišči državo na karti",
+  fb_correct:"✓ Pravilno! +{pts}",fb_wrong:"✗ Napačno → {ans}",fb_time:"⏱ Čas! → {ans}"
+},
+bg:{
+  play:"ИГРАЙ",again:"ИГРАЙ ОТНОВО",menu:"Главно меню",board:"Класация",pass:"Паспорт",
+  profile:"Профил",stats:"Статистики",casual:"Лесен",hardcore:"Труден",rounds:"Рунди",
+  btn_collect:"Събери",btn_back:"Обратно в менюто",btn_next:"Напред →",
+  btn_again:"Играй отново",btn_menu:"Главно меню",btn_adapt:"Адаптирай",
+  spotter_title:"\u{1F697} Пътен Спотър",
+  spotter_hint:"Видял табела? Запиши я веднага!",
+  spotter_all:"Всички страни",spotter_unknown:"Непозната табела",
+  spotter_not_in:"не е в",spotter_but_in:"но е в",
+  album_title:"\u{1F4D4} Албум с табели",album_list:"\u{1F4DD} Списък",album_map:"\u{1F5FA} Карта",
+  album_empty_country:"Нищо от {country} все още — използвай Спотъра!",
+  album_empty:"Все още нищо събрано!\nИграй ЕС табели или използвай Спотъра.",
+  album_codes:"кодове",
+  hl_higher:"⬆️ Повече / По-дълго / По-голямо",hl_lower:"⬇️ По-малко / По-кратко / По-малко",
+  hl_more:"⬆️ Повече жители",hl_less:"⬇️ По-малко жители",
+  loc_detected:"Намирате се в {country}",loc_adapt:"Адаптирай",
+  q_city:"В коя страна се намира този град?",q_flag:"Коя страна има това знаме?",
+  q_capital:"На коя страна принадлежи тази столица?",q_river:"В коя страна тече тази река?",
+  q_landmark:"В коя страна се намира тази забележителност?",q_park:"В коя страна се намира този национален парк?",
+  q_unesco:"В коя страна се намира това ЮНЕСКО наследство?",q_citymark:"На кой град принадлежи тази забележителност?",
+  q_subway:"В кой град е това метро?",q_flagsel:"Кое знаме принадлежи на…",
+  q_rcapital:"Каква е столицата на…?",q_rcity:"Кой град се намира в…?",
+  q_rriver:"Коя река тече през…?",q_outline:"Коя страна има тази форма?",
+  q_food:"От коя страна идва това ястие?",q_brand:"От коя страна идва тази марка?",
+  q_currency:"На коя страна принадлежи тази валута?",q_curr_real:"Каква валута има…",
+  q_pop_compare:"Повече или по-малко жители?",
+  q_hl_pop:"Повече жители от {a}?",q_hl_river:"По-дълга от {a}?",q_hl_area:"По-голяма от {a}?",
+  q_neighbor:"Коя страна граничи с…?",q_neighbor_not:"НЕ граничи с…?",
+  q_plates_casual:"От коя страна е тази табела?",q_plates_hard:"Идентифицирайте региона — без подсказка!",
+  q_river_real:"През коя страна тече тази река?",q_map_guess:"Намери страната на картата",
+  fb_correct:"✓ Правилно! +{pts}",fb_wrong:"✗ Грешно → {ans}",fb_time:"⏱ Времето изтече! → {ans}"
+},
+el:{
+  play:"ΠΑΙΞΕ",again:"ΠΑΙΞΕ ΞΑΝΑ",menu:"Κύριο μενού",board:"Κατάταξη",pass:"Διαβατήριο",
+  profile:"Προφίλ",stats:"Στατιστικά",casual:"Εύκολο",hardcore:"Δύσκολο",rounds:"Γύροι",
+  btn_collect:"Συλλογή",btn_back:"Πίσω στο μενού",btn_next:"Επόμενο →",
+  btn_again:"Παίξε ξανά",btn_menu:"Κύριο μενού",btn_adapt:"Προσαρμογή",
+  spotter_title:"\u{1F697} Spotter Ταξιδιού",
+  spotter_hint:"Είδες πινακίδα; Καταχώρησέ την τώρα!",
+  spotter_all:"Όλες οι χώρες",spotter_unknown:"Άγνωστη πινακίδα",
+  spotter_not_in:"δεν είναι σε",spotter_but_in:"αλλά σε",
+  album_title:"\u{1F4D4} Συλλογή πινακίδων",album_list:"\u{1F4DD} Λίστα",album_map:"\u{1F5FA} Χάρτης",
+  album_empty_country:"Τίποτα από {country} ακόμα — χρησιμοποίησε το Spotter!",
+  album_empty:"Δεν έχεις συλλέξει τίποτα ακόμα!\nΠαίξε πινακίδες ΕΕ ή χρησιμοποίησε το Spotter.",
+  album_codes:"κωδικοί",
+  hl_higher:"⬆️ Περισσότερο / Μεγαλύτερο / Μεγαλύτερο",hl_lower:"⬇️ Λιγότερο / Μικρότερο / Μικρότερο",
+  hl_more:"⬆️ Περισσότεροι κάτοικοι",hl_less:"⬇️ Λιγότεροι κάτοικοι",
+  loc_detected:"Βρίσκεστε στην/στο {country}",loc_adapt:"Προσαρμογή",
+  q_city:"Σε ποια χώρα βρίσκεται αυτή η πόλη;",q_flag:"Ποια χώρα έχει αυτή τη σημαία;",
+  q_capital:"Σε ποια χώρα ανήκει αυτή η πρωτεύουσα;",q_river:"Σε ποια χώρα βρίσκεται αυτό το ποτάμι;",
+  q_landmark:"Σε ποια χώρα βρίσκεται αυτό το μνημείο;",q_park:"Σε ποια χώρα βρίσκεται αυτό το εθνικό πάρκο;",
+  q_unesco:"Σε ποια χώρα βρίσκεται αυτό το μνημείο UNESCO;",q_citymark:"Σε ποια πόλη ανήκει αυτό το μνημείο;",
+  q_subway:"Σε ποια πόλη βρίσκεται αυτό το μετρό;",q_flagsel:"Ποια σημαία ανήκει στη…",
+  q_rcapital:"Ποια είναι η πρωτεύουσα της/του…;",q_rcity:"Ποια πόλη βρίσκεται στη/στο…;",
+  q_rriver:"Ποιο ποτάμι διαρρέει τη/το…;",q_outline:"Ποια χώρα έχει αυτό το σχήμα;",
+  q_food:"Από ποια χώρα προέρχεται αυτό το πιάτο;",q_brand:"Από ποια χώρα προέρχεται αυτή η μάρκα;",
+  q_currency:"Σε ποια χώρα ανήκει αυτό το νόμισμα;",q_curr_real:"Ποιο νόμισμα έχει η/ο…",
+  q_pop_compare:"Περισσότεροι ή λιγότεροι κάτοικοι;",
+  q_hl_pop:"Περισσότεροι κάτοικοι από τη/τον {a};",q_hl_river:"Μεγαλύτερο από τη/τον {a};",q_hl_area:"Μεγαλύτερη από τη/τον {a};",
+  q_neighbor:"Ποια χώρα συνορεύει με τη/το…;",q_neighbor_not:"ΔΕΝ συνορεύει με τη/το…;",
+  q_plates_casual:"Από ποια χώρα είναι αυτή η πινακίδα;",q_plates_hard:"Αναγνωρίστε την περιοχή — χωρίς υπόδειξη!",
+  q_river_real:"Μέσα από ποια χώρα διαρρέει αυτό το ποτάμι;",q_map_guess:"Βρες τη χώρα στον χάρτη",
+  fb_correct:"✓ Σωστό! +{pts}",fb_wrong:"✗ Λάθος → {ans}",fb_time:"⏱ Τέλος χρόνου! → {ans}"
+},
+da:{
+  play:"SPIL",again:"SPIL IGEN",menu:"Hovedmenu",board:"Rangliste",pass:"Pas",
+  profile:"Profil",stats:"Statistik",casual:"Casual",hardcore:"Hardcore",rounds:"Runder",
+  btn_collect:"Samle",btn_back:"Tilbage til menu",btn_next:"Næste →",
+  btn_again:"Spil igen",btn_menu:"Hovedmenu",btn_adapt:"Tilpas",
+  spotter_title:"\u{1F697} Rejse-Spotter",
+  spotter_hint:"Set en nummerplade? Notér den nu!",
+  spotter_all:"Alle lande",spotter_unknown:"Ukendt nummerplade",
+  spotter_not_in:"ikke i",spotter_but_in:"men i",
+  album_title:"\u{1F4D4} Nummerplade-album",album_list:"\u{1F4DD} Liste",album_map:"\u{1F5FA} Kort",
+  album_empty_country:"Intet fra {country} endnu — brug Spotter!",
+  album_empty:"Intet indsamlet endnu!\nSpil EU-nummerplader eller brug Spotter.",
+  album_codes:"koder",
+  hl_higher:"⬆️ Mere / Længere / Større",hl_lower:"⬇️ Mindre / Kortere / Mindre",
+  hl_more:"⬆️ Flere indbyggere",hl_less:"⬇️ Færre indbyggere",
+  loc_detected:"Du er i {country}",loc_adapt:"Tilpas",
+  q_city:"I hvilket land ligger denne by?",q_flag:"Hvilket land har dette flag?",
+  q_capital:"Hvilke land tilhører denne hovedstad?",q_river:"I hvilket land løber denne flod?",
+  q_landmark:"I hvilket land ligger dette monument?",q_park:"I hvilket land ligger denne nationalpark?",
+  q_unesco:"I hvilket land ligger dette UNESCO-sted?",q_citymark:"Hvilken by tilhører dette monument?",
+  q_subway:"I hvilken by er denne metro?",q_flagsel:"Hvilket flag tilhører…",
+  q_rcapital:"Hvad er hovedstaden i…?",q_rcity:"Hvilken by ligger i…?",
+  q_rriver:"Hvilken flod løber gennem…?",q_outline:"Hvilket land har denne form?",
+  q_food:"Fra hvilket land kommer denne ret?",q_brand:"Fra hvilket land kommer dette mærke?",
+  q_currency:"Hvilket land tilhører denne valuta?",q_curr_real:"Hvilken valuta har…",
+  q_pop_compare:"Flere eller færre indbyggere?",
+  q_hl_pop:"Flere indbyggere end {a}?",q_hl_river:"Længere end {a}?",q_hl_area:"Større end {a}?",
+  q_neighbor:"Hvilket land grænser op til…?",q_neighbor_not:"Grænser IKKE op til…?",
+  q_plates_casual:"Fra hvilket land er denne nummerplade?",q_plates_hard:"Identificér regionen — ingen hint!",
+  q_river_real:"Gennem hvilket land løber denne flod?",q_map_guess:"Find landet på kortet",
+  fb_correct:"✓ Korrekt! +{pts}",fb_wrong:"✗ Forkert → {ans}",fb_time:"⏱ Tid! → {ans}"
+},
+sv:{
+  play:"SPELA",again:"SPELA IGEN",menu:"Huvudmeny",board:"Rankningslista",pass:"Pass",
+  profile:"Profil",stats:"Statistik",casual:"Casual",hardcore:"Hardcore",rounds:"Rundor",
+  btn_collect:"Samla",btn_back:"Tillbaka till menyn",btn_next:"Nästa →",
+  btn_again:"Spela igen",btn_menu:"Huvudmeny",btn_adapt:"Anpassa",
+  spotter_title:"\u{1F697} Resespotter",
+  spotter_hint:"Sett en skylt? Notera den nu!",
+  spotter_all:"Alla länder",spotter_unknown:"Okänd skylt",
+  spotter_not_in:"inte i",spotter_but_in:"men i",
+  album_title:"\u{1F4D4} Skyltalbum",album_list:"\u{1F4DD} Lista",album_map:"\u{1F5FA} Karta",
+  album_empty_country:"Inget från {country} ännu — använd Spotter!",
+  album_empty:"Inget samlat ännu!\nSpela EU-skyltar eller använd Spotter.",
+  album_codes:"koder",
+  hl_higher:"⬆️ Mer / Längre / Större",hl_lower:"⬇️ Mindre / Kortare / Mindre",
+  hl_more:"⬆️ Fler invånare",hl_less:"⬇️ Färre invånare",
+  loc_detected:"Du är i {country}",loc_adapt:"Anpassa",
+  q_city:"I vilket land ligger den här staden?",q_flag:"Vilket land har den här flaggan?",
+  q_capital:"Vilket land tillhör den här huvudstaden?",q_river:"I vilket land flödar den här floden?",
+  q_landmark:"I vilket land finns det här monumentet?",q_park:"I vilket land finns den här nationalparken?",
+  q_unesco:"I vilket land finns det här UNESCO-arvet?",q_citymark:"Vilken stad tillhör det här monumentet?",
+  q_subway:"I vilken stad finns den här tunnelbanan?",q_flagsel:"Vilken flagga tillhör…",
+  q_rcapital:"Vad är huvudstaden i…?",q_rcity:"Vilken stad finns i…?",
+  q_rriver:"Vilken flod rinner genom…?",q_outline:"Vilket land har den här formen?",
+  q_food:"Från vilket land kommer den här rätten?",q_brand:"Från vilket land kommer det här märket?",
+  q_currency:"Vilket land tillhör den här valutan?",q_curr_real:"Vilken valuta har…",
+  q_pop_compare:"Fler eller färre invånare?",
+  q_hl_pop:"Fler invånare än {a}?",q_hl_river:"Längre än {a}?",q_hl_area:"Större än {a}?",
+  q_neighbor:"Vilket land gränsar till…?",q_neighbor_not:"Gränsar INTE till…?",
+  q_plates_casual:"Från vilket land är den här skylten?",q_plates_hard:"Identifiera regionen — inget tips!",
+  q_river_real:"Genom vilket land flödar den här floden?",q_map_guess:"Hitta landet på kartan",
+  fb_correct:"✓ Rätt! +{pts}",fb_wrong:"✗ Fel → {ans}",fb_time:"⏱ Tid! → {ans}"
+},
+fi:{
+  play:"PELAA",again:"PELAA UUDELLEEN",menu:"Päävalikko",board:"Tulostaulukko",pass:"Passi",
+  profile:"Profiili",stats:"Tilastot",casual:"Helppo",hardcore:"Vaikea",rounds:"Kierrokset",
+  btn_collect:"Kerää",btn_back:"Takaisin päävalikkoon",btn_next:"Seuraava →",
+  btn_again:"Pelaa uudelleen",btn_menu:"Päävalikko",btn_adapt:"Muokkaa",
+  spotter_title:"\u{1F697} Matkaspotter",
+  spotter_hint:"Näitkö rekisterikilven? Kirjaa se heti!",
+  spotter_all:"Kaikki maat",spotter_unknown:"Tuntematon rekisterikilpi",
+  spotter_not_in:"ei kohteessa",spotter_but_in:"mutta kohteessa",
+  album_title:"\u{1F4D4} Rekisterikilpialbumi",album_list:"\u{1F4DD} Luettelo",album_map:"\u{1F5FA} Kartta",
+  album_empty_country:"Ei vielä mitään kohteesta {country} — käytä Spotteria!",
+  album_empty:"Ei vielä kerätty mitään!\nPelaa EU-rekisterikilpiä tai käytä Spotteria.",
+  album_codes:"koodit",
+  hl_higher:"⬆️ Enemmän / Pidempi / Suurempi",hl_lower:"⬇️ Vähemmän / Lyhyempi / Pienempi",
+  hl_more:"⬆️ Enemmän asukkaita",hl_less:"⬇️ Vähemmän asukkaita",
+  loc_detected:"Olet kohteessa {country}",loc_adapt:"Muokkaa",
+  q_city:"Missä maassa tämä kaupunki sijaitsee?",q_flag:"Minkä maan tämä lippu on?",
+  q_capital:"Mille maalle tämä pääkaupunki kuuluu?",q_river:"Missä maassa tämä joki sijaitsee?",
+  q_landmark:"Missä maassa tämä nähtävyys sijaitsee?",q_park:"Missä maassa tämä kansallispuisto sijaitsee?",
+  q_unesco:"Missä maassa tämä UNESCO-kohde sijaitsee?",q_citymark:"Mille kaupungille tämä nähtävyys kuuluu?",
+  q_subway:"Missä kaupungissa tämä metro on?",q_flagsel:"Mikä lippu kuuluu…",
+  q_rcapital:"Mikä on… pääkaupunki?",q_rcity:"Mikä kaupunki sijaitsee…?",
+  q_rriver:"Mikä joki virtaa läpi…?",q_outline:"Minkä maan muoto tämä on?",
+  q_food:"Mistä maasta tämä ruoka tulee?",q_brand:"Mistä maasta tämä merkki tulee?",
+  q_currency:"Minkä maan valuutta tämä on?",q_curr_real:"Mikä valuutta on…",
+  q_pop_compare:"Enemmän vai vähemmän asukkaita?",
+  q_hl_pop:"Enemmän asukkaita kuin {a}?",q_hl_river:"Pidempi kuin {a}?",q_hl_area:"Suurempi kuin {a}?",
+  q_neighbor:"Mikä maa rajoittuu…?",q_neighbor_not:"EI rajoitu…?",
+  q_plates_casual:"Minkä maan rekisterikilpi tämä on?",q_plates_hard:"Tunnista alue — ei vihjettä!",
+  q_river_real:"Minkä maan läpi tämä joki virtaa?",q_map_guess:"Etsi maa kartalta",
+  fb_correct:"✓ Oikein! +{pts}",fb_wrong:"✗ Väärin → {ans}",fb_time:"⏱ Aika! → {ans}"
+},
+et:{
+  play:"MÄNGI",again:"MÄNGI UUESTI",menu:"Peamenüü",board:"Edetabel",pass:"Pass",
+  profile:"Profiil",stats:"Statistika",casual:"Lihtne",hardcore:"Raske",rounds:"Voorud",
+  btn_collect:"Kogu",btn_back:"Tagasi menüüsse",btn_next:"Järgmine →",
+  btn_again:"Mängi uuesti",btn_menu:"Peamenüü",btn_adapt:"Kohanda",
+  spotter_title:"\u{1F697} Reisispotter",
+  spotter_hint:"Nägid numbrimärki? Kirjuta kohe üles!",
+  spotter_all:"Kõik riigid",spotter_unknown:"Tundmatu numbrimärk",
+  spotter_not_in:"ei ole",spotter_but_in:"aga on",
+  album_title:"\u{1F4D4} Numbrimärkide album",album_list:"\u{1F4DD} Nimekiri",album_map:"\u{1F5FA} Kaart",
+  album_empty_country:"Veel midagi {country} — kasuta Spotterit!",
+  album_empty:"Veel midagi kogutud!\nMängi EL-i numbrimärke või kasuta Spotterit.",
+  album_codes:"koodid",
+  hl_higher:"⬆️ Rohkem / Pikem / Suurem",hl_lower:"⬇️ Vähem / Lühem / Väiksem",
+  hl_more:"⬆️ Rohkem elanikke",hl_less:"⬇️ Vähem elanikke",
+  loc_detected:"Oled {country}",loc_adapt:"Kohanda",
+  q_city:"Millises riigis see linn asub?",q_flag:"Millise riigi lipp see on?",
+  q_capital:"Millisele riigile see pealinn kuulub?",q_river:"Millises riigis see jõgi voolab?",
+  q_landmark:"Millises riigis see vaatamisväärsus asub?",q_park:"Millises riigis see rahvuspark asub?",
+  q_unesco:"Millises riigis see UNESCO objekt asub?",q_citymark:"Millisele linnale see vaatamisväärsus kuulub?",
+  q_subway:"Millises linnas see metroo on?",q_flagsel:"Milline lipp kuulub…",
+  q_rcapital:"Mis on… pealinn?",q_rcity:"Milline linn asub…?",
+  q_rriver:"Milline jõgi voolab läbi…?",q_outline:"Millisel riigil on see kuju?",
+  q_food:"Millisest riigist see roog pärineb?",q_brand:"Millisest riigist see bränd pärineb?",
+  q_currency:"Millisele riigile see valuuta kuulub?",q_curr_real:"Mis valuuta on…",
+  q_pop_compare:"Rohkem või vähem elanikke?",
+  q_hl_pop:"Rohkem elanikke kui {a}?",q_hl_river:"Pikem kui {a}?",q_hl_area:"Suurem kui {a}?",
+  q_neighbor:"Milline riik piirneb…?",q_neighbor_not:"EI piirne…?",
+  q_plates_casual:"Millisest riigist see numbrimärk on?",q_plates_hard:"Tuvasta piirkond — vihjeta!",
+  q_river_real:"Läbi millise riigi see jõgi voolab?",q_map_guess:"Leia riik kaardilt",
+  fb_correct:"✓ Õige! +{pts}",fb_wrong:"✗ Vale → {ans}",fb_time:"⏱ Aeg! → {ans}"
+},
+lv:{
+  play:"SPĒLĒT",again:"SPĒLĒT VĒLREIZ",menu:"Galvenā izvēlne",board:"Vērtējums",pass:"Pase",
+  profile:"Profils",stats:"Statistika",casual:"Viegls",hardcore:"Grūts",rounds:"Kārtas",
+  btn_collect:"Savākt",btn_back:"Atpakaļ uz izvēlni",btn_next:"Tālāk →",
+  btn_again:"Spēlēt vēlreiz",btn_menu:"Galvenā izvēlne",btn_adapt:"Pielāgot",
+  spotter_title:"\u{1F697} Ceļojuma Spotter",
+  spotter_hint:"Redzēji numura zīmi? Reģistrē to tagad!",
+  spotter_all:"Visas valstis",spotter_unknown:"Nezināma numura zīme",
+  spotter_not_in:"nav",spotter_but_in:"bet ir",
+  album_title:"\u{1F4D4} Numuru zīmju albums",album_list:"\u{1F4DD} Saraksts",album_map:"\u{1F5FA} Karte",
+  album_empty_country:"Vēl nekas no {country} — izmanto Spotter!",
+  album_empty:"Vēl nekas savākts!\nSpēlē ES numura zīmes vai izmanto Spotter.",
+  album_codes:"kodi",
+  hl_higher:"⬆️ Vairāk / Garāks / Lielāks",hl_lower:"⬇️ Mazāk / Īsāks / Mazāks",
+  hl_more:"⬆️ Vairāk iedzīvotāju",hl_less:"⬇️ Mazāk iedzīvotāju",
+  loc_detected:"Atrodaties {country}",loc_adapt:"Pielāgot",
+  q_city:"Kurā valstī atrodas šī pilsēta?",q_flag:"Kuras valsts šis karogs?",
+  q_capital:"Kurai valstij pieder šī galvaspilsēta?",q_river:"Kurā valstī tek šī upe?",
+  q_landmark:"Kurā valstī atrodas šis piemineklis?",q_park:"Kurā valstī atrodas šis nacionālais parks?",
+  q_unesco:"Kurā valstī atrodas šis UNESCO mantojums?",q_citymark:"Kurai pilsētai pieder šis piemineklis?",
+  q_subway:"Kurā pilsētā atrodas šis metro?",q_flagsel:"Kurš karogs pieder…",
+  q_rcapital:"Kāda ir… galvaspilsēta?",q_rcity:"Kurā pilsētā atrodas…?",
+  q_rriver:"Kura upe tek caur…?",q_outline:"Kurai valstij ir šāda forma?",
+  q_food:"No kuras valsts nāk šis ēdiens?",q_brand:"No kuras valsts nāk šis zīmols?",
+  q_currency:"Kurai valstij pieder šī valūta?",q_curr_real:"Kāda valūta ir…",
+  q_pop_compare:"Vairāk vai mazāk iedzīvotāju?",
+  q_hl_pop:"Vairāk iedzīvotāju nekā {a}?",q_hl_river:"Garāka nekā {a}?",q_hl_area:"Lielāka nekā {a}?",
+  q_neighbor:"Kura valsts robežojas ar…?",q_neighbor_not:"NAV robežas ar…?",
+  q_plates_casual:"No kuras valsts ir šī numura zīme?",q_plates_hard:"Identificēt reģionu — bez padoma!",
+  q_river_real:"Caur kuru valsti tek šī upe?",q_map_guess:"Atrodi valsti kartē",
+  fb_correct:"✓ Pareizi! +{pts}",fb_wrong:"✗ Nepareizi → {ans}",fb_time:"⏱ Laiks beidzies! → {ans}"
+},
+lt:{
+  play:"ŽAISTI",again:"ŽAISTI IŠ NAUJO",menu:"Pagrindinis meniu",board:"Reitingas",pass:"Pasas",
+  profile:"Profilis",stats:"Statistika",casual:"Lengvas",hardcore:"Sunkus",rounds:"Raundai",
+  btn_collect:"Rinkti",btn_back:"Atgal į meniu",btn_next:"Kitas →",
+  btn_again:"Žaisti iš naujo",btn_menu:"Pagrindinis meniu",btn_adapt:"Pritaikyti",
+  spotter_title:"\u{1F697} Kelionės Spotter",
+  spotter_hint:"Matei numerį? Užrašyk dabar!",
+  spotter_all:"Visos šalys",spotter_unknown:"Nežinomas numeris",
+  spotter_not_in:"nėra",spotter_but_in:"bet yra",
+  album_title:"\u{1F4D4} Numerių albumas",album_list:"\u{1F4DD} Sąrašas",album_map:"\u{1F5FA} Žemėlapis",
+  album_empty_country:"Dar nieko iš {country} — naudok Spotter!",
+  album_empty:"Dar nieko surinkta!\nŽaisk ES numerius arba naudok Spotter.",
+  album_codes:"kodai",
+  hl_higher:"⬆️ Daugiau / Ilgesnis / Didesnis",hl_lower:"⬇️ Mažiau / Trumpesnis / Mažesnis",
+  hl_more:"⬆️ Daugiau gyventojų",hl_less:"⬇️ Mažiau gyventojų",
+  loc_detected:"Esate {country}",loc_adapt:"Pritaikyti",
+  q_city:"Kurioje šalyje yra šis miestas?",q_flag:"Kurios šalies ši vėliava?",
+  q_capital:"Kuriai šaliai priklauso ši sostinė?",q_river:"Kurioje šalyje teka ši upė?",
+  q_landmark:"Kurioje šalyje yra šis paminklas?",q_park:"Kurioje šalyje yra šis nacionalinis parkas?",
+  q_unesco:"Kurioje šalyje yra šis UNESCO paveldas?",q_citymark:"Kuriam miestui priklauso šis paminklas?",
+  q_subway:"Kuriame mieste yra šis metro?",q_flagsel:"Kuri vėliava priklauso…",
+  q_rcapital:"Kokia yra… sostinė?",q_rcity:"Koks miestas yra…?",
+  q_rriver:"Kuri upė teka per…?",q_outline:"Kuri šalis turi šią formą?",
+  q_food:"Iš kurios šalies yra šis patiekalas?",q_brand:"Iš kurios šalies yra šis prekės ženklas?",
+  q_currency:"Kuriai šaliai priklauso ši valiuta?",q_curr_real:"Kokia valiuta yra…",
+  q_pop_compare:"Daugiau ar mažiau gyventojų?",
+  q_hl_pop:"Daugiau gyventojų nei {a}?",q_hl_river:"Ilgesnis nei {a}?",q_hl_area:"Didesnis nei {a}?",
+  q_neighbor:"Kuri šalis ribojasi su…?",q_neighbor_not:"NERIBOJASI su…?",
+  q_plates_casual:"Iš kurios šalies yra šis numeris?",q_plates_hard:"Nustatyti regioną — be užuominos!",
+  q_river_real:"Per kurią šalį teka ši upė?",q_map_guess:"Rask šalį žemėlapyje",
+  fb_correct:"✓ Teisingai! +{pts}",fb_wrong:"✗ Neteisingai → {ans}",fb_time:"⏱ Laikas! → {ans}"
+},
+mt:{
+  play:"ILGĦAB",again:"ILGĦAB MILL-ĠDID",menu:"Menu Prinċipali",board:"Klassifika",pass:"Passaport",
+  profile:"Profil",stats:"Statistiċi",casual:"Casual",hardcore:"Hardcore",rounds:"Rawnd",
+  btn_collect:"Iġbor",btn_back:"Lura għall-menu",btn_next:"Li Jmiss →",
+  btn_again:"Ilgħab mill-ġdid",btn_menu:"Menu Prinċipali",btn_adapt:"Adatta",
+  spotter_title:"\u{1F697} Spotter tal-Vjaġġ",
+  spotter_hint:"Rajt pjanċa? Irreġistraha issa!",
+  spotter_all:"Pajjiżi kollha",spotter_unknown:"Pjanċa mhux magħrufa",
+  spotter_not_in:"mhux fi",spotter_but_in:"imma fi",
+  album_title:"\u{1F4D4} Kollezzjoni tal-Pjanċi",album_list:"\u{1F4DD} Lista",album_map:"\u{1F5FA} Mappa",
+  album_empty_country:"Xejn minn {country} s'issa — uża s-Spotter!",
+  album_empty:"Xejn miġbur s'issa!\nIlgħab il-pjanċi tal-UE jew uża s-Spotter.",
+  album_codes:"kodiċi",
+  hl_higher:"⬆️ Aktar / Itwal / Akbar",hl_lower:"⬇️ Inqas / Iqsar / Iżgħar",
+  hl_more:"⬆️ Aktar abitanti",hl_less:"⬇️ Inqas abitanti",
+  loc_detected:"Qiegħed fi {country}",loc_adapt:"Adatta",
+  q_city:"F'liema pajjiż tinsab din il-belt?",q_flag:"Liema pajjiż għandu din il-bandiera?",
+  q_capital:"Lil liema pajjiż tappartjeni din il-kapitali?",q_river:"F'liema pajjiż jgħaddi dan ix-xmara?",
+  q_landmark:"F'liema pajjiż tinsab din il-wieqfa?",q_park:"F'liema pajjiż jinsab dan il-park nazzjonali?",
+  q_unesco:"F'liema pajjiż jinsab dan is-sit UNESCO?",q_citymark:"Lil liema belt tappartjeni din il-wieqfa?",
+  q_subway:"F'liema belt jinsab dan il-metro?",q_flagsel:"Liema bandiera tappartjeni lil…",
+  q_rcapital:"X'inhi l-kapitali ta'…?",q_rcity:"Liema belt tinsab fi…?",
+  q_rriver:"Liema xmara tgħaddi minn…?",q_outline:"Liema pajjiż għandu din il-forma?",
+  q_food:"Minn liema pajjiż ġej dan l-ikel?",q_brand:"Minn liema pajjiż ġej dan il-brand?",
+  q_currency:"Lil liema pajjiż tappartjeni din il-munita?",q_curr_real:"X'munita għandu…",
+  q_pop_compare:"Aktar jew inqas abitanti?",
+  q_hl_pop:"Aktar abitanti minn {a}?",q_hl_river:"Itwal minn {a}?",q_hl_area:"Akbar minn {a}?",
+  q_neighbor:"Liema pajjiż jibbordjja ma'…?",q_neighbor_not:"MA jibbordjjax ma'…?",
+  q_plates_casual:"Minn liema pajjiż hija din il-pjanċa?",q_plates_hard:"Identifika r-reġjun — l-ebda indikazzjoni!",
+  q_river_real:"Minn liema pajjiż jgħaddi dan ix-xmara?",q_map_guess:"Sib il-pajjiż fuq il-mappa",
+  fb_correct:"✓ Korretti! +{pts}",fb_wrong:"✗ Ħażin → {ans}",fb_time:"⏱ Ħin! → {ans}"
+},
+ga:{
+  play:"IMIR",again:"IMIR ARÍS",menu:"Príomh-roghchlár",board:"Clár na mBuaiteoirí",pass:"Pas",
+  profile:"Próifíl",stats:"Staitisticí",casual:"Éasca",hardcore:"Deacair",rounds:"Babhtaí",
+  btn_collect:"Bailigh",btn_back:"Ar ais go dtí an roghchlár",btn_next:"Ar Aghaidh →",
+  btn_again:"Imir arís",btn_menu:"Príomh-roghchlár",btn_adapt:"Oiriúnaigh",
+  spotter_title:"\u{1F697} Spotter Taistil",
+  spotter_hint:"Chonaic tú pláta? Taifeadaigh anois é!",
+  spotter_all:"Gach tír",spotter_unknown:"Pláta anaithnid",
+  spotter_not_in:"níl i",spotter_but_in:"ach tá i",
+  album_title:"\u{1F4D4} Cnuasach Pláta",album_list:"\u{1F4DD} Liosta",album_map:"\u{1F5FA} Léarscáil",
+  album_empty_country:"Fós aon rud ó {country} — úsáid an Spotter!",
+  album_empty:"Fós aon rud bailithe!\nImir pláta AE nó úsáid an Spotter.",
+  album_codes:"cóid",
+  hl_higher:"⬆️ Níos mó / Níos faide / Níos mó",hl_lower:"⬇️ Níos lú / Níos giorra / Níos lú",
+  hl_more:"⬆️ Níos mó cónaitheoirí",hl_less:"⬇️ Níos lú cónaitheoirí",
+  loc_detected:"Tá tú i {country}",loc_adapt:"Oiriúnaigh",
+  q_city:"Cén tír ina bhfuil an chathair seo?",q_flag:"Cén tír a bhfuil an bhratach seo aige?",
+  q_capital:"Cén tír ar leis an phríomhchathair seo?",q_river:"Cén tír ina ritheann an abhainn seo?",
+  q_landmark:"Cén tír ina bhfuil an séadchomhartha seo?",q_park:"Cén tír ina bhfuil an páirc náisiúnta seo?",
+  q_unesco:"Cén tír ina bhfuil an suíomh UNESCO seo?",q_citymark:"Cén chathair ar leis an séadchomhartha seo?",
+  q_subway:"Cén chathair ina bhfuil an meitreal seo?",q_flagsel:"Cén bhratach a bhaineann le…",
+  q_rcapital:"Cad is príomhchathair de…?",q_rcity:"Cén chathair atá i…?",
+  q_rriver:"Cén abhainn a ritheann trí…?",q_outline:"Cén tír a bhfuil an cruth seo aige?",
+  q_food:"Cén tír as ar tháinig an mias seo?",q_brand:"Cén tír as ar tháinig an branda seo?",
+  q_currency:"Cén tír ar leis an airgeadra seo?",q_curr_real:"Cén airgeadra atá ag…",
+  q_pop_compare:"Níos mó nó níos lú cónaitheoirí?",
+  q_hl_pop:"Níos mó cónaitheoirí ná {a}?",q_hl_river:"Níos faide ná {a}?",q_hl_area:"Níos mó ná {a}?",
+  q_neighbor:"Cén tír a bhfuil teorainn le…?",q_neighbor_not:"NÍL teorainn le…?",
+  q_plates_casual:"Cén tír ar as an pláta seo?",q_plates_hard:"Aithin an réigiún — gan leid!",
+  q_river_real:"Trí cén tír a ritheann an abhainn seo?",q_map_guess:"Aimsigh an tír ar an léarscáil",
+  fb_correct:"✓ Ceart! +{pts}",fb_wrong:"✗ Mícheart → {ans}",fb_time:"⏱ Am! → {ans}"
+}
 };
-function T(k){const l=localStorage.getItem("gq_lang")||"de";return(LANG[l]||LANG.de)[k]||k;}
+/* t(key, vars) — translate + interpolate */
+function t(key,vars){
+  const lang=(typeof S!=='undefined'&&S.language)||localStorage.getItem('gq_lang')||'de';
+  let s=(LANG[lang]&&LANG[lang][key])||(LANG.en&&LANG.en[key])||(LANG.de&&LANG.de[key])||key;
+  if(vars)Object.keys(vars).forEach(k=>{s=s.replace(new RegExp('\\{'+k+'\\}','g'),vars[k]);});
+  return s;
+}
+/* Backwards-compat alias */
+function T(k){return t(k);}
+/* setLanguage — persists choice, marks as manual override */
+function setLanguage(lang){
+  if(typeof S!=='undefined')S.language=lang;
+  localStorage.setItem('gq_lang',lang);
+  localStorage.setItem('geoquest_lang_manual','1');
+  render();
+}
+/* getCountryName(cc, lang) — Intl.DisplayNames for all 25 locales */
+function getCountryName(cc,lang){
+  if(!cc)return cc;
+  try{
+    const locMap={de:'de-DE',en:'en-GB',pl:'pl-PL',fr:'fr-FR',es:'es-ES',it:'it-IT',
+      nl:'nl-NL',pt:'pt-PT',ro:'ro-RO',hu:'hu-HU',cs:'cs-CZ',sk:'sk-SK',hr:'hr-HR',
+      sl:'sl-SI',bg:'bg-BG',el:'el-GR',da:'da-DK',sv:'sv-SE',fi:'fi-FI',et:'et-EE',
+      lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',ga:'ga-IE'};
+    const locale=locMap[lang]||'en-GB';
+    return new Intl.DisplayNames([locale],{type:'region'}).of(cc.toUpperCase())||cc;
+  }catch(e){return cc;}
+}
+/* displayCountry(name) — translate country display name for current language */
+function displayCountry(name){
+  if(!name)return name;
+  const lang=(typeof S!=='undefined'&&S.language)||localStorage.getItem('gq_lang')||'de';
+  const co=COUNTRIES.find(c=>c.c===name);
+  if(!co)return name;
+  return getCountryName(co.cc,lang);
+}
 
 /* SEEDED RNG */
 let rngSeed=null,rngState=0;
@@ -610,7 +1412,7 @@ function genPopCompareQ(){
   const ans=b.pop>a.pop?"more":"less";
   const wrong=b.pop>a.pop?"less":"more";
   const aPopStr=(a.pop/1e6).toFixed(1)+" Mio.";
-  return{type:"pop_compare",prompt:"Mehr oder weniger Einwohner?",subj:{nameA:a.c,popA:aPopStr,nameB:b.c},ans,opts:[ans,wrong],meta:"",lid:b.c,cc:ccFromCountry(b.c)};
+  return{type:"pop_compare",prompt:t("q_pop_compare"),subj:{nameA:a.c,popA:aPopStr,nameB:b.c},ans,opts:[ans,wrong],meta:"",lid:b.c,cc:ccFromCountry(b.c)};
 }
 function genRiverRealQ(){
   if(!RIVERS_REAL||!RIVERS_REAL.length)return null;
@@ -619,7 +1421,7 @@ function genRiverRealQ(){
   const countries=[...new Set(RIVERS_REAL.map(r=>r.c))];
   const dis=countries.filter(c=>c!==cor.c).sort(()=>Math.random()-.5).slice(0,3);
   const meta=cor.len>0?cor.len+" km":"";
-  return{type:"river_real",prompt:"Durch welches Land flie\u00dft dieser Fluss?",subj:cor.n,ans:cor.c,opts:sh([cor.c,...dis]),meta,lid:cor.n,cc:ccFromCountry(cor.c)};
+  return{type:"river_real",prompt:t("q_river_real"),subj:cor.n,ans:cor.c,opts:sh([cor.c,...dis]),meta,lid:cor.n,cc:ccFromCountry(cor.c)};
 }
 
 /* Phase 30 — Default neighbor map (fallback when neighbors.json is empty/broken) */
@@ -689,7 +1491,7 @@ function genHLPopQ(){
   const a=pool[ai],b=pool[bi];
   const fmt=(p)=>p>=1e9?(p/1e9).toFixed(2)+" Mrd.":p>=1e6?(p/1e6).toFixed(1)+" Mio.":(p/1e3).toFixed(0)+" Tsd.";
   const ans=b.pop>a.pop?"higher":"lower";
-  return{type:"hl_pop",prompt:"Mehr Einwohner als "+a.c+"?",nameA:a.c,valA:fmt(a.pop),nameB:b.c,valB:fmt(b.pop),ans,opts:["higher","lower"],lid:b.c,cc:ccFromCountry(b.c)};
+  return{type:"hl_pop",prompt:t("q_hl_pop",{a:a.c}),nameA:a.c,valA:fmt(a.pop),nameB:b.c,valB:fmt(b.pop),ans,opts:["higher","lower"],lid:b.c,cc:ccFromCountry(b.c)};
 }
 function genHLRiverQ(){
   if(!RIVERS_REAL||RIVERS_REAL.length<2)return null;
@@ -1277,7 +2079,7 @@ let S={
   collectedPlates:loadCollectedPlates(),
   ligaData:[],ligaLoading:false,
   titleShop:false,
-  spotterInput:"",spotterMsg:"",spotterOk:null,albumView:"list",albumCountry:_smartDefaultCountry(),spotterCountry:_smartDefaultCountry(),
+  language:localStorage.getItem("gq_lang")||"de",spotterInput:"",spotterMsg:"",spotterOk:null,albumView:"list",albumCountry:_smartDefaultCountry(),spotterCountry:_smartDefaultCountry(),
   collFilter:"all",collRarity:"all",collSearch:"",
 };
 let tIv=null,fTo=null,toastTo=null;
@@ -1344,43 +2146,43 @@ function genCityQ(){
   if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.sub===cor.sub||x.cont===cor.cont,x=>x.c===cor.c,x=>x.c);
-  return{type:"city",prompt:MODES[0].prompt,subj:cor.n,ans:cor.c,opts:sh([cor.c,...dis]),meta:cor.cont+" \u00b7 "+(cor.pop/1e6).toFixed(1)+" Mio.",lid:cor.id,cc:cor.cc};
+  return{type:"city",prompt:t("q_city"),subj:cor.n,ans:cor.c,opts:sh([cor.c,...dis]),meta:cor.cont+" \u00b7 "+(cor.pop/1e6).toFixed(1)+" Mio.",lid:cor.id,cc:cor.cc};
 }
 function genFlagQ(){
   const pool=COUNTRIES.filter(x=>x.cc!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.sr===cor.sr||x.ct===cor.ct,x=>x.c===cor.c,x=>x.c);
-  return{type:"flag",prompt:MODES[1].prompt,subj:cor.cc,ans:cor.c,opts:sh([cor.c,...dis]),meta:cor.ct,lid:cor.cc,cc:cor.cc};
+  return{type:"flag",prompt:t("q_flag"),subj:cor.cc,ans:cor.c,opts:sh([cor.c,...dis]),meta:cor.ct,lid:cor.cc,cc:cor.cc};
 }
 function genCapitalQ(){
   const pool=CAPITALS.filter(x=>x.capital!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.country===cor.country,x=>x.country);
-  return{type:"capital",prompt:MODES[2].prompt,subj:cor.capital,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.capital,cc:cor.cc};
+  return{type:"capital",prompt:t("q_capital"),subj:cor.capital,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.capital,cc:cor.cc};
 }
 function genRiverQ(){
   const pool=RIVERS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
-  return{type:"river",prompt:MODES[3].prompt,subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
+  return{type:"river",prompt:t("q_river"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genLandmarkQ(){
   const pool=LANDMARKS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
-  return{type:"landmark",prompt:MODES[4].prompt,subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
+  return{type:"landmark",prompt:t("q_landmark"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genParkQ(){
   const pool=NATIONAL_PARKS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
-  return{type:"park",prompt:MODES[5].prompt,subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
+  return{type:"park",prompt:t("q_park"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genUnescoQ(){
   const pool=UNESCO_SITES.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
-  return{type:"unesco",prompt:MODES[6].prompt,subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
+  return{type:"unesco",prompt:t("q_unesco"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genCitymarkQ(){
   const pool=CITY_LANDMARKS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
@@ -1402,13 +2204,13 @@ function genFlagselQ(){
   const pool=COUNTRIES.filter(x=>x.cc!==S.lid);if(pool.length<4)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.sr===cor.sr||x.ct===cor.ct,x=>x.cc===cor.cc,x=>x.cc,3);
-  return{type:"flagsel",prompt:MODES[9].prompt,subj:cor.c,ans:cor.cc,opts:sh([cor.cc,...dis]),meta:cor.ct,lid:cor.cc,cc:cor.cc};
+  return{type:"flagsel",prompt:t("q_flagsel"),subj:cor.c,ans:cor.cc,opts:sh([cor.cc,...dis]),meta:cor.ct,lid:cor.cc,cc:cor.cc};
 }
 function genRcapitalQ(){
   const pool=CAPITALS.filter(x=>x.country!==S.lid);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.capital===cor.capital,x=>x.capital);
-  return{type:"rcapital",prompt:MODES[10].prompt,subj:cor.country,ans:cor.capital,opts:sh([cor.capital,...dis]),meta:cor.continent,lid:cor.country,cc:cor.cc};
+  return{type:"rcapital",prompt:t("q_rcapital"),subj:cor.country,ans:cor.capital,opts:sh([cor.capital,...dis]),meta:cor.continent,lid:cor.country,cc:cor.cc};
 }
 function genRcityQ(){
   const pool=COUNTRIES.filter(x=>x.c!==S.lid);if(pool.length<3)return null;
@@ -1416,7 +2218,7 @@ function genRcityQ(){
   const cc2=CITIES.filter(c=>c.c===cor.c);if(!cc2.length)return genRcityQ();
   const corCity=cc2[~~(rng()*cc2.length)];
   const dis=distractors(CITIES,x=>x.sub===corCity.sub||x.cont===corCity.cont,x=>x.c===cor.c,x=>x.n);
-  return{type:"rcity",prompt:MODES[11].prompt,subj:cor.c,ans:corCity.n,opts:sh([corCity.n,...dis]),meta:cor.ct,lid:cor.c,cc:cor.cc};
+  return{type:"rcity",prompt:t("q_rcity"),subj:cor.c,ans:corCity.n,opts:sh([corCity.n,...dis]),meta:cor.ct,lid:cor.c,cc:cor.cc};
 }
 function genRriverQ(){
   const ctries=[...new Set(RIVERS.map(r=>r.country))].filter(c=>c!==S.lid);if(!ctries.length)return null;
@@ -1424,7 +2226,7 @@ function genRriverQ(){
   const cRivers=RIVERS.filter(r=>r.country===corC);
   const cor=cRivers[~~(rng()*cRivers.length)];
   const dis=distractors(RIVERS,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.country===corC,x=>x.name);
-  return{type:"rriver",prompt:MODES[12].prompt,subj:corC,ans:cor.name,opts:sh([cor.name,...dis]),meta:cor.continent,lid:corC,cc:cor.cc};
+  return{type:"rriver",prompt:t("q_rriver"),subj:corC,ans:cor.name,opts:sh([cor.name,...dis]),meta:cor.continent,lid:corC,cc:cor.cc};
 }
 function genFoodQ(){
   if(!FOOD_DATA.length)return null;
@@ -1432,7 +2234,7 @@ function genFoodQ(){
   const corC=item.country;
   const dis=FOOD_DATA.filter(f=>f.country!==corC).map(f=>f.country);
   const uniq=[...new Set(dis)];const picked=sh(uniq).slice(0,3);
-  return{type:"food",prompt:MODES.find(m=>m.id==="food").prompt,subj:item.dish,emoji:item.emoji,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
+  return{type:"food",prompt:t("q_food"),subj:item.dish,emoji:item.emoji,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
 }
 function genBrandQ(){
   if(!BRANDS_DATA.length)return null;
@@ -1442,7 +2244,7 @@ function genBrandQ(){
   const fallback=BRANDS_DATA.filter(b=>b.country!==corC).map(b=>b.country);
   const pool=[...new Set(sameSub.length>=3?sameSub:fallback)];
   const picked=sh(pool).slice(0,3);
-  return{type:"brand",prompt:MODES.find(m=>m.id==="brand").prompt,subj:item.brand,industry:item.industry,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
+  return{type:"brand",prompt:t("q_brand"),subj:item.brand,industry:item.industry,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
 }
 function genCurrencyQ(){
   if(!CURRENCIES_DATA.length)return null;
@@ -1452,7 +2254,7 @@ function genCurrencyQ(){
   const fallback=CURRENCIES_DATA.filter(c=>c.country!==corC).map(c=>c.country);
   const pool=[...new Set(sameSub.length>=3?sameSub:fallback)];
   const picked=sh(pool).slice(0,3);
-  return{type:"currency",prompt:MODES.find(m=>m.id==="currency").prompt,subj:item.currency,symbol:item.symbol,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
+  return{type:"currency",prompt:t("q_currency"),subj:item.currency,symbol:item.symbol,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
 }
 function genOutlineQ(){
   const pool=COUNTRIES.filter(c=>c.cc&&c.cc.length===2);
@@ -1462,7 +2264,7 @@ function genOutlineQ(){
   const corC=item.c;const corCC=item.cc;
   const dis=pool.filter(c=>c.cc!==corCC).map(c=>c.c);
   const picked=sh2(dis).slice(0,3);
-  return{type:"outline",prompt:MODES.find(m=>m.id==="outline").prompt,subj:corCC,ans:corC,opts:sh2([corC,...picked]),lid:corCC,cc:corCC};
+  return{type:"outline",prompt:t("q_outline"),subj:corCC,ans:corC,opts:sh2([corC,...picked]),lid:corCC,cc:corCC};
 }
 /* EU-KENNZEICHEN GENERATORS (Phase 23B) — smart same-country distractors */
 function genPlateQ(hardcore){
@@ -1477,7 +2279,7 @@ function genPlateQ(hardcore){
   const cc=cc_map[cor.country]||"de";
   return{
     type:hardcore?"plate_hard":"plate_casual",
-    prompt:hardcore?"Region erkennen \u2014 kein Tipp!":"Woher kommt dieses Kennzeichen?",
+    prompt:hardcore?t("q_plates_hard"):t("q_plates_casual"),
     subj:cor.code,
     ans:cor.region,
     opts,
@@ -1495,7 +2297,7 @@ function genMapGuessQ(){
   if(!MAP_COUNTRIES.length)return null;
   const idx=~~(Math.random()*MAP_COUNTRIES.length);
   const co=MAP_COUNTRIES[idx];if(!co)return null;
-  return{type:"map_guess",prompt:"Finde das Land auf der Karte",subj:co.name,
+  return{type:"map_guess",prompt:t("q_map_guess"),subj:co.name,
     ans:co.name,opts:[],meta:"",lid:co.cc,cc:co.cc};
 }
 const GEN={
@@ -1972,8 +2774,8 @@ function render(){
         </div>
       </div>
       <div class="hl-btn-row">
-        <button class="hl-btn hl-higher${sel!==null?(q.ans==="higher"?" ok":(sel==="higher"?" ng":" dm")):""}" ${hlDis} onclick="answer('higher')">\u2b06\ufe0f Mehr / L\u00e4nger / Gr\u00f6\u00dfer</button>
-        <button class="hl-btn hl-lower${sel!==null?(q.ans==="lower"?" ok":(sel==="lower"?" ng":" dm")):""}" ${hlDis} onclick="answer('lower')">\u2b07\ufe0f Weniger / K\u00fcrzer / Kleiner</button>
+        <button class="hl-btn hl-higher${sel!==null?(q.ans==="higher"?" ok":(sel==="higher"?" ng":" dm")):""}" ${hlDis} onclick="answer('higher')">${t("hl_higher")}</button>
+        <button class="hl-btn hl-lower${sel!==null?(q.ans==="lower"?" ok":(sel==="lower"?" ng":" dm")):""}" ${hlDis} onclick="answer('lower')">${t("hl_lower")}</button>
       </div>`;
   }else if(q.type==="curr_real"){
     /* Show country name; hide currency name (meta) until answered */
@@ -2049,8 +2851,8 @@ function render(){
         </div>
         <div style="color:var(--text3);font-size:.82rem;text-align:center;margin:.5rem 0">${q.prompt}</div>
         <div class="hl-btn-row">
-          <button class="${moreCls}" ${pcDis} onclick="answer('more')">⬆️ Mehr Einwohner</button>
-          <button class="${lessCls}" ${pcDis} onclick="answer('less')">⬇️ Weniger Einwohner</button>
+          <button class="${moreCls}" ${pcDis} onclick="answer('more')">${t("hl_more")}</button>
+          <button class="${lessCls}" ${pcDis} onclick="answer('less')">${t("hl_less")}</button>
         </div>
         ${sel!==null?`<div class="meta-line">${q.meta||""}</div>`:""}
         ${sel!==null?`<button class="btn-p" onclick="nextRound()">Weiter →</button>`:""}`;
@@ -2058,12 +2860,12 @@ function render(){
     if(q.type==="hl_pop"||q.type==="hl_river"||q.type==="hl_area"){
       answerHtml="";
     }else{
-      const btns=q.opts.map((o,i)=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answerByIdx(${i})">${esc(o)}${mk}</button>`;}).join("");
+      const btns=q.opts.map((o,i)=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answerByIdx(${i})">${esc(displayCountry(o))}${mk}</button>`;}).join("");
       answerHtml=`<div class="answers">${btns}</div>`;
     }
   }
   let fb="";
-  if(S.ph==="feedback"){const cls=ok?"fb ok":"fb ng";let al=q.ans;if(q.type==="flagsel"){const co=COUNTRIES.find(c=>c.cc===q.ans);al=co?co.c:q.ans;}const msg=ok?`\u2713 Richtig! +${pts}`:sel==="__t"?`\u23f1 Zeit! \u2192 ${al}`:`\u2717 Falsch \u2192 ${al}`;fb=`<div class="${cls}">${msg}</div>${plateReveal}`;}
+  if(S.ph==="feedback"){const cls=ok?"fb ok":"fb ng";let al=q.ans;if(q.type==="flagsel"){const co=COUNTRIES.find(c=>c.cc===q.ans);al=co?co.c:q.ans;}const al_d=displayCountry(al);const msg=ok?t("fb_correct",{pts}):sel==="__t"?t("fb_time",{ans:al_d}):t("fb_wrong",{ans:al_d});fb=`<div class="${cls}">${msg}</div>${plateReveal}`;}
   /* Power-up bar (Phase 26) */
   const pu=loadPU();
   const puBar=`<div class="pu-bar">
@@ -2360,18 +3162,18 @@ function renderCollectionScreen(){
   const spotCol=S.spotterOk===true?"#10b981":S.spotterOk===false?"#ef4444":"var(--text3)";
   const spotter=`<div class="album-spotter">
     <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:.4rem">
-      <span class="album-spotter-title">\u{1F697} Roadtrip-Spotter</span>
+      <span class="album-spotter-title">${t("spotter_title")}</span>
       <select class="spotter-country-sel" onchange="S.spotterCountry=this.value;S.albumCountry=this.value;localStorage.setItem('geoquest_pref_country',this.value);S.spotterMsg='';render()">
         <option value="all" ${sCountry==="all"?"selected":""}>\u{1F30D} Alle Länder</option>
         ${countries.map(c=>`<option value="${esc(c)}" ${sCountry===c?"selected":""}>${esc(c)}</option>`).join("")}
       </select>
     </div>
-    <div class="album-spotter-sub">Kennzeichen gesehen? Sofort eintragen!</div>
+    <div class="album-spotter-sub">${t("spotter_hint")}</div>
     <div style="display:flex;gap:8px">
       <input type="text" maxlength="5" placeholder="z.B. MÜ" value="${esc(spotVal)}"
         oninput="S.spotterInput=this.value.toUpperCase();this.value=this.value.toUpperCase();S.spotterMsg='';render()"
         class="spotter-input">
-      <button class="btn-p" style="width:auto;padding:.5rem 1rem;margin-bottom:0" onclick="spotterCollect()">\u{1F50D} Sammeln</button>
+      <button class="btn-p" style="width:auto;padding:.5rem 1rem;margin-bottom:0" onclick="spotterCollect()">${t("btn_collect")}</button>
     </div>
     ${spotMsg?`<div style="font-size:.82rem;font-weight:700;text-align:center;color:${spotCol};padding:.35rem 0;margin-top:4px">${spotMsg}</div>`:""}
   </div>`;
@@ -2379,7 +3181,7 @@ function renderCollectionScreen(){
   /* ── Progress ── */
   const progressBar=`<div class="album-progress-wrap">
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
-      <span style="font-weight:900;font-size:1rem">\u{1F4D4} Kennzeichen-Album</span>
+      <span style="font-weight:900;font-size:1rem">${t("album_title")}</span>
       <span style="font-size:.78rem;color:var(--text3)">${coll.length}&thinsp;/&thinsp;${total}</span>
     </div>
     <div class="coll-progress-wrap"><div class="coll-progress-bar" style="width:${pct}%"></div></div>
@@ -2391,8 +3193,8 @@ function renderCollectionScreen(){
 
   /* ── Controls ── */
   const controls=`<div style="display:flex;gap:6px;margin-bottom:.7rem;align-items:center">
-    <button class="view-toggle-btn${view==="list"?" active":""}" onclick="S.albumView='list';render()">\u{1F4DD} Liste</button>
-    <button class="view-toggle-btn${view==="map"?" active":""}" onclick="S.albumView='map';render()">\u{1F5FA} Karte</button>
+    <button class="view-toggle-btn${view==="list"?" active":""}" onclick="S.albumView='list';render()">${t("album_list")}</button>
+    <button class="view-toggle-btn${view==="map"?" active":""}" onclick="S.albumView='map';render()">${t("album_map")}</button>
     <select style="margin-left:auto;background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:.3rem .5rem;font-size:.76rem" onchange="S.albumCountry=this.value;S.spotterCountry=this.value;localStorage.setItem('geoquest_pref_country',this.value);render()">
       <option value="all" ${acF==="all"?"selected":""}>Alle Länder</option>
       ${countries.map(c=>`<option value="${esc(c)}" ${acF===c?"selected":""}>${esc(c)}</option>`).join("")}
@@ -2421,14 +3223,14 @@ function renderCollectionScreen(){
           :`<div style="color:var(--text3);font-size:.75rem;text-align:center;padding:.5rem 0">Noch nichts aus ${esc(country)} gesammelt — spiele Kennzeichen oder nutze den Spotter!</div>`}
       </div>`;
     }).join("");
-    if(!listContent)listContent=`<div style="text-align:center;padding:2rem;color:var(--text3)">Noch nichts gesammelt!<br><small>Spiele EU-Kennzeichen oder benutze den Spotter oben.</small></div>`;
+    if(!listContent)listContent=`<div style="text-align:center;padding:2rem;color:var(--text3)">${t("album_empty").replace("\n","<br>")}</div>`;
   }
 
   const mapContent=view==="map"?`<div id="album-map-svg" class="album-map-container"></div>`:"";
 
   if(view==="map")requestAnimationFrame(()=>drawAlbumMap());
 
-  const backBtn=`<button onclick="S.tab='home';render()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--text3);font-size:.82rem;font-weight:700;cursor:pointer;padding:.3rem .1rem;margin-bottom:.6rem;letter-spacing:.3px;transition:color .15s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--text3)'"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Zurück zum Hauptmenü</button>`;
+  const backBtn=`<button onclick="S.tab='home';render()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--text3);font-size:.82rem;font-weight:700;cursor:pointer;padding:.3rem .1rem;margin-bottom:.6rem;letter-spacing:.3px;transition:color .15s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--text3)'"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>${t('btn_back')}</button>`;
   return`<div>${backBtn}${spotter}${progressBar}${achBar}${controls}${listContent}${mapContent}</div>`;
 }
 
@@ -2762,6 +3564,12 @@ function renderProfilTab(){
 function renderSettingsModal(){
   return`<div class="modal-overlay" onclick="if(event.target===this){S.settingsModal=false;render()}"><div class="modal-box" style="max-width:320px">
     <div style="font-size:1.1rem;font-weight:900;margin-bottom:1rem">\u2699\ufe0f Einstellungen</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem">
+      <div style="font-weight:700">\u{1F310} Sprache / Language</div>
+      <select onchange="setLanguage(this.value)" style="font-size:.82rem;padding:.25rem .4rem;border-radius:8px;border:1.5px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer">
+        ${[["de","Deutsch"],["en","English"],["fr","Français"],["es","Español"],["it","Italiano"],["nl","Nederlands"],["pt","Português"],["pl","Polski"],["ro","Română"],["hu","Magyar"],["cs","Čeština"],["sk","Slovenčina"],["hr","Hrvatski"],["sl","Slovenščina"],["bg","Български"],["el","Ελληνικά"],["da","Dansk"],["sv","Svenska"],["fi","Suomi"],["et","Eesti"],["lv","Latviešu"],["lt","Lietuvių"],["mt","Malti"],["ga","Gaeilge"]].map(([l,n])=>`<option value="${l}" ${S.language===l?"selected":""}>${n}</option>`).join("")}
+      </select>
+    </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
       <div style="font-weight:700">\u{1F4CD} Heimatregion</div>
       <span style="font-size:.78rem;color:#3b82f6;font-weight:700;cursor:pointer" onclick="localStorage.removeItem('geoquest_last_detected_country');showToast('Erkennung wird beim n\u00e4chsten Start wiederholt')">\u21ba Reset</span>
@@ -3153,8 +3961,8 @@ function showLocationBanner(c){
   const old=document.getElementById('gq-loc-toast');if(old)old.remove();
   const el=document.createElement('div');
   el.id='gq-loc-toast';el.className='gq-loc-toast';
-  el.innerHTML=`<span style="font-size:.8rem;color:var(--text2)">\u{1F4CD} Du bist in <strong style="color:var(--text)">${c}</strong></span>`
-    +`<button class="gq-loc-btn-yes" onclick="locationBannerYes('${c.replace(/'/g,"\\'")}');document.getElementById('gq-loc-toast')?.remove()">Anpassen</button>`;
+  el.innerHTML=`<span style="font-size:.8rem;color:var(--text2)">\u{1F4CD} ${t('loc_detected',{country:c})}</span>`
+    +`<button class="gq-loc-btn-yes" onclick="locationBannerYes('${c.replace(/'/g,"\\'")}');document.getElementById('gq-loc-toast')?.remove()">${t('loc_adapt')}</button>`;
   document.body.appendChild(el);
   const _tid=setTimeout(()=>{
     const t=document.getElementById('gq-loc-toast');if(!t)return;
@@ -3178,6 +3986,37 @@ async function detectUserCountry(){
     const known=!PLATES_DATA.length||PLATES_DATA.some(p=>p.country===deCountry);
     const last=localStorage.getItem('geoquest_last_detected_country');
     localStorage.setItem('geoquest_last_detected_country',deCountry);
+    /* Auto-set language unless user manually chose one */
+    if(!localStorage.getItem('geoquest_lang_manual')){
+      const _cc=(d.country_code||'').toUpperCase();
+      const _ccMap={
+        'AT':'de','DE':'de','CH':'de','LI':'de',
+        'FR':'fr','BE':'fr','LU':'fr','MC':'fr',
+        'ES':'es','AD':'es',
+        'IT':'it','SM':'it','VA':'it',
+        'NL':'nl',
+        'PT':'pt',
+        'PL':'pl',
+        'RO':'ro','MD':'ro',
+        'HU':'hu',
+        'CZ':'cs',
+        'SK':'sk',
+        'HR':'hr','BA':'hr',
+        'SI':'sl',
+        'BG':'bg',
+        'GR':'el','CY':'el',
+        'DK':'da',
+        'SE':'sv',
+        'FI':'fi',
+        'EE':'et',
+        'LV':'lv',
+        'LT':'lt',
+        'MT':'mt',
+        'IE':'en','GB':'en','US':'en','AU':'en','CA':'en','NZ':'en','ZA':'en'
+      };
+      const _al=_ccMap[_cc]||'en';
+      S.language=_al;localStorage.setItem('gq_lang',_al);
+    }
     if(known&&last!==deCountry){showLocationBanner(deCountry);}
   }catch(e){}
 }
