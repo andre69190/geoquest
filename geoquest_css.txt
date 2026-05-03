@@ -355,3 +355,20 @@ input[type=text]::placeholder{color:var(--text3)}
   border-radius:14px;font-weight:700;font-size:.9rem;cursor:pointer;
   text-align:center;transition:background .15s}
 .mp-back-btn:hover{background:var(--bg2)}
+
+/* ── Phase 37-40: Kennzeichen-Album & Roadtrip-Spotter ── */
+.coll-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem}
+.coll-title{font-weight:900;font-size:1rem;color:var(--text)}
+.coll-sub{font-size:.78rem;color:var(--text3)}
+.coll-progress-wrap{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:.25rem}
+.coll-progress-bar{height:100%;background:linear-gradient(90deg,#10b981,#3b82f6);border-radius:4px;transition:width .6s ease}
+.coll-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:7px;margin-bottom:1.5rem}
+.coll-item{display:flex;flex-direction:column;align-items:center;gap:3px}
+.coll-locked{opacity:.38;filter:grayscale(1)}
+.coll-plate{font-size:.88rem;font-weight:900;letter-spacing:1px;border:2px solid #666;border-radius:6px;padding:4px 7px;text-align:center;min-width:46px;background:var(--bg2);transition:border-color .2s,color .2s}
+.coll-region{font-size:.58rem;color:var(--text3);text-align:center;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.coll-dot{width:6px;height:6px;border-radius:50%}
+.coll-ach{display:inline-flex;align-items:center;gap:4px;background:rgba(245,158,11,.12);border:1px solid #f59e0b;border-radius:20px;padding:3px 9px;font-size:.7rem;font-weight:700;color:#f59e0b}
+/* Toast */
+.gq-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e293b;color:#f8fafc;padding:.55rem 1.1rem;border-radius:20px;font-size:.8rem;font-weight:600;z-index:9999;white-space:nowrap;max-width:92vw;box-shadow:0 4px 20px rgba(0,0,0,.4);pointer-events:none;animation:gqToastIn .22s ease}
+@keyframes gqToastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}

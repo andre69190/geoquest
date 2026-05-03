@@ -525,8 +525,8 @@ function genPopCompareQ(){
   let bi=~~(Math.random()*pool.length);
   while(bi===ai)bi=~~(Math.random()*pool.length);
   const a=pool[ai],b=pool[bi];
-  const ans=b.pop>a.pop?"Mehr \u2b06\ufe0f":"Weniger \u2b07\ufe0f";
-  const wrong=b.pop>a.pop?"Weniger \u2b07\ufe0f":"Mehr \u2b06\ufe0f";
+  const ans=b.pop>a.pop?"more":"less";
+  const wrong=b.pop>a.pop?"less":"more";
   const aPopStr=(a.pop/1e6).toFixed(1)+" Mio.";
   return{type:"pop_compare",prompt:"Mehr oder weniger Einwohner?",subj:{nameA:a.c,popA:aPopStr,nameB:b.c},ans,opts:[ans,wrong],meta:"",lid:b.c,cc:ccFromCountry(b.c)};
 }
@@ -1192,8 +1192,11 @@ let S={
   authMode:"login",authEmail:"",authPassword:"",authUsername:"",authError:"",authLoading:false,
   settingsModal:false,
   convModal:false,
+  collectedPlates:loadCollectedPlates(),
   ligaData:[],ligaLoading:false,
   titleShop:false,
+  spotterInput:"",spotterMsg:"",spotterOk:null,
+  collFilter:"all",collRarity:"all",collSearch:"",
 };
 let tIv=null,fTo=null,toastTo=null;
 
@@ -1407,7 +1410,7 @@ function nextRound(){
   clr();
   const nr=S.rd+1;
   if(S.diff!=="survival"&&nr>=ROUNDS){
-    S.ph="gameover";S.scoreSaved=false;soundOver();checkMastery();
+    S.ph="gameover";S.scoreSaved=false;S.convModal=true;soundOver();checkMastery();
     if(S.isDailyRun&&!isDailyDone()){markDailyDone(S.sc);if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;if(sb&&sbUser)sb.from("profiles").update({geo_coins:(sbProfile?.geo_coins||0)}).eq("id",sbUser.id).catch(()=>{});}
     saveHistory({mode:S.mode,score:S.sc,correct:S.correct,rounds:ROUNDS,date:Date.now(),answers:S.sessionAnswers.map(a=>({cc:a.cc,correct:a.correct}))});
     if(sbOK)saveSession(S.mode,S.sc,S.bs,S.correct,Date.now()-(S.gameStartTime||Date.now())).then(()=>{S.scoreSaved=true;render();});
@@ -1451,7 +1454,7 @@ function answer(a){
       const survived=S.rd;
       if(survived>sb_prev)localStorage.setItem('gq_surv_best',String(survived));
       S.survivalBest=Math.max(survived,sb_prev);
-      S.ph="gameover";S.scoreSaved=false;soundOver();checkMastery();
+      S.ph="gameover";S.scoreSaved=false;S.convModal=true;soundOver();checkMastery();
       saveHistory({mode:S.mode,score:S.sc,correct:S.correct,rounds:survived,date:Date.now(),diff:"survival",answers:S.sessionAnswers.map(a=>({cc:a.cc,correct:a.correct}))});
       if(sbOK)saveSession(S.mode,S.sc,S.bs,S.correct,Date.now()-(S.gameStartTime||Date.now())).then(()=>{S.scoreSaved=true;render();});
       if(sb&&sbUser)sb.from("profiles").update({survival_best:Math.max(survived,sbProfile?.survival_best||0)}).eq("id",sbUser.id).catch(()=>{});
@@ -1460,6 +1463,15 @@ function answer(a){
     }
     /* Duolingo casual: queue wrong question for retry */
     if(S.diff==="casual"&&!S.q._retry){if(!S.queueExtra)S.queueExtra=[];S.queueExtra.push({...S.q,_retry:true});}
+  }
+  /* Phase 37: collect plate */
+  if(ok&&(S.mode==="plate_casual"||S.mode==="plate_hard")&&S.q.subj){
+    const _code=S.q.subj;
+    if(!S.collectedPlates.includes(_code)){
+      S.collectedPlates.push(_code);saveCollectedPlates(S.collectedPlates);
+      const _pc=PLATES_DATA.find(p=>p.code===_code);
+      showToast("⭐ Neu gesammelt: "+_code+(_pc?" · "+_pc.region:"")+"! ("+rarityLabel(getRarity(_code))+")");
+    }
   }
   S.pts=pts;S.lid=S.q.lid;S.ph="feedback";render();
   /* Phase 33 Teil 2 */
@@ -1470,7 +1482,7 @@ function answer(a){
   fTo=setTimeout(()=>{
     const nr=S.rd+1;
     if(S.diff!=="survival"&&nr>=ROUNDS){
-      S.ph="gameover";S.scoreSaved=false;soundOver();checkMastery();
+      S.ph="gameover";S.scoreSaved=false;S.convModal=true;soundOver();checkMastery();
       if(S.isDailyRun&&!isDailyDone()){
         markDailyDone(S.sc);
         if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;
@@ -1486,7 +1498,7 @@ function startGame(m){
   clr();
   const survBest=parseInt(localStorage.getItem('gq_surv_best')||'0');
   Object.assign(S,{sc:0,st:0,bs:0,rd:0,correct:0,lid:null,ph:"playing",mode:m||S.mode,
-    scoreSaved:false,sessionAnswers:[],newStamps:[],isDailyRun:false,challengeStarted:false,
+    scoreSaved:false,convModal:false,sessionAnswers:[],newStamps:[],isDailyRun:false,challengeStarted:false,
     half_removed:false,freezeActive:false,queueExtra:[],askedLids:new Set(),
     survivalBest:survBest,gameStartTime:Date.now()});
   lq();
@@ -1525,6 +1537,21 @@ function stampHtml(cc,rank,rot){
 
 /* DAILY CHALLENGE */
 function getDailyKey(){return"gq_daily_"+new Date().toISOString().slice(0,10);}
+
+function loadCollectedPlates(){try{return JSON.parse(localStorage.getItem("gq_coll")||"[]")}catch(e){return[]}}
+function saveCollectedPlates(arr){try{localStorage.setItem("gq_coll",JSON.stringify(arr))}catch(e){}}
+function getRarity(code){
+  if(!code)return"common";
+  const c=code.trim().toUpperCase();
+  const legendary=["WAT","CAS","AKU","BIR","HEB","HON","MEL","EUT","GUN","NAB","PEG","ABG","SCZ"];
+  if(legendary.includes(c))return"legendary";
+  if(c.length<=1)return"common";
+  if(c.length===2)return"rare";
+  if(c.length===3)return"epic";
+  return"legendary";
+}
+function rarityLabel(r){return{common:"\u{1F7E2} Common",rare:"\u{1F535} Rare",epic:"\u{1F7E3} Epic",legendary:"\u{1F7E1} Legendary"}[r]||r;}
+function rarityColor(r){return{common:"#10b981",rare:"#3b82f6",epic:"#8b5cf6",legendary:"#f59e0b"}[r]||"#999";}
 function isDailyDone(){try{return!!JSON.parse(localStorage.getItem(getDailyKey())||"null");}catch(e){return false;}}
 function markDailyDone(score){try{localStorage.setItem(getDailyKey(),JSON.stringify({score,ts:Date.now()}));}catch(e){}}
 function getDailySeed(){
@@ -1634,6 +1661,7 @@ function render(){
       ${S.tab==="lernen"?renderLernenTab():""}
       ${S.tab==="liga"?renderLigaTab():""}
       ${S.tab==="profil"?renderProfilTab():""}
+      ${S.tab==="album"?renderCollectionScreen():""}
       ${S.settingsModal?renderSettingsModal():""}
     </div>${renderBottomNav()}`;
     return;
@@ -1685,7 +1713,7 @@ function render(){
         </div>`:""}
         ${sbOK?`<div style="font-size:.76rem;color:${S.scoreSaved?"#34d399":"var(--text3)"}">${S.scoreSaved?"\u2713 Score gespeichert":"Speichere \u2026"}</div>`:""}
       </div>
-      ${isGuest&&S.correct>0?`<div class="conv-modal-bg" onclick="if(event.target===this){S.convModal=false;render()}">
+      ${isGuest&&S.correct>0&&S.convModal?`<div class="conv-modal-bg" onclick="if(event.target===this){S.convModal=false;render()}">
   <div class="conv-modal">
     <div style="font-size:2rem;margin-bottom:.4rem">\u{1F4BE}</div>
     <div style="font-size:1rem;font-weight:900;color:var(--text);margin-bottom:.4rem">Fortschritt sichern!</div>
@@ -1824,6 +1852,9 @@ function render(){
   }else{
     // Population comparison: special subj rendering
     if(q.type==="pop_compare"&&q.subj&&typeof q.subj==='object'){
+      const pcDis=sel!==null?"disabled":"";
+      const moreCls="hl-btn hl-higher"+(sel!==null?(q.ans==="more"?" ok":(sel==="more"?" ng":" dm")):"");
+      const lessCls="hl-btn hl-lower"+(sel!==null?(q.ans==="less"?" ok":(sel==="less"?" ng":" dm")):"");
       return`${topBar}
         <div class="pop-compare-wrap">
           <div class="pop-box">
@@ -1837,9 +1868,12 @@ function render(){
           </div>
         </div>
         <div style="color:var(--text3);font-size:.82rem;text-align:center;margin:.5rem 0">${q.prompt}</div>
-        <div class="btns">${q.opts.map(o=>{let cls="btn-a";if(sel!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${o.replace(/'/g,"\'")}')">${o}</button>`;}).join("")}</div>
-        ${sel?`<div class="meta-line">${q.meta}</div>`:""}
-        ${sel?`<button class="btn-p" onclick="nextRound()">Weiter \u2192</button>`:""}`;
+        <div class="hl-btn-row">
+          <button class="${moreCls}" ${pcDis} onclick="answer('more')">⬆️ Mehr Einwohner</button>
+          <button class="${lessCls}" ${pcDis} onclick="answer('less')">⬇️ Weniger Einwohner</button>
+        </div>
+        ${sel!==null?`<div class="meta-line">${q.meta||""}</div>`:""}
+        ${sel!==null?`<button class="btn-p" onclick="nextRound()">Weiter →</button>`:""}`;
     }
     const btns=q.opts.map(o=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${os}')">${esc(o)}${mk}</button>`;}).join("");
     answerHtml=`<div class="answers">${btns}</div>`;
@@ -2002,8 +2036,100 @@ function renderBottomNav(){
     {id:"lernen", icon:"\u{1F4DA}", lbl:"Lernen"},
     {id:"liga",   icon:"\u{1F3C6}", lbl:"Liga"},
     {id:"profil", icon:"\u{1F464}", lbl:"Profil"},
+    {id:"album",  icon:"\u{1F4D4}", lbl:"Album"},
   ];
   return`<nav class="bottom-nav">${tabs.map(t=>`<button class="bn-item${S.tab===t.id?" active":""}" onclick="S.tab='${t.id}';render()"><span class="bn-icon">${t.icon}</span><span class="bn-lbl">${t.lbl}</span></button>`).join("")}</nav>`;
+}
+
+
+/* ─── Phase 37-40: Kennzeichen-Album ─────────────────────────────────── */
+function spotterCollect(){
+  const code=(S.spotterInput||"").toUpperCase().trim();
+  if(!code){S.spotterMsg="Bitte Kennzeichen eingeben!";S.spotterOk=null;render();return;}
+  const plate=PLATES_DATA.find(p=>p.code===code);
+  if(!plate){S.spotterMsg="❌ Unbekanntes Kennzeichen.";S.spotterOk=false;render();return;}
+  if(S.collectedPlates.includes(code)){
+    S.spotterMsg="\u{1F4CB} "+code+" ist bereits in deiner Sammlung!";S.spotterOk=null;
+  }else{
+    S.collectedPlates.push(code);saveCollectedPlates(S.collectedPlates);
+    const r=getRarity(code);
+    S.spotterMsg="\u{1F389} Neu gesammelt: "+plate.region+" ("+rarityLabel(r)+")!";
+    S.spotterOk=true;soundStamp();
+  }
+  S.spotterInput="";render();
+}
+function renderSpotterSection(){
+  const val=S.spotterInput||"";
+  const msg=S.spotterMsg||"";
+  const msgCol=S.spotterOk===true?"#10b981":S.spotterOk===false?"#ef4444":"#f59e0b";
+  return`<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:1.2rem;margin-bottom:1rem">
+    <div style="font-weight:900;font-size:1rem;margin-bottom:.4rem">\u{1F697} Roadtrip-Spotter</div>
+    <div style="color:var(--text3);font-size:.76rem;margin-bottom:.7rem">Kennzeichen gesehen? Direkt eintragen!</div>
+    <div style="display:flex;gap:8px;margin-bottom:.45rem">
+      <input type="text" maxlength="5" placeholder="z.B. MÜ" value="${esc(val)}"
+        oninput="S.spotterInput=this.value.toUpperCase();this.value=this.value.toUpperCase();S.spotterMsg='';render()"
+        style="flex:1;font-size:1.5rem;font-weight:900;text-align:center;letter-spacing:4px;text-transform:uppercase;padding:.45rem">
+      <button class="btn-p" style="width:auto;padding:.45rem 1.1rem;font-size:.95rem;margin-bottom:0" onclick="spotterCollect()">Sammeln \u{1F50D}</button>
+    </div>
+    ${msg?`<div style="font-size:.8rem;font-weight:700;text-align:center;color:${msgCol};padding:.3rem 0">${msg}</div>`:""}
+  </div>`;
+}
+function renderCollectionScreen(){
+  if(!PLATES_DATA.length)return`<div class="panel" style="text-align:center;padding:2rem"><div style="font-size:2rem">⏳</div><p style="color:var(--text3)">Kennzeichen-Daten werden geladen…</p></div>`;
+  const coll=S.collectedPlates;
+  const total=PLATES_DATA.length;
+  const pct=Math.round(coll.length/Math.max(total,1)*100);
+  const cF=S.collFilter||"all",rF=S.collRarity||"all",sQ=(S.collSearch||"").toLowerCase().trim();
+  let pool=[...PLATES_DATA];
+  if(cF!=="all")pool=pool.filter(p=>p.country===cF);
+  if(rF!=="all")pool=pool.filter(p=>getRarity(p.code)===rF);
+  if(sQ)pool=pool.filter(p=>p.code.toLowerCase().includes(sQ)||(p.region||"").toLowerCase().includes(sQ));
+  pool.sort((a,b)=>a.code.localeCompare(b.code));
+  const countries=[...new Set(PLATES_DATA.map(p=>p.country))].sort();
+  /* achievements: full country coverage */
+  const achs=[];
+  countries.forEach(c=>{
+    const cp=PLATES_DATA.filter(p=>p.country===c);
+    if(cp.length>0&&cp.every(p=>coll.includes(p.code)))achs.push(c);
+  });
+  return`<div>
+    ${renderSpotterSection()}
+    <div class="coll-header">
+      <span class="coll-title">\u{1F4D4} Kennzeichen-Album</span>
+      <span class="coll-sub">${coll.length}&thinsp;/&thinsp;${total} gesammelt</span>
+    </div>
+    <div class="coll-progress-wrap"><div class="coll-progress-bar" style="width:${pct}%"></div></div>
+    <div style="text-align:right;font-size:.68rem;color:var(--text3);margin-bottom:.7rem">${pct}% vollständig</div>
+    ${achs.length?`<div style="margin-bottom:.8rem;display:flex;flex-wrap:wrap;gap:4px">${achs.map(c=>`<span class="coll-ach">\u{1F3C6} ${c}-Experte</span>`).join("")}</div>`:""}
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.65rem">
+      <input type="text" placeholder="Suche…" value="${S.collSearch||""}"
+        oninput="S.collSearch=this.value;render()" style="flex:1;min-width:80px;font-size:.8rem;padding:.35rem .5rem">
+      <select style="background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:.3rem .45rem;font-size:.76rem" onchange="S.collFilter=this.value;render()">
+        <option value="all" ${cF==="all"?"selected":""}>Alle Länder</option>
+        ${countries.map(c=>`<option value="${esc(c)}" ${cF===c?"selected":""}>${esc(c)}</option>`).join("")}
+      </select>
+      <select style="background:var(--bg3);color:var(--text);border:1.5px solid var(--border);border-radius:8px;padding:.3rem .45rem;font-size:.76rem" onchange="S.collRarity=this.value;render()">
+        <option value="all" ${rF==="all"?"selected":""}>Alle</option>
+        <option value="common" ${rF==="common"?"selected":""}>\u{1F7E2} Common</option>
+        <option value="rare" ${rF==="rare"?"selected":""}>\u{1F535} Rare</option>
+        <option value="epic" ${rF==="epic"?"selected":""}>\u{1F7E3} Epic</option>
+        <option value="legendary" ${rF==="legendary"?"selected":""}>\u{1F7E1} Legendary</option>
+      </select>
+    </div>
+    <div style="font-size:.68rem;color:var(--text3);margin-bottom:.4rem">${pool.length} Kennzeichen</div>
+    <div class="coll-grid">
+      ${pool.map(p=>{
+        const got=coll.includes(p.code);
+        const r=getRarity(p.code);const col=rarityColor(r);
+        return`<div class="coll-item${got?"":" coll-locked"}" title="${esc((p.region||"")+(p.country?" · "+p.country:""))}">
+          <div class="coll-plate" style="${got?"border-color:"+col+";color:"+col:""}">
+            ${got?"":"\u{1F512} "}${esc(p.code)}</div>
+          <div class="coll-region">${got?esc(p.region||""):"???"}</div>
+          <div class="coll-dot" style="background:${got?col:"#555"}"></div>
+        </div>`;
+      }).join("")}
+    </div>
+  </div>`;
 }
 
 /* HOME TAB */
