@@ -261,11 +261,11 @@ input[type=text]::placeholder{color:var(--text3)}
 
 /* Phase 30 — Higher/Lower cards */
 .hl-wrap{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 6px;flex-wrap:nowrap}
-.hl-card{background:var(--bg3);border:2px solid var(--border);border-radius:14px;padding:.7rem .9rem;text-align:center;min-width:108px;max-width:140px;flex:1;transition:border-color .25s}
+.hl-card{background:var(--bg3);border:2px solid var(--border);border-radius:14px;padding:.7rem .9rem;text-align:center;min-width:108px;max-width:160px;flex:1;transition:border-color .25s}
 .hl-card.hl-known{border-color:#10b981}
 .hl-card.hl-hidden{border-color:var(--border);opacity:.85}
 .hl-card.hl-revealed{border-color:#3b82f6;opacity:1}
-.hl-name{font-weight:900;font-size:.88rem;color:var(--text);margin-bottom:.35rem;word-break:break-word}
+.hl-name{font-weight:900;font-size:1.1rem;color:var(--text);margin-bottom:.35rem;word-break:break-word;overflow-wrap:break-word;line-height:1.25}
 .hl-val{color:#10b981;font-size:1.05rem;font-weight:700}
 .hl-hidden .hl-val{color:var(--text3);font-size:1.4rem}
 .hl-vs{font-size:1.5rem;flex-shrink:0;color:var(--text3)}
@@ -415,4 +415,10 @@ input[type=text]::placeholder{color:var(--text3)}
 .map-popup{position:absolute;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:.6rem .7rem;box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:50;pointer-events:auto;min-width:140px}
 .map-popup-title{font-weight:900;font-size:.8rem;margin-bottom:.4rem;color:var(--text)}
 .map-popup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:2px}
-.map-popup-close{position:absolute;top:5px;right:6px;background:none;border:none;font-size:.8rem;cursor:pointer;color:var(--text3);line-height:1;padding:2px}
+.map-popup-close{position:absolute;top:5px;right:6px;background:none;border:none;
+/* Location detection toast */
+.gq-loc-toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);z-index:9998;background:var(--bg2);border:1.5px solid #3b82f6;border-radius:24px;padding:.55rem .85rem .55rem .8rem;box-shadow:0 4px 18px rgba(0,0,0,.28);display:flex;align-items:center;gap:.6rem;white-space:nowrap;animation:locToastIn .3s cubic-bezier(.34,1.56,.64,1) both}
+.gq-loc-toast.hiding{animation:locToastOut .3s ease forwards}
+.gq-loc-btn-yes{background:#3b82f6;color:#fff;border:none;border-radius:14px;padding:.3rem .75rem;font-weight:700;font-size:.76rem;cursor:pointer;flex-shrink:0}
+@keyframes locToastIn{from{opacity:0;transform:translateX(-50%) translateY(14px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes locToastOut{to{opacity:0;transform:translateX(-50%) translateY(12px)}}

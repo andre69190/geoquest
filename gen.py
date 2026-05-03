@@ -2049,8 +2049,12 @@ function render(){
         ${sel\!==null?`<div class="meta-line">${q.meta||""}</div>`:""}
         ${sel\!==null?`<button class="btn-p" onclick="nextRound()">Weiter →</button>`:""}`;
     }
-    const btns=q.opts.map((o,i)=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel\!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answerByIdx(${i})">${esc(o)}${mk}</button>`;}).join("");
-    answerHtml=`<div class="answers">${btns}</div>`;
+    if(q.type==="hl_pop"||q.type==="hl_river"||q.type==="hl_area"){
+      answerHtml="";
+    }else{
+      const btns=q.opts.map((o,i)=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel\!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answerByIdx(${i})">${esc(o)}${mk}</button>`;}).join("");
+      answerHtml=`<div class="answers">${btns}</div>`;
+    }
   }
   let fb="";
   if(S.ph==="feedback"){const cls=ok?"fb ok":"fb ng";let al=q.ans;if(q.type==="flagsel"){const co=COUNTRIES.find(c=>c.cc===q.ans);al=co?co.c:q.ans;}const msg=ok?`\u2713 Richtig\! +${pts}`:sel==="__t"?`\u23f1 Zeit\! \u2192 ${al}`:`\u2717 Falsch \u2192 ${al}`;fb=`<div class="${cls}">${msg}</div>${plateReveal}`;}
@@ -2753,6 +2757,11 @@ function renderSettingsModal(){
   return`<div class="modal-overlay" onclick="if(event.target===this){S.settingsModal=false;render()}"><div class="modal-box" style="max-width:320px">
     <div style="font-size:1.1rem;font-weight:900;margin-bottom:1rem">\u2699\ufe0f Einstellungen</div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+      <div style="font-weight:700">\u{1F4CD} Heimatregion</div>
+      <span style="font-size:.78rem;color:#3b82f6;font-weight:700;cursor:pointer" onclick="localStorage.removeItem('geoquest_last_detected_country');showToast('Erkennung wird beim n\u00e4chsten Start wiederholt')">\u21ba Reset</span>
+    </div>
+    <div style="font-size:.76rem;color:var(--text2);margin-bottom:.75rem">${localStorage.getItem('geoquest_pref_country')||'Nicht gesetzt (auto)'}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
       <div style="font-weight:700">\u{1F319} Dark Mode</div>
       <button onclick="S.darkMode=!S.darkMode;applyTheme();render()" class="btn-g" style="width:auto;padding:.4rem .85rem;margin-bottom:0;font-size:.8rem">${S.darkMode?'An':'Aus'}</button>
     </div>
@@ -3110,7 +3119,64 @@ document.addEventListener("visibilitychange",()=>{
   }
 });
 
-loadGameData().then(()=>render()).catch((e)=>{console.error("loadGameData fatal:",e);document.getElementById("gq-loader")?.remove();render();});
+
+/* ── Phase 46: Smart Location Detection (IP-based, silent) ─────────────── */
+const _GQ_IP_DE_MAP={
+  "Germany":"Deutschland","Austria":"Österreich","Switzerland":"Schweiz",
+  "Liechtenstein":"Liechtenstein","France":"Frankreich","Belgium":"Belgien",
+  "Netherlands":"Niederlande","Luxembourg":"Luxemburg","Italy":"Italien",
+  "Spain":"Spanien","Portugal":"Portugal","Poland":"Polen",
+  "Czech Republic":"Tschechien","Czechia":"Tschechien","Slovakia":"Slowakei",
+  "Hungary":"Ungarn","Romania":"Rumänien","Bulgaria":"Bulgarien",
+  "Croatia":"Kroatien","Slovenia":"Slowenien","Serbia":"Serbien",
+  "Bosnia and Herzegovina":"Bosnien","Albania":"Albanien","Montenegro":"Montenegro",
+  "North Macedonia":"Nordmazedonien","Greece":"Griechenland","Turkey":"Türkei",
+  "Estonia":"Estland","Latvia":"Lettland","Lithuania":"Litauen",
+  "Finland":"Finnland","Sweden":"Schweden","Norway":"Norwegen","Denmark":"Dänemark",
+  "Iceland":"Island","Ireland":"Irland","United Kingdom":"Vereinigtes Königreich",
+  "Russia":"Russland","Ukraine":"Ukraine","Belarus":"Weißrussland",
+  "Moldova":"Moldau","Georgia":"Georgien","Armenia":"Armenien","Azerbaijan":"Aserbaidschan"
+};
+function locationBannerYes(c){
+  localStorage.setItem('geoquest_pref_country',c);
+  S.spotterCountry=c;S.albumCountry=c;
+  showToast('✓ Region auf '+c+' gesetzt');
+  render();
+}
+function showLocationBanner(c){
+  const old=document.getElementById('gq-loc-toast');if(old)old.remove();
+  const el=document.createElement('div');
+  el.id='gq-loc-toast';el.className='gq-loc-toast';
+  el.innerHTML=`<span style="font-size:.8rem;color:var(--text2)">\u{1F4CD} Du bist in <strong style="color:var(--text)">${c}</strong></span>`
+    +`<button class="gq-loc-btn-yes" onclick="locationBannerYes('${c.replace(/'/g,"\\'")}');document.getElementById('gq-loc-toast')?.remove()">Anpassen</button>`;
+  document.body.appendChild(el);
+  const _tid=setTimeout(()=>{
+    const t=document.getElementById('gq-loc-toast');if(\!t)return;
+    t.classList.add('hiding');
+    setTimeout(()=>t?.remove(),300);
+  },7000);
+  el.querySelector('.gq-loc-btn-yes').addEventListener('click',()=>clearTimeout(_tid),{once:true});
+}
+async function detectUserCountry(){
+  try{
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),6000);
+    const res=await fetch('https://ipapi.co/json/',{signal:ctrl.signal,cache:'no-store'});
+    clearTimeout(tid);
+    if(\!res.ok)return;
+    const d=await res.json();
+    const enName=d.country_name||'';
+    const deCountry=_GQ_IP_DE_MAP[enName]||enName;
+    if(\!deCountry)return;
+    /* Only show banner if country exists in PLATES_DATA (sanity check) */
+    const known=\!PLATES_DATA.length||PLATES_DATA.some(p=>p.country===deCountry);
+    const last=localStorage.getItem('geoquest_last_detected_country');
+    localStorage.setItem('geoquest_last_detected_country',deCountry);
+    if(known&&last!==deCountry){showLocationBanner(deCountry);}
+  }catch(e){}
+}
+
+loadGameData().then(()=>{render();setTimeout(detectUserCountry,2000);}).catch((e)=>{console.error("loadGameData fatal:",e);document.getElementById("gq-loader")?.remove();render();});
 
 
 '''
