@@ -2024,7 +2024,16 @@ async function doRegister(){
   S.authLoading=true;S.authError="";render();
   try{
     const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{username:uname}}});
-    if(error){S.authError=error.message;S.authLoading=false;render();return;}
+    if(error){
+      const _em=error.message||"";
+      S.authError=
+        _em.includes("already registered")||_em.includes("already been registered")?"Diese E-Mail ist bereits registriert.":
+        _em.includes("Password should be")||_em.includes("password")?"Passwort zu schwach (mind. 6 Zeichen).":
+        _em.includes("valid email")||_em.includes("invalid format")||_em.includes("Unable to validate email")?"Bitte eine gültige E-Mail-Adresse eingeben.":
+        _em.includes("rate limit")||_em.includes("too many")?"Zu viele Versuche. Bitte kurz warten.":
+        _em||"Registrierung fehlgeschlagen.";
+      S.authLoading=false;render();return;
+    }
     const uid=data.user?.id;
     if(!uid){S.authError="Registrierung fehlgeschlagen.";S.authLoading=false;render();return;}
     // Save username locally immediately
@@ -2046,7 +2055,11 @@ async function doRegister(){
     }
     render();
   }catch(err){
-    S.authError=err.message||"Unbekannter Fehler.";
+    const _em=err.message||"";
+    S.authError=
+      _em.includes("already registered")||_em.includes("already been registered")?"Diese E-Mail ist bereits registriert.":
+      _em.includes("valid email")||_em.includes("invalid format")?"Bitte eine gültige E-Mail-Adresse eingeben.":
+      _em||"Unbekannter Fehler.";
     S.authLoading=false;
     render();
   }
@@ -2836,7 +2849,7 @@ function render(){
   /* PLAYING / FEEDBACK */
   const{sc,st,bs,rd,tm,q,sel,ok,pts,mode,diff}=S;
   if(!q){S.ph="menu";S.q=null;render();return;}  /* guard: q not yet set */
-  const col=tc(),p=pct(),t=tier(st);
+  const col=tc(),p=pct(),_tr=tier(st);
   let qBody="";
   if(q.type==="flag"){
     qBody=`<div class="qprompt">${q.prompt}</div><div class="qflag"><img src="https://flagcdn.com/w160/${q.subj}.png" alt="Flagge" onerror="this.style.display='none'"></div>${sel!==null?`<div class="qmeta">${q.meta||""}</div>`:""}`;
@@ -2990,7 +3003,7 @@ function render(){
       </div>
     </div>
     ${S.mpOpponent?`<div class="duell-bar-wrap"><div class="duell-lbl duell-you">Ich<span class="duell-score">${sc.toLocaleString()}</span></div><div class="duell-track"><div class="duell-fill-you" style="width:${duellPct(sc,S.mpOppScore||0)}%"></div><div class="duell-fill-opp" style="width:${duellPct(S.mpOppScore||0,sc)}%"></div></div><div class="duell-lbl duell-opp"><span class="duell-score">${(S.mpOppScore||0).toLocaleString()}</span>${esc(S.mpOpponent.slice(0,8))}</div></div>`:""}
-    ${st>=3?`<div style="text-align:center;font-size:.76rem;font-weight:700;color:#fb923c;margin-bottom:6px">${t.l}</div>`:""}
+    ${st>=3?`<div style="text-align:center;font-size:.76rem;font-weight:700;color:#fb923c;margin-bottom:6px">${_tr.l}</div>`:""}
     <div class="tbar${S.freezeActive?" frozen":""}"><div class="tfill" style="width:${p}%;background:${col}"></div></div>
     <div class="qcard">${qBody}<div class="qtimer" style="color:${col}">${tm}</div></div>
     ${sel===null?puBar:""}
