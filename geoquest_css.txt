@@ -16,10 +16,10 @@ input[type=text]::placeholder{color:var(--text3)}
 .g-stat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:3px 9px;font-size:.78rem;font-weight:700;color:var(--text)}
 .sound-btn{background:transparent;border:none;color:var(--text3);font-size:1rem;cursor:pointer;padding:4px;display:flex;align-items:center;width:28px;height:28px;border-radius:6px}
 .sound-btn:hover{color:var(--text2);background:var(--bg3)}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:300;transition:background .25s}
-.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:none;background:transparent;padding:0}
-.bn-icon{font-size:1.25rem;line-height:1}
-.bn-lbl{font-size:.55rem;font-weight:700;letter-spacing:.3px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:300;transition:background .25s;padding-bottom:env(safe-area-inset-bottom)}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;border:none;background:transparent;padding:0 2px;min-width:0}
+.bn-icon{font-size:1.15rem;line-height:1}
+.bn-lbl{font-size:.5rem;font-weight:700;letter-spacing:.2px;white-space:nowrap}
 .bn-item.active .bn-icon,.bn-item.active .bn-lbl{color:#10b981}
 .bn-item:not(.active) .bn-icon,.bn-item:not(.active) .bn-lbl{color:var(--text3)}
 .filter-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:.85rem;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -372,3 +372,8 @@ input[type=text]::placeholder{color:var(--text3)}
 /* Toast */
 .gq-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e293b;color:#f8fafc;padding:.55rem 1.1rem;border-radius:20px;font-size:.8rem;font-weight:600;z-index:9999;white-space:nowrap;max-width:92vw;box-shadow:0 4px 20px rgba(0,0,0,.4);pointer-events:none;animation:gqToastIn .22s ease}
 @keyframes gqToastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* Album shortcut banner in Home tab */
+.album-shortcut{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#1e3a5f,#1e4080);border:1.5px solid #3b82f6;border-radius:14px;padding:.7rem 1rem;margin-bottom:.65rem;cursor:pointer;transition:opacity .15s;color:#fff;font-weight:700;font-size:.9rem}
+.album-shortcut:active{opacity:.8}
+.album-shortcut-count{font-size:.75rem;background:rgba(255,255,255,.15);border-radius:20px;padding:.2rem .65rem;font-weight:600}

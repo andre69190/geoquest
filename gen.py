@@ -2251,11 +2251,15 @@ function renderHomeTab(){
       <div style="display:flex;align-items:center;gap:14px">
         <div style="font-size:2.2rem">⚔️</div>
         <div>
-          <div style="font-size:1rem;font-weight:900;color:var(--text)">Live 1vs1 Duell</div>
-          <div style="font-size:.74rem;color:var(--text2);margin-top:2px">Echtzeit gegen einen Freund spielen</div>
+          <div style="font-size:1rem;font-weight:900;color:#fff">Live 1vs1 Duell</div>
+          <div style="font-size:.74rem;color:rgba(255,255,255,.75);margin-top:2px">Echtzeit gegen einen Freund spielen</div>
         </div>
         <div style="margin-left:auto;background:#7c3aed;color:#fff;border-radius:20px;padding:.3rem .85rem;font-size:.76rem;font-weight:700">▶ Spielen</div>
       </div>
+    </div>
+    <div class="album-shortcut" onclick="S.tab='album';render()">
+      <span>\u{1F4D4} Kennzeichen-Album</span>
+      <span class="album-shortcut-count">${S.collectedPlates.length} gesammelt</span>
     </div>
     <div class="filter-bar">${chips}</div>
     ${catSection("pure_geo")}
@@ -2272,7 +2276,8 @@ function renderHomeTab(){
       S.diff==="casual"?"\u{1F7E2} Casual: Gro\u00dfe St\u00e4dte \u00b7 12s \u00b7 "+ROUNDS+" Runden":
       S.diff==="hardcore"?"\u{1F525} Hardcore: Alle St\u00e4dte \u00b7 8s \u00b7 "+ROUNDS+" Runden":
       "\u{1F480} Survival: Kein Fehler erlaubt \u00b7 8s \u00b7 \u221e Runden"
-    }</p>`;
+    }</p>
+    <div style="height:5rem"></div>`;
 }
 
 /* LERNEN TAB — Flashcards (Phase 23C) */
@@ -2827,7 +2832,6 @@ print(f'GeoQuest.html written: {size} KB')
 # Post-process: fix \! -> ! (bash heredoc artifact)
 raw = open(out,'rb').read()
 fixed_raw = raw.replace(b'\x5c\x21', b'\x21')
-n_fixed = raw.count(b'\x5c\x21')
 open(out,'wb').write(fixed_raw)
-print(f'Post-process: fixed {n_fixed} backslash-bang occurrences')
-                                                                                                               
+cnt=fixed_raw.count(b'\x5c\x21')
+print(f'Post-process: fixed {fixed_raw.count(b"!")} backslash-bang occurrences')
