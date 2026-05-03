@@ -1269,7 +1269,7 @@ let S={
   collectedPlates:loadCollectedPlates(),
   ligaData:[],ligaLoading:false,
   titleShop:false,
-  spotterInput:"",spotterMsg:"",spotterOk:null,albumView:"list",albumCountry:"all",
+  spotterInput:"",spotterMsg:"",spotterOk:null,albumView:"list",albumCountry:"all",spotterCountry:localStorage.getItem("gq_spotter_country")||"all",
   collFilter:"all",collRarity:"all",collSearch:"",
 };
 let tIv=null,fTo=null,toastTo=null;
@@ -1573,13 +1573,17 @@ function answer(a){
     /* Duolingo casual: queue wrong question for retry */
     if(S.diff==="casual"&&\!S.q._retry){if(\!S.queueExtra)S.queueExtra=[];S.queueExtra.push({...S.q,_retry:true});}
   }
-  /* Phase 37: collect plate */
+  /* Phase 43: collect plate with code::country key */
   if(ok&&(S.mode==="plate_casual"||S.mode==="plate_hard")&&S.q.subj){
     const _code=S.q.subj;
-    if(\!S.collectedPlates.includes(_code)){
-      S.collectedPlates.push(_code);saveCollectedPlates(S.collectedPlates);
-      const _pc=PLATES_DATA.find(p=>p.code===_code);
-      showToast("⭐ Neu gesammelt: "+_code+(_pc?" · "+_pc.region:"")+"\! ("+rarityLabel(getRarity(_code))+")");
+    const _pc=PLATES_DATA.find(p=>p.code===_code);
+    if(_pc){
+      const _key=collKey(_code,_pc.country);
+      if(\!S.collectedPlates.includes(_key)){
+        S.collectedPlates.push(_key);saveCollectedPlates(S.collectedPlates);
+        const _allR=PLATES_DATA.filter(p=>p.code===_code&&p.country===_pc.country);
+        showToast("⭐ Neu: "+_code+" — "+_pc.region+(_allR.length>1?" +"+(_allR.length-1)+" weitere":"")+"!");
+      }
     }
   }
   S.pts=pts;S.lid=S.q.lid;S.ph="feedback";render();
@@ -2181,10 +2185,9 @@ function renderBottomNav(){
 }
 
 
-/* ─── Phase 41: Kennzeichen-Album (Redesign) ─────────────────────────── */
+/* ─── Phase 43: Kennzeichen-Album ─────────────────────────────────────── */
 
-/* Country name normaliser: PLATES_DATA may use English or German country names;
-   TopoJSON uses English. We try both via simple lookup. */
+/* Country name → English for world-110m matching */
 const PLATE_COUNTRY_EN={
   "Deutschland":"Germany","Österreich":"Austria","Frankreich":"France",
   "Italien":"Italy","Spanien":"Spain","Polen":"Poland","Tschechien":"Czechia",
@@ -2201,56 +2204,138 @@ const PLATE_COUNTRY_EN={
 };
 function plateCountryToEn(c){return PLATE_COUNTRY_EN[c]||c;}
 
+/* ── Collection key helpers ──────────────────────────────────────────────
+   collectedPlates stores "CODE::Country" keys to handle cross-country dups
+   e.g. "HD::Germany" and "HD::Romania" are separate entries
+   ──────────────────────────────────────────────────────────────────────── */
+function collKey(code,country){return code+"::"+country;}
+function parseCollKey(k){const i=k.indexOf("::");return i<0?{code:k,country:"?"}:{code:k.slice(0,i),country:k.slice(i+2)};}
+function isCollected(code,country){return S.collectedPlates.includes(collKey(code,country));}
+
+/* Migrate old plain-code format → code::country */
+function migrateCollectedPlates(){
+  if(\!PLATES_DATA.length)return;
+  let changed=false;
+  S.collectedPlates=S.collectedPlates.map(entry=>{
+    if(entry.includes("::"))return entry; /* already new format */
+    const code=entry.toUpperCase();
+    const matches=[...new Set(PLATES_DATA.filter(p=>p.code===code).map(p=>p.country))];
+    if(matches.length===1){changed=true;return collKey(code,matches[0]);}
+    if(matches.length>1){changed=true;return collKey(code,matches[0]);} /* take first if ambiguous */
+    return null; /* unknown code — discard */
+  }).filter(Boolean);
+  /* Deduplicate */
+  S.collectedPlates=[...new Set(S.collectedPlates)];
+  if(changed)saveCollectedPlates(S.collectedPlates);
+}
+
+/* ── Unique deduped plate view per country ───────────────────────────────
+   PLATES_DATA may have 61 rows for "HD" in Germany (61 municipalities).
+   We want ONE entry per code per country in the album.
+   ──────────────────────────────────────────────────────────────────────── */
+function getUniquePlatesForCountry(country){
+  /* Returns [{code, mainRegion, extraCount}] — one entry per unique code */
+  const codeMap={};
+  PLATES_DATA.filter(p=>p.country===country).forEach(p=>{
+    if(\!codeMap[p.code])codeMap[p.code]={code:p.code,mainRegion:p.region,count:0};
+    codeMap[p.code].count++;
+  });
+  return Object.values(codeMap).sort((a,b)=>a.code.localeCompare(b.code));
+}
+
+/* Total unique code::country combos (= album size) */
+function totalUniquePlates(){
+  const seen=new Set();
+  PLATES_DATA.forEach(p=>seen.add(collKey(p.code,p.country)));
+  return seen.size;
+}
+
+/* ── Spotter ─────────────────────────────────────────────────────────────*/
 function spotterCollect(){
   const code=(S.spotterInput||"").toUpperCase().trim();
   if(\!code){S.spotterMsg="Bitte Kennzeichen eingeben\!";S.spotterOk=null;render();return;}
-  const plate=PLATES_DATA.find(p=>p.code===code);
-  if(\!plate){S.spotterMsg="❌ Unbekanntes Kennzeichen.";S.spotterOk=false;render();return;}
-  if(S.collectedPlates.includes(code)){
-    S.spotterMsg="\u{1F4CB} "+code+" ist bereits in deiner Sammlung\!";S.spotterOk=null;
+  const country=S.spotterCountry&&S.spotterCountry\!=="all"?S.spotterCountry:null;
+  /* Find matching plates filtered by country if set */
+  const candidates=PLATES_DATA.filter(p=>p.code===code&&(country===null||p.country===country));
+  if(\!candidates.length){
+    /* Check if code exists in other countries */
+    const elsewhere=PLATES_DATA.filter(p=>p.code===code);
+    if(elsewhere.length){
+      const others=[...new Set(elsewhere.map(p=>p.country))].join(", ");
+      S.spotterMsg="❓ '"+code+"' nicht in "+(country||"Alle")+" — aber in: "+others;
+    }else{
+      S.spotterMsg="❌ Unbekanntes Kennzeichen: "+code;
+    }
+    S.spotterOk=false;render();return;
+  }
+  const mainPlate=candidates[0];
+  const mainCountry=mainPlate.country;
+  const key=collKey(code,mainCountry);
+  if(S.collectedPlates.includes(key)){
+    S.spotterMsg="\u{1F4CB} "+code+" ("+mainCountry+") bereits in der Sammlung\!";S.spotterOk=null;
   }else{
-    S.collectedPlates.push(code);saveCollectedPlates(S.collectedPlates);
-    S.spotterMsg="\u{1F389} Neu: "+plate.region+"!";S.spotterOk=true;soundStamp();
+    S.collectedPlates.push(key);saveCollectedPlates(S.collectedPlates);
+    const extras=candidates.length-1;
+    S.spotterMsg="\u{1F389} Neu: "+code+" — "+mainPlate.region+(extras?" +"+extras+" weitere":"")+"\!";
+    S.spotterOk=true;soundStamp();
   }
   S.spotterInput="";render();
 }
 
-function renderRealPlate(code,region){
+/* ── Real plate HTML ─────────────────────────────────────────────────────*/
+function renderRealPlate(code,region,extra){
   return`<div class="real-plate">
     <div class="rp-eu-strip"><span class="rp-stars">★</span></div>
     <div class="rp-body">
       <div class="rp-code">${esc(code)}</div>
-      ${region?`<div class="rp-region">${esc(region)}</div>`:""}
+      ${region?`<div class="rp-region">${esc(region)}${extra>0?" +"+extra+" weitere":""}</div>`:""}
     </div>
   </div>`;
 }
 
+/* ── Collection Screen ───────────────────────────────────────────────────*/
 function renderCollectionScreen(){
   if(\!PLATES_DATA.length)return`<div class="panel" style="text-align:center;padding:2rem"><div style="font-size:2rem">⏳</div><p style="color:var(--text3);margin-top:.5rem">Kennzeichen-Daten werden geladen…</p></div>`;
+  /* Run migration once per session */
+  if(\!window._platesMigrated){window._platesMigrated=true;migrateCollectedPlates();}
+
   const coll=S.collectedPlates;
-  const total=PLATES_DATA.length;
+  const total=totalUniquePlates();
   const pct=Math.round(coll.length/Math.max(total,1)*100);
   const countries=[...new Set(PLATES_DATA.map(p=>p.country))].sort();
   const view=S.albumView||"list";
   const acF=S.albumCountry||"all";
+  const sCountry=S.spotterCountry||"all";
 
-  /* Spotter */
+  /* Achievements: all unique codes in a country collected */
+  const achs=countries.filter(c=>{
+    const uCodes=getUniquePlatesForCountry(c);
+    return uCodes.length>0&&uCodes.every(u=>isCollected(u.code,c));
+  });
+
+  /* ── Spotter ── */
   const spotVal=S.spotterInput||"";
   const spotMsg=S.spotterMsg||"";
-  const spotCol=S.spotterOk===true?"#10b981":S.spotterOk===false?"#ef4444":"#f59e0b";
+  const spotCol=S.spotterOk===true?"#10b981":S.spotterOk===false?"#ef4444":"var(--text3)";
   const spotter=`<div class="album-spotter">
-    <div class="album-spotter-title">\u{1F697} Roadtrip-Spotter</div>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:.4rem">
+      <span class="album-spotter-title">\u{1F697} Roadtrip-Spotter</span>
+      <select class="spotter-country-sel" onchange="S.spotterCountry=this.value;localStorage.setItem('gq_spotter_country',this.value);S.spotterMsg='';render()">
+        <option value="all" ${sCountry==="all"?"selected":""}>\u{1F30D} Alle Länder</option>
+        ${countries.map(c=>`<option value="${esc(c)}" ${sCountry===c?"selected":""}>${esc(c)}</option>`).join("")}
+      </select>
+    </div>
     <div class="album-spotter-sub">Kennzeichen gesehen? Sofort eintragen\!</div>
     <div style="display:flex;gap:8px">
       <input type="text" maxlength="5" placeholder="z.B. MÜ" value="${esc(spotVal)}"
         oninput="S.spotterInput=this.value.toUpperCase();this.value=this.value.toUpperCase();S.spotterMsg='';render()"
         class="spotter-input">
-      <button class="btn-p" style="width:auto;padding:.5rem 1.1rem;margin-bottom:0;font-size:.95rem" onclick="spotterCollect()">\u{1F50D} Sammeln</button>
+      <button class="btn-p" style="width:auto;padding:.5rem 1rem;margin-bottom:0" onclick="spotterCollect()">\u{1F50D} Sammeln</button>
     </div>
-    ${spotMsg?`<div style="font-size:.82rem;font-weight:700;text-align:center;color:${spotCol};padding:.35rem 0">${spotMsg}</div>`:""}
+    ${spotMsg?`<div style="font-size:.82rem;font-weight:700;text-align:center;color:${spotCol};padding:.35rem 0;margin-top:4px">${spotMsg}</div>`:""}
   </div>`;
 
-  /* Progress bar */
+  /* ── Progress ── */
   const progressBar=`<div class="album-progress-wrap">
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
       <span style="font-weight:900;font-size:1rem">\u{1F4D4} Kennzeichen-Album</span>
@@ -2260,14 +2345,10 @@ function renderCollectionScreen(){
     <div style="text-align:right;font-size:.65rem;color:var(--text3);margin-top:2px">${pct}% vollständig</div>
   </div>`;
 
-  /* Achievements */
-  const achs=countries.filter(c=>{
-    const cp=PLATES_DATA.filter(p=>p.country===c);
-    return cp.length>0&&cp.every(p=>coll.includes(p.code));
-  });
+  /* ── Achievements ── */
   const achBar=achs.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.7rem">${achs.map(c=>`<span class="coll-ach">\u{1F3C6} ${esc(c)}-Experte</span>`).join("")}</div>`:"";
 
-  /* View toggle + country filter */
+  /* ── Controls ── */
   const controls=`<div style="display:flex;gap:6px;margin-bottom:.7rem;align-items:center">
     <button class="view-toggle-btn${view==="list"?" active":""}" onclick="S.albumView='list';render()">\u{1F4DD} Liste</button>
     <button class="view-toggle-btn${view==="map"?" active":""}" onclick="S.albumView='map';render()">\u{1F5FA} Karte</button>
@@ -2277,117 +2358,152 @@ function renderCollectionScreen(){
     </select>
   </div>`;
 
-  /* LIST VIEW — performance-safe: group by country, only render collected plates */
+  /* ── List view: deduplicated per code per country ── */
   let listContent="";
   if(view==="list"){
     const showCountries=acF==="all"?countries:[acF];
-    listContent=showCountries.map(c=>{
-      const countryPlates=PLATES_DATA.filter(p=>p.country===c);
-      const collectedHere=countryPlates.filter(p=>coll.includes(p.code));
-      if(acF==="all"&&collectedHere.length===0)return""; /* skip empty countries unless filtered */
-      const cPct=Math.round(collectedHere.length/Math.max(countryPlates.length,1)*100);
+    listContent=showCountries.map(country=>{
+      const uPlates=getUniquePlatesForCountry(country);
+      const collHere=uPlates.filter(u=>isCollected(u.code,country));
+      if(acF==="all"&&collHere.length===0)return"";
+      const cPct=Math.round(collHere.length/Math.max(uPlates.length,1)*100);
       return`<div class="album-country-section">
         <div class="album-country-header">
-          <span style="font-weight:900;font-size:.88rem">${esc(c)}</span>
-          <span style="font-size:.72rem;color:var(--text3)">${collectedHere.length}&thinsp;/&thinsp;${countryPlates.length}</span>
+          <span style="font-weight:900;font-size:.88rem">${esc(country)}</span>
+          <span style="font-size:.72rem;color:var(--text3)">${collHere.length}&thinsp;/&thinsp;${uPlates.length} Kürzel</span>
         </div>
-        <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-bottom:.6rem">
+        <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-bottom:.65rem">
           <div style="height:100%;width:${cPct}%;background:#10b981;border-radius:2px"></div>
         </div>
-        ${collectedHere.length?`<div class="real-plate-grid">${collectedHere.map(p=>renderRealPlate(p.code,p.region)).join("")}</div>`
-          :`<div style="color:var(--text3);font-size:.75rem;text-align:center;padding:.5rem 0">Noch keine Kennzeichen aus ${esc(c)} gesammelt.</div>`}
+        ${collHere.length
+          ?`<div class="real-plate-grid">${collHere.map(u=>renderRealPlate(u.code,u.mainRegion,u.count-1)).join("")}</div>`
+          :`<div style="color:var(--text3);font-size:.75rem;text-align:center;padding:.5rem 0">Noch nichts aus ${esc(country)} gesammelt — spiele Kennzeichen oder nutze den Spotter!</div>`}
       </div>`;
     }).join("");
-    if(\!listContent)listContent=`<div style="text-align:center;padding:2rem;color:var(--text3)">Noch nichts gesammelt – spiele EU-Kennzeichen oder benutze den Spotter!</div>`;
+    if(\!listContent)listContent=`<div style="text-align:center;padding:2rem;color:var(--text3)">Noch nichts gesammelt\!<br><small>Spiele EU-Kennzeichen oder benutze den Spotter oben.</small></div>`;
   }
 
-  /* MAP VIEW */
   const mapContent=view==="map"?`<div id="album-map-svg" class="album-map-container"></div>`:"";
 
-  const html=`<div>
-    ${spotter}
-    ${progressBar}
-    ${achBar}
-    ${controls}
-    ${listContent}
-    ${mapContent}
-  </div>`;
+  if(view==="map")requestAnimationFrame(()=>drawAlbumMap());
 
-  /* After render: draw map */
-  if(view==="map"){
-    requestAnimationFrame(()=>drawAlbumMap());
-  }
-  return html;
+  return`<div>${spotter}${progressBar}${achBar}${controls}${listContent}${mapContent}</div>`;
 }
 
+/* ── Trophy Map ──────────────────────────────────────────────────────────*/
 function drawAlbumMap(){
   const el=document.getElementById("album-map-svg");
   if(\!el||typeof d3==="undefined"||typeof topojson==="undefined"||\!window.WORLD_TOPO)return;
+
   const coll=S.collectedPlates;
-  /* build set of EN country names that have collected plates */
-  const collCountrySet=new Set();
-  coll.forEach(code=>{
-    const p=PLATES_DATA.find(x=>x.code===code);
-    if(p)collCountrySet.add(plateCountryToEn(p.country));
+  /* Collected countries (EN) → unique codes collected there */
+  const collByCountryEn={};
+  coll.forEach(key=>{
+    const {code,country}=parseCollKey(key);
+    const en=plateCountryToEn(country);
+    if(\!collByCountryEn[en])collByCountryEn[en]=[];
+    /* Only add unique codes */
+    if(\!collByCountryEn[en].includes(code))collByCountryEn[en].push(code);
   });
-  /* country→collected plates lookup for popup */
-  const countryPlatesMap={};
-  coll.forEach(code=>{
-    const p=PLATES_DATA.find(x=>x.code===code);
-    if(\!p)return;
-    const en=plateCountryToEn(p.country);
-    if(\!countryPlatesMap[en])countryPlatesMap[en]=[];
-    countryPlatesMap[en].push(p);
-  });
+  const collCountrySet=new Set(Object.keys(collByCountryEn));
 
-  const W=el.clientWidth||(window.innerWidth||360);
-  const H=Math.min(W*0.56,260);
+  const W=el.clientWidth||(window.innerWidth-32)||360;
+  const H=Math.min(W*0.58,280);
   const proj=d3.geoNaturalEarth1().scale(W/6.3).translate([W/2,H/2]);
-  const path=d3.geoPath().projection(proj);
-  const countries=topojson.feature(window.WORLD_TOPO,window.WORLD_TOPO.objects.countries);
+  const geoPath=d3.geoPath().projection(proj);
+  const countriesGeo=topojson.feature(window.WORLD_TOPO,window.WORLD_TOPO.objects.countries);
 
-  const svg=d3.select(el).html("").append("svg")
+  d3.select(el).html("");
+  const svg=d3.select(el).append("svg")
     .attr("width","100%").attr("height",H)
-    .style("border-radius","12px").style("background","var(--bg3)");
+    .style("border-radius","12px").style("display","block")
+    .style("background","#c8dff0");
+
+  /* Graticule */
+  svg.append("path").datum(d3.geoGraticule()())
+    .attr("d",geoPath).attr("fill","none")
+    .attr("stroke","#b0cce0").attr("stroke-width",.3);
+
   const g=svg.append("g");
 
-  g.selectAll("path").data(countries.features)
-    .join("path")
-    .attr("d",path)
+  /* Country fills */
+  g.selectAll("path.country").data(countriesGeo.features)
+    .join("path").attr("class","country")
+    .attr("d",geoPath)
     .attr("fill",d=>{
       const name=d.properties&&d.properties.name;
-      return collCountrySet.has(name)?"#10b981":"var(--bg4)";
+      return collCountrySet.has(name)?"#10b981":"#d4dfe8";
     })
-    .attr("stroke","var(--bg2)").attr("stroke-width",.5)
-    .style("cursor",d=>(d.properties&&collCountrySet.has(d.properties.name))?"pointer":"default")
-    .on("click",function(ev,d){
-      const name=d.properties&&d.properties.name;
-      if(\!name||\!collCountrySet.has(name))return;
-      const plates=countryPlatesMap[name]||[];
-      /* remove old popup */
-      d3.select(el).selectAll(".map-popup").remove();
-      /* show popup */
-      const [mx,my]=d3.pointer(ev,el);
-      const popW=Math.min(220,W-20);
-      const px=Math.min(mx,W-popW-8);
-      const py=Math.max(my-40,4);
-      const pop=d3.select(el).append("div")
-        .attr("class","map-popup")
-        .style("left",px+"px").style("top",py+"px").style("max-width",popW+"px");
-      pop.append("div").attr("class","map-popup-title").text(name+" ("+plates.length+")");
-      const grid=pop.append("div").attr("class","map-popup-grid");
-      plates.slice(0,12).forEach(p=>{
-        const item=grid.append("div").attr("class","real-plate real-plate-sm");
-        item.append("div").attr("class","rp-eu-strip").append("span").attr("class","rp-stars").text("★");
-        const body=item.append("div").attr("class","rp-body");
-        body.append("div").attr("class","rp-code").text(p.code);
-      });
-      if(plates.length>12)pop.append("div").style("font-size",".68rem").style("color","var(--text3)").style("margin-top","4px").text("+"+(plates.length-12)+" weitere");
-      pop.append("button").attr("class","map-popup-close").text("✕").on("click",function(){d3.select(el).selectAll(".map-popup").remove();});
-    });
+    .attr("stroke","#fff").attr("stroke-width",.4);
 
-  /* Pan/zoom */
-  svg.call(d3.zoom().scaleExtent([1,8]).on("zoom",ev=>{g.attr("transform",ev.transform);}));
+  /* Pins at country centroids for collected countries */
+  const pinData=countriesGeo.features.filter(d=>{
+    return d.properties&&collCountrySet.has(d.properties.name);
+  }).map(d=>{
+    const name=d.properties.name;
+    const c=geoPath.centroid(d);
+    return{name,c,codes:collByCountryEn[name]||[]};
+  }).filter(d=>d.c&&\!isNaN(d.c[0])&&\!isNaN(d.c[1]));
+
+  /* Drop shadow filter */
+  const defs=svg.append("defs");
+  const filter=defs.append("filter").attr("id","pin-shadow");
+  filter.append("feDropShadow").attr("dx",0).attr("dy",1).attr("stdDeviation",1.5).attr("flood-opacity",.35);
+
+  const pinG=g.append("g").attr("class","pins");
+  pinData.forEach(d=>{
+    const pg=pinG.append("g")
+      .attr("transform","translate("+d.c[0]+","+d.c[1]+")")
+      .style("cursor","pointer")
+      .on("click",function(ev){
+        ev.stopPropagation();
+        d3.select(el).selectAll(".map-popup").remove();
+        /* Position popup near pin, avoid overflow */
+        const rect=el.getBoundingClientRect();
+        const px=Math.min(d.c[0]+8,W-180);
+        const py=Math.max(d.c[1]-60,4);
+        const pop=d3.select(el).append("div")
+          .attr("class","map-popup")
+          .style("left",px+"px").style("top",py+"px")
+          .style("min-width","150px").style("max-width","200px");
+        pop.append("button").attr("class","map-popup-close")
+          .text("✕").on("click",()=>d3.select(el).selectAll(".map-popup").remove());
+        pop.append("div").attr("class","map-popup-title")
+          .text(d.name+" ("+d.codes.length+")");
+        const grid=pop.append("div").attr("class","map-popup-grid");
+        d.codes.slice(0,9).forEach(code=>{
+          const plates=PLATES_DATA.filter(p=>p.code===code&&plateCountryToEn(p.country)===d.name);
+          const region=plates.length?plates[0].region:"";
+          const item=grid.append("div").attr("class","real-plate real-plate-sm");
+          item.append("div").attr("class","rp-eu-strip")
+            .append("span").attr("class","rp-stars").text("★");
+          const body=item.append("div").attr("class","rp-body");
+          body.append("div").attr("class","rp-code").text(code);
+          if(plates.length>1)body.append("div").attr("class","rp-region").text("+"+(plates.length-1));
+        });
+        if(d.codes.length>9)pop.append("div")
+          .style("font-size",".65rem").style("color","var(--text3)").style("margin-top","3px")
+          .text("+"+(d.codes.length-9)+" weitere");
+      });
+
+    /* Pin circle with glow */
+    pg.append("circle").attr("r",7).attr("fill","#10b981")
+      .attr("stroke","#fff").attr("stroke-width",1.5)
+      .attr("filter","url(#pin-shadow)");
+    /* Count badge */
+    pg.append("text").attr("text-anchor","middle").attr("dy","0.35em")
+      .attr("fill","#fff").attr("font-size","6px").attr("font-weight","bold")
+      .attr("pointer-events","none")
+      .text(d.codes.length>9?"9+":d.codes.length);
+  });
+
+  /* Click outside popup closes it */
+  svg.on("click",()=>d3.select(el).selectAll(".map-popup").remove());
+
+  /* Pan/zoom (on g group, not pins layer) */
+  svg.call(d3.zoom().scaleExtent([1,10]).on("zoom",ev=>{
+    g.attr("transform",ev.transform);
+  }));
 }
 
 /* HOME TAB */
@@ -2450,7 +2566,7 @@ function renderHomeTab(){
       <div style="width:44px;height:44px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0">\u{1F4D4}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:900;font-size:.9rem;color:var(--text)">Kennzeichen-Album & Spotter</div>
-        <div style="font-size:.72rem;color:var(--text3);margin-top:2px">${S.collectedPlates.length} von ${PLATES_DATA.length||"..."} gesammelt</div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:2px">${S.collectedPlates.length} von ${totalUniquePlates()||"?"} gesammelt</div>
       </div>
       <div style="color:#3b82f6;font-size:1.1rem;font-weight:700">→</div>
     </div>
