@@ -470,6 +470,8 @@ function rng(){return rngSeed\!==null?seededRand():Math.random();}
 let PLATES_DATA=[],CURR_REAL=[],CAPS_POP=[],RIVERS_REAL=[],NEIGHBORS={},AREA_DATA=[];
 
 const CITIES=PLACEHOLDER_CJ;
+/* Build CAPS_POP from aggregated city populations per country */
+(function(){const m={};CITIES.forEach(c=>{if(!m[c.c])m[c.c]=0;m[c.c]+=c.pop;});CAPS_POP=Object.entries(m).map(([c,pop])=>({c,pop})).filter(x=>x.pop>500000);})();
 const COUNTRIES=[
   {c:"Afghanistan",cc:"af",ct:"Asia",sr:"Southern Asia"},{c:"Algeria",cc:"dz",ct:"Africa",sr:"Northern Africa"},
   {c:"Angola",cc:"ao",ct:"Africa",sr:"Middle Africa"},{c:"Argentina",cc:"ar",ct:"South America",sr:"South America"},
@@ -707,11 +709,11 @@ function genNeighborQ(){
   if(type2&&neighborList.length>=2){
     const ans=nonNb[~~(rng()*nonNb.length)];
     const dis=neighborList.slice().sort(()=>rng()-.5).slice(0,2);
-    return{type:"neighbor",prompt:"Grenzt NICHT an "+country+"?",subj:country,ans,opts:sh([ans,...dis]),lid:country+'|'+ans,cc:ccFromCountry(country)||''};
+    return{type:"neighbor",prompt:"Grenzt NICHT an\u2026?",subj:country,ans,opts:sh([ans,...dis]),lid:country+'|'+ans,cc:ccFromCountry(country)||''};
   }else{
     const ans=neighborList[~~(rng()*neighborList.length)];
     const dis=nonNb.slice().sort(()=>rng()-.5).slice(0,3);
-    return{type:"neighbor",prompt:"Welches Land grenzt an "+country+"?",subj:country,ans,opts:sh([ans,...dis.slice(0,3)]),lid:country+'|'+ans,cc:ccFromCountry(country)||''};
+    return{type:"neighbor",prompt:"Welches Land grenzt an\u2026?",subj:country,ans,opts:sh([ans,...dis.slice(0,3)]),lid:country+'|'+ans,cc:ccFromCountry(country)||''};
   }
 }
 
@@ -1929,7 +1931,7 @@ function render(){
   const col=tc(),p=pct(),t=tier(st);
   let qBody="";
   if(q.type==="flag"){
-    qBody=`<div class="qprompt">${q.prompt}</div><div class="qflag"><img src="https://flagcdn.com/w160/${q.subj}.png" alt="Flagge" onerror="this.style.display='none'"></div><div class="qmeta">${q.meta||""}</div>`;
+    qBody=`<div class="qprompt">${q.prompt}</div><div class="qflag"><img src="https://flagcdn.com/w160/${q.subj}.png" alt="Flagge" onerror="this.style.display='none'"></div>${sel!==null?`<div class="qmeta">${q.meta||""}</div>`:""}`;
   }else if(q.type==="outline"){
     qBody=`<div class="qprompt">${q.prompt}</div><div class="outline-wrap" id="gq-outline-svg"></div>`;
   }else if(q.type==="food"){
@@ -1979,7 +1981,7 @@ function render(){
         <div style="font-size:1.2rem;margin-top:4px">${flagOf(q.subj)}</div>
       </div>`;
   }else{
-    qBody=`<div class="qprompt">${q.prompt}</div><div class="qmain">${q.subj}</div><div class="qmeta">${q.meta||""}</div>`;
+    qBody=`<div class="qprompt">${q.prompt}</div><div class="qmain">${q.subj}</div>${sel!==null?`<div class="qmeta">${q.meta||""}</div>`:""}`;
   }
   /* After-answer reveal for plate casual */
   let plateReveal="";
@@ -2439,7 +2441,7 @@ function drawAlbumMap(){
 
   const W=el.clientWidth||(window.innerWidth-32)||360;
   const H=Math.min(W*0.58,280);
-  const proj=d3.geoNaturalEarth1().scale(W/6.3).translate([W/2,H/2]);
+  const proj=d3.geoMercator().scale(W*0.95).center([12,52]).translate([W/2,H/2]);
   const geoPath=d3.geoPath().projection(proj);
   const countriesGeo=topojson.feature(window.WORLD_TOPO,window.WORLD_TOPO.objects.countries);
 
