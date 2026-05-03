@@ -1332,7 +1332,8 @@ ga:{
 function t(key,vars){
   const lang=(typeof S!=='undefined'&&S.language)||localStorage.getItem('gq_lang')||'de';
   let s=(LANG[lang]&&LANG[lang][key])||(LANG.en&&LANG.en[key])||(LANG.de&&LANG.de[key])||key;
-  if(vars)Object.keys(vars).forEach(k=>{s=s.replace(new RegExp('\\{'+k+'\\}','g'),vars[k]);});
+  if(!s)return key;  /* never return undefined */
+  if(vars)Object.keys(vars).forEach(k=>{const rv=vars[k]??"-";s=s.replace(new RegExp('\\{'+k+'\\}','g'),String(rv));});
   return s;
 }
 /* Backwards-compat alias */
@@ -1346,7 +1347,7 @@ function setLanguage(lang){
 }
 /* getCountryName(cc, lang) — Intl.DisplayNames for all 25 locales */
 function getCountryName(cc,lang){
-  if(!cc)return cc;
+  if(!cc||typeof cc!=="string")return cc||"";
   try{
     const locMap={de:'de-DE',en:'en-GB',pl:'pl-PL',fr:'fr-FR',es:'es-ES',it:'it-IT',
       nl:'nl-NL',pt:'pt-PT',ro:'ro-RO',hu:'hu-HU',cs:'cs-CZ',sk:'sk-SK',hr:'hr-HR',
@@ -1358,7 +1359,7 @@ function getCountryName(cc,lang){
 }
 /* displayCountry(name) — translate country display name for current language */
 function displayCountry(name){
-  if(!name)return name;
+  if(!name||typeof name!=="string")return name||"";
   const lang=(typeof S!=='undefined'&&S.language)||localStorage.getItem('gq_lang')||'de';
   const co=COUNTRIES.find(c=>c.c===name);
   if(!co)return name;
@@ -2068,7 +2069,7 @@ async function doLogin(){
   if(error){S.authError=error.message==="Invalid login credentials"?"E-Mail oder Passwort falsch.":error.message;S.authLoading=false;render();return;}
   sbUser=data.user;
   await loadProfile();
-  S.authLoading=false;S.authEmail="";S.authPassword="";S.authError="";
+  S.authLoading=false;S.authEmail="";S.authPassword="";S.authConfirm="";S.authError="";
   S.tab="home";
   render();
 }
@@ -2079,18 +2080,25 @@ async function doLogout(){
   await sb.auth.signOut();
   sbUser=null;sbProfile=null;sbStamps=new Set();
   try{localStorage.removeItem("gq_username");}catch(e){}
+  /* Reset UI state — prevents stale mid-game or modal views after logout */
+  S.ph="menu";S.tab="home";S.mpModal=false;S.payModal=false;S.lockModal=null;
+  S.authEmail="";S.authPassword="";S.authConfirm="";S.authError="";
   const{data}=await sb.auth.signInAnonymously();
   if(data)sbUser=data.user;
   render();
 }
 async function saveSession(mode,score,bs,correct,durationMs){
+  /* Sanity-cap score before submitting — max honest = ROUNDS*(BASE+12*TB)*3*3 */
+  const _maxScore=Math.ceil(ROUNDS*(BASE+12*TB)*3*3*1.1);
+  score=Math.min(score,_maxScore);
+  bs=Math.min(bs,ROUNDS);
+  correct=Math.min(correct,ROUNDS);
   /* Phase 33 Teil 2: notify opponent at game end */
   if(window.mpGameCh&&S.mpOpponent){
     window.mpGameCh.send({type:"broadcast",event:"game_over",
       payload:{score,name:sbProfile?.username||"Ich",correct}}).then(()=>{},()=>{});
     window.mpGameCh=null;
   }
-  if(!sb||!sbUser)return;
   if(!sb||!sbUser?.id)return;
   await sb.from("game_sessions").insert({user_id:sbUser.id,mode,score,best_streak:bs,rounds:ROUNDS,accuracy:Math.round(correct/ROUNDS*100),username:sbProfile?.username||null});
   /* Use RPC to prevent client-side score tampering */
@@ -2183,7 +2191,7 @@ let tIv=null,fTo=null,toastTo=null;
 
 /* ── Phase 42: Anti-Cheat — Proxy wrapper for S in console ── */
 (function(){
-  const GUARDED=new Set(["sc","correct","st","bs","collectedPlates","sbProfile"]);
+  const GUARDED=new Set(["sc","correct","st","bs","pts","collectedPlates","sbProfile"]);
   if(typeof Proxy==="undefined")return;
   try{
     const _real=S;
@@ -2833,6 +2841,7 @@ function render(){
 
   /* PLAYING / FEEDBACK */
   const{sc,st,bs,rd,tm,q,sel,ok,pts,mode,diff}=S;
+  if(!q){S.ph="menu";S.q=null;render();return;}  /* guard: q not yet set */
   const col=tc(),p=pct(),t=tier(st);
   let qBody="";
   if(q.type==="flag"){
