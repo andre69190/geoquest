@@ -429,7 +429,8 @@ print('Lifestyle data: Food', len(FOOD), '| Brands', len(BRANDS), '| Currencies'
 import os as _os
 
 # CSS
-CSS = open('/tmp/geoquest_css.txt','r',encoding='utf-8').read()
+_css_path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'geoquest_css.txt')
+CSS = open(_css_path,'r',encoding='utf-8').read()
 
 # Phase 28 data payloads — loaded at runtime via fetch()
 print('CSS ready:', len(CSS), 'chars')
@@ -1196,8 +1197,8 @@ async function fetchLeaderboard(mode){
 }
 
 /* MASTERY */
-function loadMastery(){try{return JSON.parse(localStorage.getItem("gq_mastery")||"{}")}catch(e){return{}}}
-function saveMastery(d){try{localStorage.setItem("gq_mastery",JSON.stringify(d))}catch(e){}}
+function loadMastery(){return _gqLoad("gq_mastery",{});}
+function saveMastery(d){_gqSave("gq_mastery",d);}
 function getMasteryRank(v,p){if(v>=15||p>=3)return"gold";if(v>=5||p>=1)return"silver";if(v>=1)return"bronze";return null;}
 function getTravelRank(n){return n>=50?"Weltbuerger":n>=30?"Globetrotter":n>=15?"Weltenbummler":n>=5?"Reisender":"Einheimischer";}
 function checkMastery(){
@@ -1272,6 +1273,35 @@ let S={
   collFilter:"all",collRarity:"all",collSearch:"",
 };
 let tIv=null,fTo=null,toastTo=null;
+
+/* ── Phase 42: Anti-Cheat — Proxy wrapper for S in console ── */
+(function(){
+  const GUARDED=new Set(["sc","correct","st","bs","collectedPlates","sbProfile"]);
+  if(typeof Proxy==="undefined")return;
+  try{
+    const _real=S;
+    const _p=new Proxy(_real,{
+      set(t,k,v){
+        if(GUARDED.has(k)){
+          /* Check if call is from our own code (has game functions in stack) */
+          const stk=(new Error()).stack||"";
+          const trusted=["answer","startGame","mpCountdown","lq","nextRound",
+            "checkMastery","spotterCollect","saveSession","loadData","initAuth"];
+          const ok=trusted.some(fn=>stk.includes(fn));
+          if(!ok){
+            console.warn("%c🚫 GeoQuest: Schummeln erkannt! Feld '"+k+"' ist geschützt.",
+              "color:#ef4444;font-weight:bold;font-size:14px");
+            return true; /* silent block */
+          }
+        }
+        t[k]=v;return true;
+      }
+    });
+    /* Shadow window.S with the guarded proxy */
+    Object.defineProperty(window,"S",{get:()=>_p,configurable:false,enumerable:false});
+  }catch(e){}
+})();
+
 
 /* DARK MODE */
 function applyTheme(){
@@ -1512,6 +1542,12 @@ function lq(){
   render();
   tIv=setInterval(()=>{S.tm--;if(S.tm===3)soundWarn();if(S.tm<=0){clearInterval(tIv);answer(null);}else render();},1000);
 }
+
+/* ── Phase 42: Index-based answer dispatch (hides answer strings from DOM) ── */
+function answerByIdx(i){
+  if(!S.q||!S.q.opts||i<0||i>=S.q.opts.length)return;
+  answer(S.q.opts[i]);
+}
 function answer(a){
   if(S.sel\!==null)return;clr();
   const ok=a===S.q.ans;
@@ -1611,8 +1647,38 @@ function stampHtml(cc,rank,rot){
 /* DAILY CHALLENGE */
 function getDailyKey(){return"gq_daily_"+new Date().toISOString().slice(0,10);}
 
-function loadCollectedPlates(){try{return JSON.parse(localStorage.getItem("gq_coll")||"[]")}catch(e){return[]}}
-function saveCollectedPlates(arr){try{localStorage.setItem("gq_coll",JSON.stringify(arr))}catch(e){}}
+
+/* ── Phase 42: LocalStorage Checksums ── */
+const _GQ_SALT="GQ®2025\u{1F30D}XKCD327";
+function _fnv1a(s){
+  let h=0x811c9dc5;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=(h*0x01000193)>>>0;}
+  return h.toString(36);
+}
+function _gqSave(key,data){
+  const json=JSON.stringify(data);
+  const cs=_fnv1a(json+_GQ_SALT);
+  try{localStorage.setItem(key,JSON.stringify({d:data,c:cs}));}catch(e){}
+}
+function _gqLoad(key,fallback){
+  try{
+    const raw=localStorage.getItem(key);
+    if(!raw)return fallback;
+    const w=JSON.parse(raw);
+    /* Support legacy plain format */
+    if(w===null||typeof w!=="object"||!("d" in w))return w||fallback;
+    const expected=_fnv1a(JSON.stringify(w.d)+_GQ_SALT);
+    if(w.c!==expected){
+      console.warn("GeoQuest: Integritätsfehler für",key,"— Daten zurückgesetzt");
+      localStorage.removeItem(key);
+      return fallback;
+    }
+    return w.d;
+  }catch(e){return fallback;}
+}
+
+function loadCollectedPlates(){return _gqLoad("gq_coll",[]);}
+function saveCollectedPlates(arr){_gqSave("gq_coll",arr);}
 function getRarity(code){
   if(!code)return"common";
   const c=code.trim().toUpperCase();
@@ -1948,7 +2014,7 @@ function render(){
         ${sel\!==null?`<div class="meta-line">${q.meta||""}</div>`:""}
         ${sel\!==null?`<button class="btn-p" onclick="nextRound()">Weiter →</button>`:""}`;
     }
-    const btns=q.opts.map(o=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel\!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answer('${os}')">${esc(o)}${mk}</button>`;}).join("");
+    const btns=q.opts.map((o,i)=>{let cls="btn-a";const os=o.replace(/'/g,"\\'");if(sel\!==null){if(o===q.ans)cls+=" ok";else if(o===sel)cls+=" ng";else cls+=" dm";}const mk=sel?(o===q.ans?`<span>\u2713</span>`:o===sel?`<span>\u2717</span>`:""):"";return`<button class="${cls}" ${sel?"disabled":""} onclick="answerByIdx(${i})">${esc(o)}${mk}</button>`;}).join("");
     answerHtml=`<div class="answers">${btns}</div>`;
   }
   let fb="";
@@ -2380,13 +2446,13 @@ function renderHomeTab(){
     ${catSection("pure_geo")}
     ${catSection("lifestyle")}
     ${catSection("eu_plates")}
-    <div class="album-entry-btn" onclick="S.tab='album';render()">
-      <span style="font-size:1.3rem">\u{1F4D4}</span>
-      <div style="flex:1">
-        <div style="font-weight:900;font-size:.9rem;color:#fff">Mein Kennzeichen-Album & Spotter</div>
-        <div style="font-size:.72rem;color:rgba(255,255,255,.75);margin-top:1px">${S.collectedPlates.length} von ${PLATES_DATA.length||"?"} Kennzeichen gesammelt</div>
+    <div style="background:var(--bg2);border:2px solid #3b82f6;border-radius:16px;padding:1rem;margin-bottom:.7rem;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(59,130,246,.15);transition:transform .15s,box-shadow .15s" onclick="S.tab='album';render()" onmousedown="this.style.transform='scale(.98)'" onmouseup="this.style.transform=''">
+      <div style="width:44px;height:44px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0">\u{1F4D4}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:900;font-size:.9rem;color:var(--text)">Kennzeichen-Album & Spotter</div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:2px">${S.collectedPlates.length} von ${PLATES_DATA.length||"..."} gesammelt</div>
       </div>
-      <span style="color:rgba(255,255,255,.6);font-size:1rem">→</span>
+      <div style="color:#3b82f6;font-size:1.1rem;font-weight:700">→</div>
     </div>
     ${catSection("hl_compare")}
     ${catSection("neighbors")}
@@ -2636,8 +2702,8 @@ function renderLeaderboard(lbData,lbLoading,mode){
 }
 
 /* GAME HISTORY */
-function loadHistory(){try{return JSON.parse(localStorage.getItem("gq_history")||"[]")}catch(e){return[]}}
-function saveHistory(entry){try{const h=loadHistory();h.unshift(entry);if(h.length>60)h.length=60;localStorage.setItem("gq_history",JSON.stringify(h));}catch(e){}}
+function loadHistory(){return _gqLoad("gq_history",[]);}
+function saveHistory(entry){const h=loadHistory();h.unshift(entry);if(h.length>60)h.length=60;_gqSave("gq_history",h);}
 
 /* ONBOARDING */
 function loadOb(){try{return JSON.parse(localStorage.getItem("gq_onboarding")||"null")}catch(e){return null}}
@@ -2957,4 +3023,4 @@ raw = open(out,'rb').read()
 fixed_raw = raw.replace(b'\x5c\x21', b'\x21')
 open(out,'wb').write(fixed_raw)
 cnt=fixed_raw.count(b'\x5c\x21')
-print(f'Post-process: fixed {fixed_raw.count(b"!")} backslash-bang occurrences')
+print(f'Post-process: fixed {fixed_raw.count(b"!") } backslash-bang occurrences')
