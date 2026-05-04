@@ -472,6 +472,7 @@ de:{
   album_codes:"Kürzel",
   hl_higher:"⬆️ Mehr / Länger / Größer",hl_lower:"⬇️ Weniger / Kürzer / Kleiner",
   hl_more:"⬆️ Mehr Einwohner",hl_less:"⬇️ Weniger Einwohner",
+  hl_longer:"⬆️ Länger",hl_shorter:"⬇️ Kürzer",hl_bigger:"⬆️ Größer (Fläche)",hl_smaller:"⬇️ Kleiner (Fläche)",
   loc_detected:"Du bist in {country}",loc_adapt:"Anpassen",
   q_city:"In welchem Land liegt diese Stadt?",q_flag:"Welches Land zeigt diese Flagge?",
   q_capital:"Zu welchem Land gehört diese Hauptstadt?",q_river:"In welchem Land liegt dieser Fluss?",
@@ -512,6 +513,7 @@ en:{
   album_codes:"codes",
   hl_higher:"⬆️ More / Longer / Larger",hl_lower:"⬇️ Less / Shorter / Smaller",
   hl_more:"⬆️ More Population",hl_less:"⬇️ Less Population",
+  hl_longer:"⬆️ Longer",hl_shorter:"⬇️ Shorter",hl_bigger:"⬆️ Larger (Area)",hl_smaller:"⬇️ Smaller (Area)",
   loc_detected:"You are in {country}",loc_adapt:"Adapt",
   q_city:"In which country is this city?",q_flag:"Which country does this flag belong to?",
   q_capital:"Which country has this capital?",q_river:"In which country is this river?",
@@ -3130,6 +3132,8 @@ function render(){
     const hlFbH=sel===null?"":ok&&q.ans==="higher"?"ok":"ng";
     const hlFbL=sel===null?"":ok&&q.ans==="lower"?"ok":"ng";
     const hlDis=sel\!==null?"disabled":"";
+    const hlBtnH=q.type==="hl_pop"?t("hl_more"):q.type==="hl_river"?t("hl_longer"):t("hl_bigger");
+    const hlBtnL=q.type==="hl_pop"?t("hl_less"):q.type==="hl_river"?t("hl_shorter"):t("hl_smaller");
     qBody=`<div class="qprompt">${hlIcon} ${q.prompt}</div>
       <div class="hl-wrap">
         <div class="hl-card hl-known">
@@ -3143,8 +3147,8 @@ function render(){
         </div>
       </div>
       <div class="hl-btn-row">
-        <button class="hl-btn hl-higher${sel\!==null?(q.ans==="higher"?" ok":(sel==="higher"?" ng":" dm")):""}" ${hlDis} onclick="answer('higher')">${t("hl_higher")}</button>
-        <button class="hl-btn hl-lower${sel\!==null?(q.ans==="lower"?" ok":(sel==="lower"?" ng":" dm")):""}" ${hlDis} onclick="answer('lower')">${t("hl_lower")}</button>
+        <button class="hl-btn hl-higher${sel\!==null?(q.ans==="higher"?" ok":(sel==="higher"?" ng":" dm")):""}" ${hlDis} onclick="answer('higher')">${hlBtnH}</button>
+        <button class="hl-btn hl-lower${sel\!==null?(q.ans==="lower"?" ok":(sel==="lower"?" ng":" dm")):""}" ${hlDis} onclick="answer('lower')">${hlBtnL}</button>
       </div>`;
   }else if(q.type==="curr_real"){
     /* Show country name; hide currency name (meta) until answered */
@@ -4716,11 +4720,11 @@ input[type=text]::placeholder{color:var(--text3)}
 
 /* Phase 30 — Higher/Lower cards */
 .hl-wrap{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 6px;flex-wrap:nowrap}
-.hl-card{background:var(--bg3);border:2px solid var(--border);border-radius:14px;padding:.7rem .9rem;text-align:center;min-width:108px;max-width:160px;flex:1;transition:border-color .25s}
+.hl-card{background:var(--bg3);border:2px solid var(--border);border-radius:14px;padding:.7rem .9rem;text-align:center;min-width:110px;max-width:180px;flex:1;transition:border-color .25s}
 .hl-card.hl-known{border-color:#10b981}
 .hl-card.hl-hidden{border-color:var(--border);opacity:.85}
 .hl-card.hl-revealed{border-color:#3b82f6;opacity:1}
-.hl-name{font-weight:900;font-size:1.1rem;color:var(--text);margin-bottom:.35rem;word-break:break-word;overflow-wrap:break-word;line-height:1.25}
+.hl-name{font-weight:900;font-size:1.35rem;color:var(--text);margin-bottom:.3rem;word-break:break-word;overflow-wrap:break-word;line-height:1.2}
 .hl-val{color:#10b981;font-size:1.05rem;font-weight:700}
 .hl-hidden .hl-val{color:var(--text3);font-size:1.4rem}
 .hl-vs{font-size:1.5rem;flex-shrink:0;color:var(--text3)}
