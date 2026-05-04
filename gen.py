@@ -3293,7 +3293,7 @@ function renderCollectionScreen(){
     <div class="album-spotter-sub">${t("spotter_hint")}</div>
     <div style="display:flex;gap:8px">
       <input type="text" maxlength="5" placeholder="e.g. D / PL" value="${esc(spotVal)}"
-        oninput="S.spotterInput=this.value.toUpperCase();this.value=this.value.toUpperCase();S.spotterMsg='';render()"
+        oninput="S.spotterInput=this.value.toUpperCase();this.value=this.value.toUpperCase();S.spotterMsg=''"
         class="spotter-input">
       <button class="btn-p" style="width:auto;padding:.5rem 1rem;margin-bottom:0" onclick="spotterCollect()">${t("btn_collect")}</button>
     </div>
@@ -3513,7 +3513,20 @@ function renderHomeTab(){
       <div style="position:relative"><div class="mode-grid" style="opacity:${unlocked?1:.4}">${cards}</div>${lockOverlay}</div>
     </div>`;
   }
-  return`${renderDailyHero()}
+  /* Phase 59: Dynamic Home Header */
+  const _li=sbUser&&sbProfile?.username;
+  const _un=sbProfile?.username||(sbUser?.email?.split('@')[0]||'Gast');
+  const _gc=(sbProfile?.geo_coins||0).toLocaleString();
+  const _hdr=_li
+    ?`<div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem .6rem;margin-bottom:.1rem">
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">Hallo, ${_un} \u{1F44B}</div>
+        <div style="display:flex;align-items:center;gap:5px;background:var(--bg2);border-radius:20px;padding:.28rem .75rem;font-size:.82rem;font-weight:700;color:#f59e0b;border:1px solid rgba(245,158,11,.25)">\u{1FA99} ${_gc}</div>
+      </div>`
+    :`<div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem .6rem;margin-bottom:.1rem">
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">Willkommen, Gast \u{1F30D}</div>
+        <button onclick="S.tab='profil';render()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:20px;padding:.3rem .8rem;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(99,102,241,.35)">\u{1F510} Fortschritt sichern</button>
+      </div>`;
+  return`${_hdr}${renderDailyHero()}
     <div class="pvp-hero" onclick="S.mpModal=true;render()" role="button" aria-label="Live 1vs1 starten">
       <div style="display:flex;align-items:center;gap:14px">
         <div style="font-size:2.2rem">⚔️</div>

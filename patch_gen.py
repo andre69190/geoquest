@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-patch_gen.py — GeoQuest Phases 54/55/56 source patches
+patch_gen.py — GeoQuest Phases 54/55/56/59 source patches
 Idempotent: safe to run multiple times.
 Usage:  python patch_gen.py
 Then:   python gen.py
 """
-import os, sys, re
+import os, sys
 
 GEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gen.py')
 if not os.path.exists(GEN):
@@ -34,18 +34,15 @@ def patch(label, old, new):
 
 print()
 print('=== Fix 1 — Phase 55: rename local t → _tr (stops shadowing global t()) ===')
-
 patch('_tr = tier(st)',
     old='const col=tc(),p=pct(),t=tier(st);',
     new='const col=tc(),p=pct(),_tr=tier(st);')
-
 patch('${_tr.l} streak label',
     old='${st>=3?`<div style="text-align:center;font-size:.76rem;font-weight:700;color:#fb923c;margin-bottom:6px">${t.l}</div>`:""}',
     new='${st>=3?`<div style="text-align:center;font-size:.76rem;font-weight:700;color:#fb923c;margin-bottom:6px">${_tr.l}</div>`:""}')
 
 print()
 print('=== Fix 2 — Phase 54: German error messages in doRegister ===')
-
 _OLD_REGISTER_ERR = (
     '    if(error){S.authError=error.message;S.authLoading=false;render();return;}\n'
     '    const uid=data.user?.id;'
@@ -93,7 +90,6 @@ patch('doRegister catch-block German errors', _OLD_CATCH, _NEW_CATCH)
 
 print()
 print('=== Fix 3 — Phase 56: Joker guard clauses + disabled button state ===')
-
 _OLD_FREEZE = (
     'function useFreeze(){\n'
     '  if(S.freezeActive)return;\n'
@@ -131,7 +127,6 @@ _NEW_FREEZE = (
 )
 patch('useFreeze softlock guard', _OLD_FREEZE, _NEW_FREEZE)
 
-# Buttons use double-quotes in ternary expressions (gen.py raw string style)
 _OLD_BTN_50 = (
     '<button class="pu-btn${S.half_removed?" pu-used":""}" onclick="useFiveO()" '
     'title="50/50-Joker (${pu.five0||0} \\u00fcbrig)">\\u2702 50/50 '
@@ -160,8 +155,6 @@ patch('Freeze button disabled when count=0', _OLD_BTN_FRZ, _NEW_BTN_FRZ)
 
 print()
 print('=== Fix 4 — HTML assembly: inject fresh CSS + ensure file write ===')
-
-# Old: truncated gen.py ending (no with-open / print)
 _OLD_ASSEMBLE = (
     "HTML = _HTML_HEAD + '<script>\\n' + JS + '\\n' + _HTML_TAIL\n"
     "\n"
@@ -186,6 +179,34 @@ _NEW_ASSEMBLE = (
     "print(f'Written: {len(HTML):,} chars → {out}')\n"
 )
 patch('HTML assembly uses fresh CSS variable', _OLD_ASSEMBLE, _NEW_ASSEMBLE)
+
+print()
+print('=== Fix 5 — Phase 59a: Spotter input focus-loss (remove render() from oninput) ===')
+_OLD_SPOTTER = "oninput=\"S.spotterInput=this.value.toUpperCase();this.value=this.value.toUpperCase();S.spotterMsg='';render()\""
+_NEW_SPOTTER = "oninput=\"S.spotterInput=this.value.toUpperCase();this.value=this.value.toUpperCase();S.spotterMsg=''\""
+patch('Spotter oninput: drop render() to preserve focus', _OLD_SPOTTER, _NEW_SPOTTER)
+
+print()
+print('=== Fix 6 — Phase 59b: Dynamic Home Header (greeting + GeoCoins / guest CTA) ===')
+_OLD_HOME_HDR = '  return`${renderDailyHero()}\n    <div class="pvp-hero" onclick="S.mpModal=true;render()" role="button" aria-label="Live 1vs1 starten">'
+_NEW_HOME_HDR = (
+    '  /* Phase 59: Dynamic Home Header */\n'
+    "  const _li=sbUser&&sbProfile?.username;\n"
+    "  const _un=sbProfile?.username||(sbUser?.email?.split('@')[0]||'Gast');\n"
+    "  const _gc=(sbProfile?.geo_coins||0).toLocaleString();\n"
+    "  const _hdr=_li\n"
+    "    ?`<div style=\"display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem .6rem;margin-bottom:.1rem\">\n"
+    "        <div style=\"font-size:1.05rem;font-weight:700;color:var(--text)\">Hallo, ${_un} \\u{1F44B}</div>\n"
+    "        <div style=\"display:flex;align-items:center;gap:5px;background:var(--bg2);border-radius:20px;padding:.28rem .75rem;font-size:.82rem;font-weight:700;color:#f59e0b;border:1px solid rgba(245,158,11,.25)\">\\u{1FA99} ${_gc}</div>\n"
+    "      </div>`\n"
+    "    :`<div style=\"display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem .6rem;margin-bottom:.1rem\">\n"
+    "        <div style=\"font-size:1.05rem;font-weight:700;color:var(--text)\">Willkommen, Gast \\u{1F30D}</div>\n"
+    "        <button onclick=\"S.tab='profil';render()\" style=\"background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:20px;padding:.3rem .8rem;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(99,102,241,.35)\">\\u{1F510} Fortschritt sichern</button>\n"
+    "      </div>`;\n"
+    '  return`${_hdr}${renderDailyHero()}\n'
+    '    <div class="pvp-hero" onclick="S.mpModal=true;render()" role="button" aria-label="Live 1vs1 starten">'
+)
+patch('Home tab: dynamic header Phase 59', _OLD_HOME_HDR, _NEW_HOME_HDR)
 
 # ─── Summary ──────────────────────────────────────────────────────────────────
 print()
