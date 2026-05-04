@@ -1885,7 +1885,7 @@ function buyCategory(catId){
   if(coins<cat.cost){showToast("Zu wenig GeoCoins\!");return;}
   if(sbProfile)sbProfile.geo_coins=coins-cat.cost;
   const arr=loadUnlocked();if(\!arr.includes(catId))arr.push(catId);saveUnlocked(arr);
-  if(sb&&sbUser){sb.from("profiles").update({geo_coins:coins-cat.cost}).eq("id",sbUser.id).then(()=>{},()=>{});}
+  if(sb&&sbUser){sb.rpc("spend_coins",{p_user_id:sbUser.id,p_amount:cat.cost}).then(r=>{if(r.data!=null&&sbProfile)sbProfile.geo_coins=r.data;},()=>{});}
   showConfetti();S.lockModal=null;render();
 }
 function showConfetti(){
@@ -2016,7 +2016,7 @@ async function migrateGuestToAccount(uid){
     else if(r==="bronze")bonusCoins+=1;
   });
   const totalCoins=(sbProfile?.geo_coins||0)+bonusCoins;
-  try{await sb.from("profiles").update({geo_coins:totalCoins}).eq("id",uid);}catch(_){}
+  try{const _cr=await sb.rpc("add_coins",{p_user_id:uid,p_amount:bonusCoins});if(_cr.data!=null&&sbProfile)sbProfile.geo_coins=_cr.data;}catch(_){}
   if(sbProfile)sbProfile.geo_coins=totalCoins;
   const masteryCC=Object.keys(mastery).filter(cc=>getMasteryRank(mastery[cc].v,mastery[cc].p));
   for(const cc of masteryCC){
@@ -2051,9 +2051,10 @@ async function doRegister(){
     // Save username locally immediately
     try{localStorage.setItem("gq_username",uname);}catch(e){}
     // Upsert profile (fire & forget errors)
-    const{error:_upErr}=await sb.from("profiles").upsert({id:uid,username:uname,geo_coins:100});
+    const{error:_upErr}=await sb.from("profiles").upsert({id:uid,username:uname});
     sbUser=data.user;
     sbProfile={...(sbProfile||{}),username:uname,geo_coins:100,id:uid};
+    if(data.session)sb.rpc("add_coins",{p_user_id:uid,p_amount:100}).then(()=>{},()=>{});
     // Migrate guest data in background (don't await to avoid hanging)
     migrateGuestToAccount(uid).catch(()=>{});
     S.authLoading=false;S.authEmail="";S.authPassword="";S.authConfirm="";S.authUsername="";S.authError="";
@@ -2332,6 +2333,40 @@ function _regionOk(cc,cont){
 }
 function _rfilt(pool,minLen){
   if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
   const f=pool.filter(x=>_regionOk(x.cc,x.continent));
   return f.length>=minLen?f:pool;
 }
@@ -2499,7 +2534,7 @@ function nextRound(){
   const nr=S.rd+1;
   if(S.diff!=="survival"&&nr>=ROUNDS){
     S.ph="gameover";S.scoreSaved=false;S.convModal=true;soundOver();checkMastery();
-    if(S.isDailyRun&&!isDailyDone()){markDailyDone(S.sc);if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;if(sb&&sbUser)sb.from("profiles").update({geo_coins:(sbProfile?.geo_coins||0)}).eq("id",sbUser.id).then(()=>{},()=>{});}
+    if(S.isDailyRun&&!isDailyDone()){markDailyDone(S.sc);if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;if(sb&&sbUser)sb.rpc("add_coins",{p_user_id:sbUser.id,p_amount:100}).then(r=>{if(r.data!=null&&sbProfile)sbProfile.geo_coins=r.data;},()=>{});}
     saveHistory({mode:S.mode,score:S.sc,correct:S.correct,rounds:ROUNDS,date:Date.now(),answers:S.sessionAnswers.map(a=>({cc:a.cc,correct:a.correct}))});
     if(sbOK)saveSession(S.mode,S.sc,S.bs,S.correct,Date.now()-(S.gameStartTime||Date.now())).then(()=>{S.scoreSaved=true;render();});
     render();
@@ -2584,7 +2619,7 @@ function answer(a){
       if(S.isDailyRun&&\!isDailyDone()){
         markDailyDone(S.sc);
         if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;
-        if(sb&&sbUser)sb.from("profiles").update({geo_coins:(sbProfile?.geo_coins||0)}).eq("id",sbUser.id).then(()=>{},()=>{});
+        if(sb&&sbUser)sb.rpc("add_coins",{p_user_id:sbUser.id,p_amount:100}).then(r=>{if(r.data!=null&&sbProfile)sbProfile.geo_coins=r.data;},()=>{});
       }
       saveHistory({mode:S.mode,score:S.sc,correct:S.correct,rounds:ROUNDS,date:Date.now(),answers:S.sessionAnswers.map(a=>({cc:a.cc,correct:a.correct}))});
       if(sbOK)saveSession(S.mode,S.sc,S.bs,S.correct,Date.now()-(S.gameStartTime||Date.now())).then(()=>{S.scoreSaved=true;render();});
@@ -2622,6 +2657,38 @@ function shareResult(){
   const stars="\u{1F525}".repeat(Math.min(5,Math.ceil(S.correct/2)));
   const text=`\u{1F30D} GeoQuest: ${S.sc.toLocaleString()} Punkte\! ${stars}\n${S.correct}/${ROUNDS} richtig \u2022 Streak: ${S.bs}\u00d7\nKannst du das toppen? \u{1F3C6}`;
   navigator.clipboard.writeText(text).then(showCopyToast).catch(()=>{});
+}
+/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
+function loadAd(){
+  /* adsbygoogle.push({}); */
+}
+/* Phase 61: Viral share — Web Share API with clipboard fallback */
+function shareGame(){
+  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\! Schaffst du mehr?`;
+  const url=window.location.href;
+  if(navigator.share){
+    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(text+" "+url)
+      .then(()=>showToast(t("link_copied")||"Link kopiert\!"))
+      .catch(()=>showToast("Link kopiert\!"));
+  }
+}
+/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
+function loadAd(){
+  /* adsbygoogle.push({}); */
+}
+/* Phase 61: Viral share — Web Share API with clipboard fallback */
+function shareGame(){
+  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\! Schaffst du mehr?`;
+  const url=window.location.href;
+  if(navigator.share){
+    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(text+" "+url)
+      .then(()=>showToast(t("link_copied")||"Link kopiert\!"))
+      .catch(()=>showToast("Link kopiert\!"));
+  }
 }
 /* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
 function loadAd(){
@@ -2948,7 +3015,11 @@ function render(){
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
+      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
+      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
       <button class="share-btn" onclick="shareResult()">\u{1F4CB} Ergebnis teilen</button>
+      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
+      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
@@ -4026,10 +4097,13 @@ async function processMockPayment(productId){
   const p=PAY_PRODUCTS.find(x=>x.id===productId);if(\!p)return;
   if(p.pu&&p.pu_qty){addPU(p.pu,p.pu_qty);S.payModal=false;render();showToast("✓ "+p.name+" hinzugefügt\!");return;}
   if(sbOK&&sbUser){
-    const upd={geo_coins:(sbProfile?.geo_coins||0)+p.coins};
-    if(p.premium){const u=new Date();u.setMonth(u.getMonth()+(p.months||1));upd.is_premium=true;upd.premium_until=u.toISOString();}
-    await sb.from("profiles").update(upd).eq("id",sbUser.id);
-    if(sbProfile)Object.assign(sbProfile,upd);
+    if(p.coins>0){const _cr=await sb.rpc("add_coins",{p_user_id:sbUser.id,p_amount:p.coins});
+      if(_cr.data!=null&&sbProfile)sbProfile.geo_coins=_cr.data;
+      else if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+p.coins;}
+    if(p.premium){const u=new Date();u.setMonth(u.getMonth()+(p.months||1));
+      const _upd={is_premium:true,premium_until:u.toISOString()};
+      await sb.from("profiles").update(_upd).eq("id",sbUser.id);
+      if(sbProfile)Object.assign(sbProfile,_upd);}
   }
   S.payModal=false;render();showToast("✓ "+p.name+" aktiviert\!");
 }

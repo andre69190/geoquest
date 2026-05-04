@@ -431,6 +431,78 @@ patch('genHLAreaQ region filter',
     '  const ai=~~(rng()*pool.length);let bi=~~(rng()*pool.length);while(bi===ai)bi=~~(rng()*pool.length);\n'
     '  const a=pool[ai],b=pool[bi];')
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Fix 13 — Phase 66: Replace all direct geo_coins profile updates with RPCs
+#
+# After Phase 65 the RLS UPDATE policy blocks direct writes to geo_coins,
+# total_score and games_played.  Every place that touched geo_coins must
+# now call either:
+#   sb.rpc("spend_coins", {p_user_id, p_amount})  — debit
+#   sb.rpc("add_coins",   {p_user_id, p_amount})  — credit
+#
+# add_coins SQL must be deployed first (see geoquest_security_v3.sql addendum).
+# ──────────────────────────────────────────────────────────────────────────────
+
+# 13a: buyCategory() — spend coins (debit)
+patch('buyCategory: spend_coins RPC',
+    'if(sb&&sbUser){sb.from("profiles").update({geo_coins:coins-cat.cost}).eq("id",sbUser.id).then(()=>{},()=>{});}',
+    'if(sb&&sbUser){sb.rpc("spend_coins",{p_user_id:sbUser.id,p_amount:cat.cost})'
+    '.then(r=>{if(r.data!=null&&sbProfile)sbProfile.geo_coins=r.data;},()=>{});}')
+
+# 13b: checkMastery() — add mastery bonus coins (credit)
+patch('checkMastery: add_coins RPC',
+    'try{await sb.from("profiles").update({geo_coins:totalCoins}).eq("id",uid);}catch(_){}',
+    'try{const _cr=await sb.rpc("add_coins",{p_user_id:uid,p_amount:bonusCoins});'
+    'if(_cr.data!=null&&sbProfile)sbProfile.geo_coins=_cr.data;}catch(_){}')
+
+# 13c: doRegister() — remove geo_coins from upsert, add via RPC after session exists
+patch('doRegister: upsert without geo_coins + add_coins RPC',
+    'const{error:_upErr}=await sb.from("profiles").upsert({id:uid,username:uname,geo_coins:100});\n'
+    '    sbUser=data.user;\n'
+    '    sbProfile={...(sbProfile||{}),username:uname,geo_coins:100,id:uid};',
+    'const{error:_upErr}=await sb.from("profiles").upsert({id:uid,username:uname});\n'
+    '    sbUser=data.user;\n'
+    '    sbProfile={...(sbProfile||{}),username:uname,geo_coins:100,id:uid};\n'
+    '    if(data.session)sb.rpc("add_coins",{p_user_id:uid,p_amount:100}).then(()=>{},()=>{});')
+
+# 13d: nextRound() daily bonus — replace fire-and-forget update with add_coins RPC
+# Note: line 2520 in gen.py uses plain ! (not \! convention)
+patch('nextRound: daily bonus add_coins RPC',
+    'if(S.isDailyRun&&!isDailyDone()){markDailyDone(S.sc);if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;'
+    'if(sb&&sbUser)sb.from("profiles").update({geo_coins:(sbProfile?.geo_coins||0)}).eq("id",sbUser.id).then(()=>{},()=>{});}',
+    'if(S.isDailyRun&&!isDailyDone()){markDailyDone(S.sc);if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;'
+    'if(sb&&sbUser)sb.rpc("add_coins",{p_user_id:sbUser.id,p_amount:100})'
+    '.then(r=>{if(r.data!=null&&sbProfile)sbProfile.geo_coins=r.data;},()=>{});}')
+
+# 13e: timer callback daily bonus (same pattern, inside setTimeout)
+patch('timer daily bonus: add_coins RPC',
+    'if(S.isDailyRun&&\\!isDailyDone()){\n'
+    '        markDailyDone(S.sc);\n'
+    '        if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;\n'
+    '        if(sb&&sbUser)sb.from("profiles").update({geo_coins:(sbProfile?.geo_coins||0)}).eq("id",sbUser.id).then(()=>{},()=>{});\n'
+    '      }',
+    'if(S.isDailyRun&&\\!isDailyDone()){\n'
+    '        markDailyDone(S.sc);\n'
+    '        if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+100;\n'
+    '        if(sb&&sbUser)sb.rpc("add_coins",{p_user_id:sbUser.id,p_amount:100})'
+    '.then(r=>{if(r.data!=null&&sbProfile)sbProfile.geo_coins=r.data;},()=>{});\n'
+    '      }')
+
+# 13f: processMockPayment() — split into add_coins RPC + separate premium update
+patch('processMockPayment: split coins/premium update',
+    '    const upd={geo_coins:(sbProfile?.geo_coins||0)+p.coins};\n'
+    '    if(p.premium){const u=new Date();u.setMonth(u.getMonth()+(p.months||1));upd.is_premium=true;upd.premium_until=u.toISOString();}\n'
+    '    await sb.from("profiles").update(upd).eq("id",sbUser.id);\n'
+    '    if(sbProfile)Object.assign(sbProfile,upd);',
+    '    if(p.coins>0){const _cr=await sb.rpc("add_coins",{p_user_id:sbUser.id,p_amount:p.coins});\n'
+    '      if(_cr.data!=null&&sbProfile)sbProfile.geo_coins=_cr.data;\n'
+    '      else if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+p.coins;}\n'
+    '    if(p.premium){const u=new Date();u.setMonth(u.getMonth()+(p.months||1));\n'
+    '      const _upd={is_premium:true,premium_until:u.toISOString()};\n'
+    '      await sb.from("profiles").update(_upd).eq("id",sbUser.id);\n'
+    '      if(sbProfile)Object.assign(sbProfile,_upd);}')
+
 # ─── Summary ──────────────────────────────────────────────────────────────────
 print()
 print('=' * 60)
