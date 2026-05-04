@@ -1970,10 +1970,42 @@ function loadPU(){return _gqLoad("gq_pu",{});}
 function savePU(d){_gqSave("gq_pu",d);}
 function getPUCount(type){return(loadPU()[type]||0);}
 function addPU(type,qty){const d=loadPU();d[type]=(d[type]||0)+qty;savePU(d);}
+function syncJokersFromProfile(){
+  if(\!sbProfile)return;
+  const d=loadPU();
+  if(sbProfile.joker_5050\!==null&&sbProfile.joker_5050\!==undefined)d.five0=sbProfile.joker_5050;
+  if(sbProfile.joker_freeze\!==null&&sbProfile.joker_freeze\!==undefined)d.freeze=sbProfile.joker_freeze;
+  savePU(d);
+}
+async function buyJoker(type){
+  if(\!sb||\!sbUser){showToast("Bitte zuerst anmelden\!");return;}
+  const cost=type==="five0"?50:75;
+  const col=type==="five0"?"joker_5050":"joker_freeze";
+  const coins=sbProfile?.geo_coins||0;
+  if(coins<cost){showToast("Zu wenig GeoCoins\!");return;}
+  if(sbProfile)sbProfile.geo_coins=coins-cost;
+  const prevQty=(loadPU()[type]||0);
+  addPU(type,3);
+  const newQty=prevQty+3;
+  if(sbProfile)sbProfile[col]=newQty;
+  render();
+  try{
+    const r=await sb.rpc("spend_coins",{p_user_id:sbUser.id,p_amount:cost});
+    if(r.data\!==null&&sbProfile)sbProfile.geo_coins=r.data;
+    await sb.from("profiles").update({[col]:newQty}).eq("id",sbUser.id);
+    showToast("\u2713 3\u00d7 Joker hinzugef\u00fcgt\!");
+  }catch(e){
+    const d=loadPU();d[type]=prevQty;savePU(d);
+    if(sbProfile){sbProfile.geo_coins=coins;sbProfile[col]=prevQty;}
+    showToast("Kauf fehlgeschlagen.");
+    render();
+  }
+}
 function useFiveO(){
   if(S.sel\!==null||S.half_removed)return;
   const pu=loadPU();if(\!(pu.five0>0)){showToast("Kein 50/50-Joker mehr\!");return;}
   pu.five0--;savePU(pu);
+  if(sb&&sbUser)sb.from("profiles").update({joker_5050:pu.five0}).eq("id",sbUser.id).then(()=>{},()=>{});
   const wrong=S.q.opts.filter(o=>o\!==S.q.ans);
   const toRemove=sh([...wrong]).slice(0,2);
   S.q.opts=S.q.opts.filter(o=>o===S.q.ans||\!toRemove.includes(o));
@@ -1985,6 +2017,7 @@ function useFreeze(){
   if(\!(pu.freeze>0)){showToast("Kein Zeit-Stopp mehr\!");return;}
   if(S.ph\!=="playing"&&S.ph\!=="feedback")return;
   pu.freeze--;savePU(pu);
+  if(sb&&sbUser)sb.from("profiles").update({joker_freeze:pu.freeze}).eq("id",sbUser.id).then(()=>{},()=>{});
   clearInterval(tIv);S.freezeActive=true;
   const bar=document.querySelector(".tbar");if(bar)bar.classList.add("frozen");
   render();
@@ -2034,6 +2067,7 @@ async function loadProfile(){
   if(\!sb||\!sbUser)return;
   const{data}=await sb.from("profiles").select("*").eq("id",sbUser.id).single();
   sbProfile=data;
+  syncJokersFromProfile();
   /* Admin privileges handled server-side via Supabase trigger */
   const{data:stamps}=await sb.from("user_stamps").select("stamp_id,stamps(country_code)").eq("user_id",sbUser.id);
   if(stamps)stamps.forEach(s=>s.stamps&&sbStamps.add(s.stamps.country_code));
@@ -4075,7 +4109,21 @@ function renderMehrTab(){
       <div><div style="color:var(--text);font-weight:700;font-size:.85rem">\uD83D\uDCB0 GeoCoins</div><div style="color:#fbbf24;font-size:1.2rem;font-weight:900">${(sbProfile?.geo_coins||0).toLocaleString()}</div></div>
       <button class="btn-p" style="width:auto;padding:.5rem 1rem;font-size:.82rem;margin-bottom:0" onclick="S.payModal=true;render()">\uD83D\uDED2 Shop</button>
     </div>
-    <div style="color:var(--text3);font-size:.68rem">Power-ups: <span style="color:var(--text)">50/50: ${pu.five0||0}</span> \u00b7 <span style="color:var(--text)">Freeze: ${pu.freeze||0}</span></div>
+    <div style="color:var(--text3);font-size:.65rem;font-weight:700;letter-spacing:1px;margin-bottom:.55rem">JOKER</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="joker-card">
+        <div style="font-size:1.4rem">\u2702</div>
+        <div style="font-weight:900;font-size:.82rem;color:var(--text)">50/50</div>
+        <div style="color:#34d399;font-size:.75rem;font-weight:700">${pu.five0||0} \u00fcbrig</div>
+        <button class="joker-buy-btn" onclick="buyJoker('five0')">+3 f\u00fcr 50 \uD83D\uDCB0</button>
+      </div>
+      <div class="joker-card">
+        <div style="font-size:1.4rem">\u{1F9CA}</div>
+        <div style="font-weight:900;font-size:.82rem;color:var(--text)">Freeze</div>
+        <div style="color:#60a5fa;font-size:.75rem;font-weight:700">${pu.freeze||0} \u00fcbrig</div>
+        <button class="joker-buy-btn" onclick="buyJoker('freeze')">+3 f\u00fcr 75 \uD83D\uDCB0</button>
+      </div>
+    </div>
   </div>
   <div class="panel" style="padding:.85rem">
     <div style="color:var(--text3);font-size:.65rem;font-weight:700;letter-spacing:1px;margin-bottom:.65rem">EINSTELLUNGEN</div>
@@ -4590,6 +4638,9 @@ input[type=text]::placeholder{color:var(--text3)}
 .pu-btn:hover:not(:disabled){border-color:#10b981;color:var(--text)}
 .pu-btn:disabled{opacity:.35;cursor:default}
 .pu-btn.freeze-on{border-color:#3b82f6 !important;color:#3b82f6 !important;background:rgba(59,130,246,.1) !important}
+.joker-card{background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:.6rem;text-align:center;display:flex;flex-direction:column;gap:3px;align-items:center}
+.joker-buy-btn{margin-top:5px;width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:8px;padding:.35rem .5rem;font-size:.7rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+.joker-buy-btn:hover{opacity:.88}.joker-buy-btn:active{transform:scale(.97)}
 .fb{margin-top:10px;border-radius:12px;padding:.7rem 1rem;text-align:center;font-weight:700;font-size:.86rem}
 .fb.ok{background:#f0fdf4;color:#065f46;border:1.5px solid #10b981}
 .fb.ng{background:#fff1f2;color:#9f1239;border:1.5px solid #f43f5e}
