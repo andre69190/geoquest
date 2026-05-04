@@ -2074,6 +2074,7 @@ async function migrateGuestToAccount(uid){
   }
 }
 
+function togglePw(id,btn){const el=document.getElementById(id);if(\!el)return;const show=el.type==="password";el.type=show?"text":"password";btn.textContent=show?"\u{1F648}":"\u{1F441}";}
 /* Phase 27: Register */
 async function doRegister(){
   if(!sb){showToast("Supabase nicht verbunden");return;}
@@ -4037,8 +4038,8 @@ function renderMehrTab(){
       ${S.authError?`<div class="auth-err">${S.authError}</div>`:""}
       ${isReg?`<div class="auth-field"><label>BENUTZERNAME</label><input type="text" placeholder="Dein Spielername" maxlength="20" value="${S.authUsername}" oninput="S.authUsername=this.value"></div>`:""}
       <div class="auth-field"><label>E-MAIL</label><input type="email" placeholder="deine@email.de" value="${S.authEmail}" oninput="S.authEmail=this.value"></div>
-      <div class="auth-field"><label>PASSWORT</label><input type="password" placeholder="${isReg?"Mind. 6 Zeichen":"\u2022\u2022\u2022\u2022\u2022\u2022"}" value="${S.authPassword}" oninput="S.authPassword=this.value" onkeydown="if(event.key==='Enter'){${isReg?"doRegister":"doLogin"}();}"></div>
-      ${isReg?`<div class="auth-field"><label>PASSWORT BESTÄTIGEN</label><input type="password" placeholder="Passwort wiederholen" value="${S.authConfirm}" oninput="S.authConfirm=this.value" onkeydown="if(event.key==='Enter')doRegister();"></div>`:""}
+      <div class="auth-field"><label>PASSWORT</label><div style="position:relative"><input id="pw-main" type="password" style="padding-right:2.4rem" placeholder="${isReg?"Mind. 6 Zeichen":"\u2022\u2022\u2022\u2022\u2022\u2022"}" value="${S.authPassword}" oninput="S.authPassword=this.value" onkeydown="if(event.key==='Enter'){${isReg?"doRegister":"doLogin"}();}"><button type="button" onclick="togglePw('pw-main',this)" style="position:absolute;right:.55rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">\u{1F441}</button></div></div>
+      ${isReg?`<div class="auth-field"><label>PASSWORT BESTÄTIGEN</label><div style="position:relative"><input id="pw-confirm" type="password" style="padding-right:2.4rem" placeholder="Passwort wiederholen" value="${S.authConfirm}" oninput="S.authConfirm=this.value" onkeydown="if(event.key==='Enter')doRegister();"><button type="button" onclick="togglePw('pw-confirm',this)" style="position:absolute;right:.55rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">\u{1F441}</button></div></div>`:""}
       <button class="btn-p" onclick="${isReg?"doRegister":"doLogin"}()" ${S.authLoading?"disabled":""}>
         ${S.authLoading?"Bitte warten \u2026":isReg?"\uD83C\uDF31 Konto erstellen &amp; Fortschritt sichern":"\uD83D\uDD11 Anmelden"}
       </button>
