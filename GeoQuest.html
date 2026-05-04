@@ -2283,38 +2283,55 @@ function genCapitalQ(){
   const dis=distractors(pool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.country===cor.country,x=>x.country);
   return{type:"capital",prompt:t("q_capital"),subj:cor.capital,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.capital,cc:cor.cc};
 }
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent));
+  return f.length>=minLen?f:pool;
+}
 function genRiverQ(){
-  const pool=RIVERS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(RIVERS.filter(x=>x.name!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"river",prompt:t("q_river"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genLandmarkQ(){
-  const pool=LANDMARKS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(LANDMARKS.filter(x=>x.name!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"landmark",prompt:t("q_landmark"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genParkQ(){
-  const pool=NATIONAL_PARKS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(NATIONAL_PARKS.filter(x=>x.name!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"park",prompt:t("q_park"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genUnescoQ(){
-  const pool=UNESCO_SITES.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(UNESCO_SITES.filter(x=>x.name!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"unesco",prompt:t("q_unesco"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genCitymarkQ(){
-  const pool=CITY_LANDMARKS.filter(x=>x.name!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(CITY_LANDMARKS.filter(x=>x.name!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(CITY_LANDMARKS,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.city===cor.city,x=>x.city);
   return{type:"citymark",prompt:t("q_citymark"),subj:cor.name,ans:cor.city,opts:sh([cor.city,...dis]),meta:cor.country,lid:cor.name,cc:cor.cc};
 }
 function genSubwayQ(){
-  const pool=SUBWAYS.filter(x=>x.city!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(SUBWAYS.filter(x=>x.city!==S.lid),3);if(pool.length<3)return null;
   const t=Math.floor(rng()*2);
   const cor=pool[~~(rng()*pool.length)];
   const dis3=distractors(pool,x=>x.country===cor.country||x.cc===cor.cc,x=>x.city===cor.city,x=>t===0?x.km:x.lines,2);
@@ -2353,7 +2370,7 @@ function genRriverQ(){
 }
 function genFoodQ(){
   if(!FOOD_DATA.length)return null;
-  const idx=~~(rng()*FOOD_DATA.length);const item=FOOD_DATA[idx];
+  const _fp=_rfilt(FOOD_DATA,3);const item=_fp[~~(rng()*_fp.length)];
   const corC=item.country;
   const dis=FOOD_DATA.filter(f=>f.country!==corC).map(f=>f.country);
   const uniq=[...new Set(dis)];const picked=sh(uniq).slice(0,3);
@@ -2361,7 +2378,7 @@ function genFoodQ(){
 }
 function genBrandQ(){
   if(!BRANDS_DATA.length)return null;
-  const idx=~~(rng()*BRANDS_DATA.length);const item=BRANDS_DATA[idx];
+  const _bp=_rfilt(BRANDS_DATA,3);const item=_bp[~~(rng()*_bp.length)];
   const corC=item.country;
   const sameSub=BRANDS_DATA.filter(b=>b.sub===item.sub&&b.country!==corC).map(b=>b.country);
   const fallback=BRANDS_DATA.filter(b=>b.country!==corC).map(b=>b.country);
@@ -2371,7 +2388,7 @@ function genBrandQ(){
 }
 function genCurrencyQ(){
   if(!CURRENCIES_DATA.length)return null;
-  const idx=~~(rng()*CURRENCIES_DATA.length);const item=CURRENCIES_DATA[idx];
+  const _cp=_rfilt(CURRENCIES_DATA,3);const item=_cp[~~(rng()*_cp.length)];
   const corC=item.country;
   const sameSub=CURRENCIES_DATA.filter(c=>c.sub===item.sub&&c.country!==corC).map(c=>c.country);
   const fallback=CURRENCIES_DATA.filter(c=>c.country!==corC).map(c=>c.country);
@@ -2570,6 +2587,22 @@ function shareResult(){
   const stars="\u{1F525}".repeat(Math.min(5,Math.ceil(S.correct/2)));
   const text=`\u{1F30D} GeoQuest: ${S.sc.toLocaleString()} Punkte! ${stars}\n${S.correct}/${ROUNDS} richtig \u2022 Streak: ${S.bs}\u00d7\nKannst du das toppen? \u{1F3C6}`;
   navigator.clipboard.writeText(text).then(showCopyToast).catch(()=>{});
+}
+/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
+function loadAd(){
+  /* adsbygoogle.push({}); */
+}
+/* Phase 61: Viral share — Web Share API with clipboard fallback */
+function shareGame(){
+  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht! Schaffst du mehr?`;
+  const url=window.location.href;
+  if(navigator.share){
+    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(text+" "+url)
+      .then(()=>showToast(t("link_copied")||"Link kopiert!"))
+      .catch(()=>showToast("Link kopiert!"));
+  }
 }
 /* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
 function loadAd(){
@@ -2845,7 +2878,9 @@ function render(){
 </div>`:""}
       ${S.challenge?renderChallengeResult(S.challenge,S.sc,S.mode):""}
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst! \u{1F499}</div>
+      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst! \u{1F499}</div>
       <button class="share-btn" onclick="shareResult()">\u{1F4CB} Ergebnis teilen</button>
+      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-p" onclick="rngSeed=null;S.challenge=null;S.challengeStarted=false;startGame()">NOCHMAL</button>
       <button class="btn-g" onclick="S.ph='menu';S.tab='home';rngSeed=null;render()">Hauptmen\u00fc</button>

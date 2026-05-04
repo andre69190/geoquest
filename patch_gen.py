@@ -280,6 +280,79 @@ _NEW_AFTER_LOAD_AD = (
 )
 patch('shareGame() viral share function', _OLD_AFTER_LOAD_AD, _NEW_AFTER_LOAD_AD)
 
+
+print()
+print('=== Fix 9 — Phase 62a: pop_compare country name text size ===')
+
+_OLD_POP_CSS = '.pop-country{font-weight:900;font-size:.88rem;color:var(--text);margin-bottom:.3rem}'
+_NEW_POP_CSS = '.pop-country{font-weight:900;font-size:1.3rem;color:var(--text);margin-bottom:.3rem}'
+patch('pop-country font-size bump', _OLD_POP_CSS, _NEW_POP_CSS)
+
+print()
+print('=== Fix 10 — Phase 62b: Region filter in question generators ===')
+
+# 10a: inject _regionOk + _rfilt helpers before genRiverQ
+_OLD_BEFORE_RIVER = '}\nfunction genRiverQ(){'
+_NEW_BEFORE_RIVER = (
+    '}\n'
+    '/* Phase 62: region filter helpers */\n'
+    'function _regionOk(cc,cont){\n'
+    '  const f=S.filter;\n'
+    '  if(f==="all"||f==="eu_plates")return true;\n'
+    '  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";\n'
+    '  if(f==="europe")return c==="Europe";\n'
+    '  if(f==="africa")return c==="Africa";\n'
+    '  if(f==="oceania")return c==="Oceania";\n'
+    '  if(f==="asia")return c==="Asia";\n'
+    '  if(f==="america")return c.includes("America");\n'
+    '  return true;\n'
+    '}\n'
+    'function _rfilt(pool,minLen){\n'
+    '  if(S.filter==="all"||S.filter==="eu_plates")return pool;\n'
+    '  const f=pool.filter(x=>_regionOk(x.cc,x.continent));\n'
+    '  return f.length>=minLen?f:pool;\n'
+    '}\n'
+    'function genRiverQ(){'
+)
+patch('_regionOk + _rfilt helpers', _OLD_BEFORE_RIVER, _NEW_BEFORE_RIVER)
+
+# 10b-10f: pool-based generators (have .name//.cc//.continent fields)
+_POOL_PATCHES = [
+    ('genRiverQ region filter',
+     'const pool=RIVERS.filter(x=>x.name\\!==S.lid);if(pool.length<3)return null;',
+     'const pool=_rfilt(RIVERS.filter(x=>x.name\\!==S.lid),3);if(pool.length<3)return null;'),
+    ('genLandmarkQ region filter',
+     'const pool=LANDMARKS.filter(x=>x.name\\!==S.lid);if(pool.length<3)return null;',
+     'const pool=_rfilt(LANDMARKS.filter(x=>x.name\\!==S.lid),3);if(pool.length<3)return null;'),
+    ('genParkQ region filter',
+     'const pool=NATIONAL_PARKS.filter(x=>x.name\\!==S.lid);if(pool.length<3)return null;',
+     'const pool=_rfilt(NATIONAL_PARKS.filter(x=>x.name\\!==S.lid),3);if(pool.length<3)return null;'),
+    ('genUnescoQ region filter',
+     'const pool=UNESCO_SITES.filter(x=>x.name\\!==S.lid);if(pool.length<3)return null;',
+     'const pool=_rfilt(UNESCO_SITES.filter(x=>x.name\\!==S.lid),3);if(pool.length<3)return null;'),
+    ('genCitymarkQ region filter',
+     'const pool=CITY_LANDMARKS.filter(x=>x.name\\!==S.lid);if(pool.length<3)return null;',
+     'const pool=_rfilt(CITY_LANDMARKS.filter(x=>x.name\\!==S.lid),3);if(pool.length<3)return null;'),
+    ('genSubwayQ region filter',
+     'const pool=SUBWAYS.filter(x=>x.city\\!==S.lid);if(pool.length<3)return null;',
+     'const pool=_rfilt(SUBWAYS.filter(x=>x.city\\!==S.lid),3);if(pool.length<3)return null;'),
+]
+for label, old, new in _POOL_PATCHES:
+    patch(label, old, new)
+
+# 10g-10i: index-based generators (food/brand/currency — no pre-filter)
+patch('genFoodQ region filter',
+    'const idx=~~(rng()*FOOD_DATA.length);const item=FOOD_DATA[idx];',
+    'const _fp=_rfilt(FOOD_DATA,3);const item=_fp[~~(rng()*_fp.length)];')
+
+patch('genBrandQ region filter',
+    'const idx=~~(rng()*BRANDS_DATA.length);const item=BRANDS_DATA[idx];',
+    'const _bp=_rfilt(BRANDS_DATA,3);const item=_bp[~~(rng()*_bp.length)];')
+
+patch('genCurrencyQ region filter',
+    'const idx=~~(rng()*CURRENCIES_DATA.length);const item=CURRENCIES_DATA[idx];',
+    'const _cp=_rfilt(CURRENCIES_DATA,3);const item=_cp[~~(rng()*_cp.length)];')
+
 # ─── Summary ──────────────────────────────────────────────────────────────────
 print()
 print('=' * 60)
