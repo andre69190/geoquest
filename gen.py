@@ -4617,11 +4617,14 @@ input[type=text]::placeholder{color:var(--text3)}
 _HTML_TAIL = '''</script>
 </body>
 </html>'''
+# Inject fresh CSS from geoquest_css.txt (overrides the static CSS in _HTML_HEAD)
+_si = _HTML_HEAD.find('<style>')
+_se = _HTML_HEAD.find('</style>') + len('</style>')
+if _si >= 0 and _se > _si:
+    _HTML_HEAD = _HTML_HEAD[:_si] + '<style>\n' + CSS + '\n</style>' + _HTML_HEAD[_se:]
 HTML = _HTML_HEAD + '<script>\n' + JS + '\n' + _HTML_TAIL
-
-out = 'GeoQuest.html'
-# Post-process: backslash-bang to plain bang (raw-string convention in JS block)
 HTML = HTML.replace('\\!', '!')
+out = 'GeoQuest.html'
 with open(out, 'w', encoding='utf-8') as _f:
     _f.write(HTML)
 print(f'Written: {len(HTML):,} chars → {out}')
