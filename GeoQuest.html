@@ -1492,8 +1492,11 @@ const MODE_CATS={
 /* Phase 28: New real-data mode generators */
 function genCurrRealQ(){
   if(!CURR_REAL||!CURR_REAL.length)return null;
-  const idx=~~(Math.random()*CURR_REAL.length);
-  const cor=CURR_REAL[idx];
+  const _fcc=_rfilt(COUNTRIES,2);const _ccc=new Set(_fcc.map(x=>x.cc));
+  const _crPool=CURR_REAL.filter(x=>_ccc.has(ccFromCountry(x.c)));
+  const _crSrc=_crPool.length>=2?_crPool:CURR_REAL;
+  const idx=~~(Math.random()*_crSrc.length);
+  const cor=_crSrc[idx];
   /* Show only currency name+ISO — NOT country name (would give away the answer) */
   const dis=CURR_REAL.filter((_,i)=>i!==idx).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.n+" ("+x.iso+")");
   const ans=cor.n+" ("+cor.iso+")";
@@ -1501,7 +1504,9 @@ function genCurrRealQ(){
 }
 function genPopCompareQ(){
   if(!CAPS_POP||CAPS_POP.length<2)return null;
-  const pool=CAPS_POP.filter(x=>x.pop>500000);
+  const _fpp=_rfilt(COUNTRIES,4);const _cpp=new Set(_fpp.map(x=>x.cc));
+  let pool=CAPS_POP.filter(x=>x.pop>500000&&_cpp.has(ccFromCountry(x.c)));
+  if(pool.length<2)pool=CAPS_POP.filter(x=>x.pop>500000);if(pool.length<2)return null;
   const ai=~~(Math.random()*pool.length);
   let bi=~~(Math.random()*pool.length);
   while(bi===ai)bi=~~(Math.random()*pool.length);
@@ -1513,8 +1518,11 @@ function genPopCompareQ(){
 }
 function genRiverRealQ(){
   if(!RIVERS_REAL||!RIVERS_REAL.length)return null;
-  const idx=~~(Math.random()*RIVERS_REAL.length);
-  const cor=RIVERS_REAL[idx];
+  const _frr=_rfilt(COUNTRIES,2);const _ccr2=new Set(_frr.map(x=>x.cc));
+  const _rrPool=RIVERS_REAL.filter(r=>_ccr2.has(ccFromCountry(r.c)));
+  const _rrSrc=_rrPool.length>=1?_rrPool:RIVERS_REAL;
+  const idx=~~(Math.random()*_rrSrc.length);
+  const cor=_rrSrc[idx];
   const countries=[...new Set(RIVERS_REAL.map(r=>r.c))];
   const dis=countries.filter(c=>c!==cor.c).sort(()=>Math.random()-.5).slice(0,3);
   const meta=cor.len>0?cor.len+" km":"";
@@ -2373,6 +2381,23 @@ function _regionOk(cc,cont){
 }
 function _rfilt(pool,minLen){
   if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
   const f=pool.filter(x=>_regionOk(x.cc,x.continent));
   return f.length>=minLen?f:pool;
 }
@@ -2760,6 +2785,22 @@ function shareGame(){
       .catch(()=>showToast("Link kopiert!"));
   }
 }
+/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
+function loadAd(){
+  /* adsbygoogle.push({}); */
+}
+/* Phase 61: Viral share — Web Share API with clipboard fallback */
+function shareGame(){
+  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht! Schaffst du mehr?`;
+  const url=window.location.href;
+  if(navigator.share){
+    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(text+" "+url)
+      .then(()=>showToast(t("link_copied")||"Link kopiert!"))
+      .catch(()=>showToast("Link kopiert!"));
+  }
+}
 function updateHdrGuest(){
   const hdr=document.getElementById("g-hdr");
   const _uname=sbProfile?.username||localStorage.getItem("gq_username")||null;
@@ -3023,7 +3064,9 @@ function render(){
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst! \u{1F499}</div>
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst! \u{1F499}</div>
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst! \u{1F499}</div>
+      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst! \u{1F499}</div>
       <button class="share-btn" onclick="shareResult()">\u{1F4CB} Ergebnis teilen</button>
+      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>

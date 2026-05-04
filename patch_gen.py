@@ -503,6 +503,52 @@ patch('processMockPayment: split coins/premium update',
     '      await sb.from("profiles").update(_upd).eq("id",sbUser.id);\n'
     '      if(sbProfile)Object.assign(sbProfile,_upd);}')
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Fix 14 — Phase 67: Region filter for genPopCompareQ, genCurrRealQ, genRiverRealQ
+#
+# These three generators were missed in Phase 62-64.  They all use runtime
+# data arrays (CAPS_POP / CURR_REAL / RIVERS_REAL) that have no cc/continent
+# field, so we cross-filter via _rfilt(COUNTRIES,N) allowed-cc set.
+#
+# Note: lines 1487-1516 in gen.py use plain ! (not the \! convention).
+# ──────────────────────────────────────────────────────────────────────────────
+
+# 14a: genPopCompareQ — "Mehr Einwohner?" — cross-filter CAPS_POP via COUNTRIES
+patch('genPopCompareQ region filter',
+    '  const pool=CAPS_POP.filter(x=>x.pop>500000);\n'
+    '  const ai=~~(Math.random()*pool.length);\n'
+    '  let bi=~~(Math.random()*pool.length);\n'
+    '  while(bi===ai)bi=~~(Math.random()*pool.length);',
+    '  const _fpp=_rfilt(COUNTRIES,4);const _cpp=new Set(_fpp.map(x=>x.cc));\n'
+    '  let pool=CAPS_POP.filter(x=>x.pop>500000&&_cpp.has(ccFromCountry(x.c)));\n'
+    '  if(pool.length<2)pool=CAPS_POP.filter(x=>x.pop>500000);if(pool.length<2)return null;\n'
+    '  const ai=~~(Math.random()*pool.length);\n'
+    '  let bi=~~(Math.random()*pool.length);\n'
+    '  while(bi===ai)bi=~~(Math.random()*pool.length);')
+
+# 14b: genCurrRealQ — cross-filter CURR_REAL via COUNTRIES (subject only; distractors stay global)
+patch('genCurrRealQ region filter',
+    '  const idx=~~(Math.random()*CURR_REAL.length);\n'
+    '  const cor=CURR_REAL[idx];',
+    '  const _fcc=_rfilt(COUNTRIES,2);const _ccc=new Set(_fcc.map(x=>x.cc));\n'
+    '  const _crPool=CURR_REAL.filter(x=>_ccc.has(ccFromCountry(x.c)));\n'
+    '  const _crSrc=_crPool.length>=2?_crPool:CURR_REAL;\n'
+    '  const idx=~~(Math.random()*_crSrc.length);\n'
+    '  const cor=_crSrc[idx];')
+
+# 14c: genRiverRealQ — cross-filter RIVERS_REAL via COUNTRIES (subject only; distractors stay global)
+patch('genRiverRealQ region filter',
+    '  const idx=~~(Math.random()*RIVERS_REAL.length);\n'
+    '  const cor=RIVERS_REAL[idx];\n'
+    '  const countries=[...new Set(RIVERS_REAL.map(r=>r.c))];',
+    '  const _frr=_rfilt(COUNTRIES,2);const _ccr2=new Set(_frr.map(x=>x.cc));\n'
+    '  const _rrPool=RIVERS_REAL.filter(r=>_ccr2.has(ccFromCountry(r.c)));\n'
+    '  const _rrSrc=_rrPool.length>=1?_rrPool:RIVERS_REAL;\n'
+    '  const idx=~~(Math.random()*_rrSrc.length);\n'
+    '  const cor=_rrSrc[idx];\n'
+    '  const countries=[...new Set(RIVERS_REAL.map(r=>r.c))];')
+
 # ─── Summary ──────────────────────────────────────────────────────────────────
 print()
 print('=' * 60)
