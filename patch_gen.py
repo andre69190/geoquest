@@ -397,6 +397,40 @@ patch('genOutlineQ region filter',
     'const pool=COUNTRIES.filter(c=>c.cc&&c.cc.length===2);',
     'const pool=_rfilt(COUNTRIES.filter(c=>c.cc&&c.cc.length===2),4);')
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Fix 12 — Phase 64: Region filter for Higher/Lower mode generators
+# genHLPopQ, genHLRiverQ, genHLAreaQ all use data structs that have no cc/cont
+# fields of their own, so we derive an allowed-cc set from _rfilt(COUNTRIES,4)
+# and cross-filter the respective pools.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# 12a: genHLPopQ — CAPS_POP has {c: countryName, pop}, cross-filter by allowed cc
+patch('genHLPopQ region filter',
+    'const pool=CAPS_POP.filter(x=>x.pop>500000);if(pool.length<2)return null;',
+    'const _fcp=_rfilt(COUNTRIES,4);const _ccp=new Set(_fcp.map(x=>x.cc));\n'
+    '  let pool=CAPS_POP.filter(x=>x.pop>500000&&_ccp.has(ccFromCountry(x.c)));\n'
+    '  if(pool.length<2)pool=CAPS_POP.filter(x=>x.pop>500000);if(pool.length<2)return null;')
+
+# 12b: genHLRiverQ — RIVERS_REAL has {n, c: countryName, len}, cross-filter by allowed cc
+patch('genHLRiverQ region filter',
+    'const pool=RIVERS_REAL.filter(r=>r.len>100);if(pool.length<2)return null;',
+    'const _fcr=_rfilt(COUNTRIES,4);const _ccr=new Set(_fcr.map(x=>x.cc));\n'
+    '  let pool=RIVERS_REAL.filter(r=>r.len>100&&_ccr.has(ccFromCountry(r.c)));\n'
+    '  if(pool.length<2)pool=RIVERS_REAL.filter(r=>r.len>100);if(pool.length<2)return null;')
+
+# 12c: genHLAreaQ — AREA_DATA has {c: countryName, area}, needs pool var introduced
+patch('genHLAreaQ region filter',
+    'if(\\!AREA_DATA||AREA_DATA.length<2)return null;\n'
+    '  const ai=~~(rng()*AREA_DATA.length);let bi=~~(rng()*AREA_DATA.length);while(bi===ai)bi=~~(rng()*AREA_DATA.length);\n'
+    '  const a=AREA_DATA[ai],b=AREA_DATA[bi];',
+    'if(\\!AREA_DATA||AREA_DATA.length<2)return null;\n'
+    '  const _fca=_rfilt(COUNTRIES,4);const _cca=new Set(_fca.map(x=>x.cc));\n'
+    '  let pool=AREA_DATA.filter(x=>_cca.has(ccFromCountry(x.c)));\n'
+    '  if(pool.length<2)pool=AREA_DATA.slice();if(pool.length<2)return null;\n'
+    '  const ai=~~(rng()*pool.length);let bi=~~(rng()*pool.length);while(bi===ai)bi=~~(rng()*pool.length);\n'
+    '  const a=pool[ai],b=pool[bi];')
+
 # ─── Summary ──────────────────────────────────────────────────────────────────
 print()
 print('=' * 60)
