@@ -353,6 +353,50 @@ patch('genCurrencyQ region filter',
     'const idx=~~(rng()*CURRENCIES_DATA.length);const item=CURRENCIES_DATA[idx];',
     'const _cp=_rfilt(CURRENCIES_DATA,3);const item=_cp[~~(rng()*_cp.length)];')
 
+
+print()
+print('=== Fix 11 — Phase 63: Region filter for base-mode generators ===')
+
+# 11a: make _rfilt handle .ct (COUNTRIES) and .cont (CITIES) as continent aliases
+patch('_rfilt: support .ct and .cont continent fields',
+    'const f=pool.filter(x=>_regionOk(x.cc,x.continent));',
+    'const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));')
+
+# 11b: genCityQ — CITIES has .cc + .cont
+patch('genCityQ region filter',
+    'const pool=CITIES.filter(c=>c.pop>=pf&&c.id\\!==S.lid);',
+    'const pool=_rfilt(CITIES.filter(c=>c.pop>=pf&&c.id\\!==S.lid),3);')
+
+# 11c: genFlagQ — COUNTRIES has .cc + .ct
+patch('genFlagQ region filter',
+    'const pool=COUNTRIES.filter(x=>x.cc\\!==S.lid);if(pool.length<3)return null;',
+    'const pool=_rfilt(COUNTRIES.filter(x=>x.cc\\!==S.lid),3);if(pool.length<3)return null;')
+
+# 11d: genCapitalQ — CAPITALS has .cc + .continent
+patch('genCapitalQ region filter',
+    'const pool=CAPITALS.filter(x=>x.capital\\!==S.lid);if(pool.length<3)return null;',
+    'const pool=_rfilt(CAPITALS.filter(x=>x.capital\\!==S.lid),3);if(pool.length<3)return null;')
+
+# 11e: genRcapitalQ — CAPITALS
+patch('genRcapitalQ region filter',
+    'const pool=CAPITALS.filter(x=>x.country\\!==S.lid);if(pool.length<3)return null;',
+    'const pool=_rfilt(CAPITALS.filter(x=>x.country\\!==S.lid),3);if(pool.length<3)return null;')
+
+# 11f: genRcityQ — filters COUNTRIES first, then picks a city from that country
+patch('genRcityQ region filter',
+    'const pool=COUNTRIES.filter(x=>x.c\\!==S.lid);if(pool.length<3)return null;',
+    'const pool=_rfilt(COUNTRIES.filter(x=>x.c\\!==S.lid),3);if(pool.length<3)return null;')
+
+# 11g: genFlagselQ — COUNTRIES, needs 4 choices
+patch('genFlagselQ region filter',
+    'const pool=COUNTRIES.filter(x=>x.cc\\!==S.lid);if(pool.length<4)return null;',
+    'const pool=_rfilt(COUNTRIES.filter(x=>x.cc\\!==S.lid),4);if(pool.length<4)return null;')
+
+# 11h: genOutlineQ — COUNTRIES
+patch('genOutlineQ region filter',
+    'const pool=COUNTRIES.filter(c=>c.cc&&c.cc.length===2);',
+    'const pool=_rfilt(COUNTRIES.filter(c=>c.cc&&c.cc.length===2),4);')
+
 # ─── Summary ──────────────────────────────────────────────────────────────────
 print()
 print('=' * 60)

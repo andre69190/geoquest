@@ -2259,23 +2259,40 @@ function distractors(pool,matchFn,excludeFn,keyFn,n=2){
 /* GENERATORS */
 function genCityQ(){
   const pf=S.diff==="hardcore"?0:200000;
-  const pool=CITIES.filter(c=>c.pop>=pf&&c.id\!==S.lid);
+  const pool=_rfilt(CITIES.filter(c=>c.pop>=pf&&c.id\!==S.lid),3);
   if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.sub===cor.sub||x.cont===cor.cont,x=>x.c===cor.c,x=>x.c);
   return{type:"city",prompt:t("q_city"),subj:cor.n,ans:cor.c,opts:sh([cor.c,...dis]),meta:cor.cont+" \u00b7 "+(cor.pop/1e6).toFixed(1)+" Mio.",lid:cor.id,cc:cor.cc};
 }
 function genFlagQ(){
-  const pool=COUNTRIES.filter(x=>x.cc\!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(COUNTRIES.filter(x=>x.cc\!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.sr===cor.sr||x.ct===cor.ct,x=>x.c===cor.c,x=>x.c);
   return{type:"flag",prompt:t("q_flag"),subj:cor.cc,ans:cor.c,opts:sh([cor.c,...dis]),meta:cor.ct,lid:cor.cc,cc:cor.cc};
 }
 function genCapitalQ(){
-  const pool=CAPITALS.filter(x=>x.capital\!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(CAPITALS.filter(x=>x.capital\!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.country===cor.country,x=>x.country);
   return{type:"capital",prompt:t("q_capital"),subj:cor.capital,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.capital,cc:cor.cc};
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
 }
 /* Phase 62: region filter helpers */
 function _regionOk(cc,cont){
@@ -2335,19 +2352,19 @@ function genSubwayQ(){
   return{type:"subway",prompt,subj:cor.city,ans:String(ansVal),opts:sh([String(ansVal),...dis3.map(String)]),meta:cor.country+" \u00b7 "+suffix.trim(),lid:cor.city,cc:cor.cc};
 }
 function genFlagselQ(){
-  const pool=COUNTRIES.filter(x=>x.cc\!==S.lid);if(pool.length<4)return null;
+  const pool=_rfilt(COUNTRIES.filter(x=>x.cc\!==S.lid),4);if(pool.length<4)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.sr===cor.sr||x.ct===cor.ct,x=>x.cc===cor.cc,x=>x.cc,3);
   return{type:"flagsel",prompt:t("q_flagsel"),subj:cor.c,ans:cor.cc,opts:sh([cor.cc,...dis]),meta:cor.ct,lid:cor.cc,cc:cor.cc};
 }
 function genRcapitalQ(){
-  const pool=CAPITALS.filter(x=>x.country\!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(CAPITALS.filter(x=>x.country\!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const dis=distractors(pool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.capital===cor.capital,x=>x.capital);
   return{type:"rcapital",prompt:t("q_rcapital"),subj:cor.country,ans:cor.capital,opts:sh([cor.capital,...dis]),meta:cor.continent,lid:cor.country,cc:cor.cc};
 }
 function genRcityQ(){
-  const pool=COUNTRIES.filter(x=>x.c\!==S.lid);if(pool.length<3)return null;
+  const pool=_rfilt(COUNTRIES.filter(x=>x.c\!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
   const cc2=CITIES.filter(c=>c.c===cor.c);if(\!cc2.length)return genRcityQ();
   const corCity=cc2[~~(rng()*cc2.length)];
@@ -2391,7 +2408,7 @@ function genCurrencyQ(){
   return{type:"currency",prompt:t("q_currency"),subj:item.currency,symbol:item.symbol,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
 }
 function genOutlineQ(){
-  const pool=COUNTRIES.filter(c=>c.cc&&c.cc.length===2);
+  const pool=_rfilt(COUNTRIES.filter(c=>c.cc&&c.cc.length===2),4);
   if(pool.length<4)return null;
   const sh2=arr=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=~~(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
   const idx=~~(rng()*pool.length);const item=pool[idx];
@@ -2581,6 +2598,22 @@ function shareResult(){
   const stars="\u{1F525}".repeat(Math.min(5,Math.ceil(S.correct/2)));
   const text=`\u{1F30D} GeoQuest: ${S.sc.toLocaleString()} Punkte\! ${stars}\n${S.correct}/${ROUNDS} richtig \u2022 Streak: ${S.bs}\u00d7\nKannst du das toppen? \u{1F3C6}`;
   navigator.clipboard.writeText(text).then(showCopyToast).catch(()=>{});
+}
+/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
+function loadAd(){
+  /* adsbygoogle.push({}); */
+}
+/* Phase 61: Viral share — Web Share API with clipboard fallback */
+function shareGame(){
+  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\! Schaffst du mehr?`;
+  const url=window.location.href;
+  if(navigator.share){
+    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(text+" "+url)
+      .then(()=>showToast(t("link_copied")||"Link kopiert\!"))
+      .catch(()=>showToast("Link kopiert\!"));
+  }
 }
 /* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
 function loadAd(){
@@ -2873,7 +2906,9 @@ function render(){
       ${S.challenge?renderChallengeResult(S.challenge,S.sc,S.mode):""}
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
+      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
       <button class="share-btn" onclick="shareResult()">\u{1F4CB} Ergebnis teilen</button>
+      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-p" onclick="rngSeed=null;S.challenge=null;S.challengeStarted=false;startGame()">NOCHMAL</button>
