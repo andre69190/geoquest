@@ -208,6 +208,78 @@ _NEW_HOME_HDR = (
 )
 patch('Home tab: dynamic header Phase 59', _OLD_HOME_HDR, _NEW_HOME_HDR)
 
+
+print()
+print('=== Fix 7 — Phase 60: Ad-container + loadAd() hook on Score Screen ===')
+
+# 7a: insert ad banner before the share-btn
+_OLD_AD_SLOT = '      <button class="share-btn" onclick="shareResult()">\\u{1F4CB} Ergebnis teilen</button>'
+_NEW_AD_SLOT = (
+    '      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);'
+    'border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;'
+    'color:var(--text3);font-size:.8rem">'
+    'Danke, dass du GeoQuest spielst\\! \\u{1F499}</div>\n'
+    '      <button class="share-btn" onclick="shareResult()">\\u{1F4CB} Ergebnis teilen</button>'
+)
+patch('Score screen: ad container slot', _OLD_AD_SLOT, _NEW_AD_SLOT)
+
+# 7b: call loadAd after rendering gameover
+_OLD_LOAD_AD_HOOK = '    </div>`;\n    return;\n  }\n\n  /* PLAYING / FEEDBACK */'
+_NEW_LOAD_AD_HOOK = '    </div>`;\n    setTimeout(loadAd,100);\n    return;\n  }\n\n  /* PLAYING / FEEDBACK */'
+patch('Score screen: setTimeout(loadAd,100)', _OLD_LOAD_AD_HOOK, _NEW_LOAD_AD_HOOK)
+
+# 7c: add loadAd function in JS
+_OLD_AFTER_SHARE = '\n}\nfunction updateHdrGuest(){'
+_NEW_AFTER_SHARE = (
+    '\n}\n'
+    '/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */\n'
+    'function loadAd(){\n'
+    '  /* adsbygoogle.push({}); */\n'
+    '}\n'
+    'function updateHdrGuest(){'
+)
+patch('loadAd() stub function', _OLD_AFTER_SHARE, _NEW_AFTER_SHARE)
+
+print()
+print('=== Fix 8 — Phase 61: shareGame() viral share button on Score Screen ===')
+
+# 8a: add shareGame button before NOCHMAL
+_OLD_NOCHMAL = '      <button class="btn-p" onclick="rngSeed=null;S.challenge=null;S.challengeStarted=false;startGame()">NOCHMAL</button>'
+_NEW_NOCHMAL = (
+    '      <button class="btn-share-viral" onclick="shareGame()">\\u{1F4E4} Spiel teilen</button>\n'
+    '      <button class="btn-p" onclick="rngSeed=null;S.challenge=null;S.challengeStarted=false;startGame()">NOCHMAL</button>'
+)
+patch('Score screen: shareGame viral button', _OLD_NOCHMAL, _NEW_NOCHMAL)
+
+# 8b: add shareGame() JS function (after loadAd stub)
+_OLD_AFTER_LOAD_AD = (
+    '/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */\n'
+    'function loadAd(){\n'
+    '  /* adsbygoogle.push({}); */\n'
+    '}\n'
+    'function updateHdrGuest(){'
+)
+_NEW_AFTER_LOAD_AD = (
+    '/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */\n'
+    'function loadAd(){\n'
+    '  /* adsbygoogle.push({}); */\n'
+    '}\n'
+    '/* Phase 61: Viral share — Web Share API with clipboard fallback */\n'
+    'function shareGame(){\n'
+    '  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\\! Schaffst du mehr?`;\n'
+    '  const url=window.location.href;\n'
+    '  if(navigator.share){\n'
+    '    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});\n'
+    '  }else{\n'
+    '    navigator.clipboard.writeText(text+" "+url)\n'
+    '      .then(()=>showToast(t("link_copied")||"Link kopiert\\!"))\n'
+    '      .catch(()=>showToast("Link kopiert\\!"));\n'
+    '  }\n'
+    '}\n'
+    'function updateHdrGuest(){'
+)
+patch('shareGame() viral share function', _OLD_AFTER_LOAD_AD, _NEW_AFTER_LOAD_AD)
+
 # ─── Summary ──────────────────────────────────────────────────────────────────
 print()
 print('=' * 60)

@@ -2571,6 +2571,22 @@ function shareResult(){
   const text=`\u{1F30D} GeoQuest: ${S.sc.toLocaleString()} Punkte! ${stars}\n${S.correct}/${ROUNDS} richtig \u2022 Streak: ${S.bs}\u00d7\nKannst du das toppen? \u{1F3C6}`;
   navigator.clipboard.writeText(text).then(showCopyToast).catch(()=>{});
 }
+/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
+function loadAd(){
+  /* adsbygoogle.push({}); */
+}
+/* Phase 61: Viral share — Web Share API with clipboard fallback */
+function shareGame(){
+  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht! Schaffst du mehr?`;
+  const url=window.location.href;
+  if(navigator.share){
+    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(text+" "+url)
+      .then(()=>showToast(t("link_copied")||"Link kopiert!"))
+      .catch(()=>showToast("Link kopiert!"));
+  }
+}
 function updateHdrGuest(){
   const hdr=document.getElementById("g-hdr");
   const _uname=sbProfile?.username||localStorage.getItem("gq_username")||null;
@@ -2828,7 +2844,9 @@ function render(){
   </div>
 </div>`:""}
       ${S.challenge?renderChallengeResult(S.challenge,S.sc,S.mode):""}
+      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst! \u{1F499}</div>
       <button class="share-btn" onclick="shareResult()">\u{1F4CB} Ergebnis teilen</button>
+      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-p" onclick="rngSeed=null;S.challenge=null;S.challengeStarted=false;startGame()">NOCHMAL</button>
       <button class="btn-g" onclick="S.ph='menu';S.tab='home';rngSeed=null;render()">Hauptmen\u00fc</button>
       ${S.mpOpponent?`
@@ -2854,6 +2872,7 @@ function render(){
           :'<div class="mp-waiting">\u23f3 Warte auf Gegner\u2026<br><button class="btn-g" style="margin-top:.5rem;width:auto;padding:.35rem .9rem;font-size:.75rem" onclick="S.mpOpponent=null;render()">Trotzdem weiter</button></div>'}
       </div>`:""}
     </div>`;
+    setTimeout(loadAd,100);
     return;
   }
 
