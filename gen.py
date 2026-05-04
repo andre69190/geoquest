@@ -491,7 +491,11 @@ de:{
   plates_more:"+{n} weitere",pct_complete:"{pct}% vollständig",
   spotter_dup:"📋 {code} ({country}) bereits gesammelt!",
   map_unavail:"Karte nicht verfügbar",map_loading:"Kartendaten werden geladen…",
-  q_subway_km:"Wie lang ist das U-Bahn-Netz … (km)?",q_subway_lines:"Wie viele U-Bahn-Linien hat …?"
+  q_subway_km:"Wie lang ist das U-Bahn-Netz … (km)?",q_subway_lines:"Wie viele U-Bahn-Linien hat …?",
+  ob_welcome:"Willkommen bei GeoQuest",ob_sub1:"Das Geografie-Quiz \u2014 sammle Stempel, steige in der Liga auf!",ob_difficulty:"Schwierigkeitsgrad",ob_diff_sub:"W\u00e4hle deinen Stil. \u00c4nderbar jederzeit.",
+  ob_diff_casual_desc:"Gro\u00dfe St\u00e4dte \u2022 12 Sek.",ob_diff_hc_desc:"Alle St\u00e4dte \u2022 8 Sek.",ob_back:"\u2190 Zur\u00fcck",ob_modes_title:"Spielmodi",
+  ob_modes_sub:"19 Modi, ein Ziel: Die Welt kennenlernen.",ob_more_modes:"\u2026 und 16 weitere Modi",ob_start:"\u{1F680} Los geht's!",ob_have_account:"Ich habe bereits einen Account",ob_register:"Neu hier? Registrieren",
+  home_hi:"Hallo, {name} \u{1F44B}",home_guest:"Willkommen, Gast \u{1F30D}",home_save:"\u{1F510} Fortschritt sichern",home_pvp_sub:"Echtzeit gegen einen Freund spielen"
 },
 en:{
   play:"PLAY",again:"PLAY AGAIN",menu:"Main Menu",board:"Leaderboard",pass:"Passport",
@@ -527,7 +531,11 @@ en:{
   plates_more:"+{n} more",pct_complete:"{pct}% complete",
   spotter_dup:"📋 {code} ({country}) already collected!",
   map_unavail:"Map not available",map_loading:"Loading map data…",
-  q_subway_km:"How long is the metro network … (km)?",q_subway_lines:"How many metro lines does … have?"
+  q_subway_km:"How long is the metro network … (km)?",q_subway_lines:"How many metro lines does … have?",
+  ob_welcome:"Welcome to GeoQuest",ob_sub1:"The geography quiz \u2014 collect stamps, climb the league!",ob_difficulty:"Difficulty",ob_diff_sub:"Choose your style. Changeable at any time.",
+  ob_diff_casual_desc:"Major cities \u2022 12 sec.",ob_diff_hc_desc:"All cities \u2022 8 sec.",ob_back:"\u2190 Back",ob_modes_title:"Game Modes",
+  ob_modes_sub:"19 modes, one goal: know the world.",ob_more_modes:"\u2026 and 16 more modes",ob_start:"\u{1F680} Let's go!",ob_have_account:"I already have an account",ob_register:"New here? Register",
+  home_hi:"Hi, {name} \u{1F44B}",home_guest:"Welcome, Guest \u{1F30D}",home_save:"\u{1F510} Save progress",home_pvp_sub:"Play in real time against a friend"
 },
 pl:{
   play:"GRAJ",again:"ZAGRAJ PONOWNIE",menu:"Menu",board:"Ranking",pass:"Paszport",
@@ -2212,7 +2220,7 @@ let S={
   collectedPlates:loadCollectedPlates(),
   ligaData:[],ligaLoading:false,
   titleShop:false,
-  language:localStorage.getItem("gq_lang")||"de",spotterInput:"",spotterMsg:"",spotterOk:null,albumView:"list",albumCountry:_smartDefaultCountry(),spotterCountry:_smartDefaultCountry(),
+  language:(()=>{const _sl=localStorage.getItem("gq_lang");if(_sl&&LANG[_sl])return _sl;const _bl=(navigator.language||"de").substring(0,2).toLowerCase();return LANG[_bl]?_bl:"de";})(),spotterInput:"",spotterMsg:"",spotterOk:null,albumView:"list",albumCountry:_smartDefaultCountry(),spotterCountry:_smartDefaultCountry(),
   collFilter:"all",collRarity:"all",collSearch:"",
 };
 let tIv=null,fTo=null,toastTo=null;
@@ -2392,37 +2400,139 @@ function _regionOk(cc,cont){
 }
 function _rfilt(pool,minLen){
   if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
+  const f=pool.filter(x=>_regionOk(x.cc,x.continent||x.ct||x.cont));
+  return f.length>=minLen?f:pool;
+}
+/* Phase 62: region filter helpers */
+function _regionOk(cc,cont){
+  const f=S.filter;
+  if(f==="all"||f==="eu_plates")return true;
+  const c=cont||(COUNTRIES.find(x=>x.cc===cc)||{}).ct||"";
+  if(f==="europe")return c==="Europe";
+  if(f==="africa")return c==="Africa";
+  if(f==="oceania")return c==="Oceania";
+  if(f==="asia")return c==="Asia";
+  if(f==="america")return c.includes("America");
+  return true;
+}
+function _rfilt(pool,minLen){
+  if(S.filter==="all"||S.filter==="eu_plates")return pool;
   const f=pool.filter(x=>_regionOk(x.cc,x.continent));
   return f.length>=minLen?f:pool;
 }
 function genRiverQ(){
   const pool=_rfilt(RIVERS.filter(x=>x.name\!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
-  const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
+  const _cpool=_rfilt(COUNTRIES,4);const dis=distractors(_cpool,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"river",prompt:t("q_river"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genLandmarkQ(){
   const pool=_rfilt(LANDMARKS.filter(x=>x.name\!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
-  const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
+  const _cpool=_rfilt(COUNTRIES,4);const dis=distractors(_cpool,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"landmark",prompt:t("q_landmark"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genParkQ(){
   const pool=_rfilt(NATIONAL_PARKS.filter(x=>x.name\!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
-  const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
+  const _cpool=_rfilt(COUNTRIES,4);const dis=distractors(_cpool,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"park",prompt:t("q_park"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genUnescoQ(){
   const pool=_rfilt(UNESCO_SITES.filter(x=>x.name\!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
-  const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
+  const _cpool=_rfilt(COUNTRIES,4);const dis=distractors(_cpool,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);
   return{type:"unesco",prompt:t("q_unesco"),subj:cor.name,ans:cor.country,opts:sh([cor.country,...dis]),meta:cor.continent,lid:cor.name,cc:cor.cc};
 }
 function genCitymarkQ(){
   const pool=_rfilt(CITY_LANDMARKS.filter(x=>x.name\!==S.lid),3);if(pool.length<3)return null;
   const cor=pool[~~(rng()*pool.length)];
-  const dis=distractors(CITY_LANDMARKS,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.city===cor.city,x=>x.city);
+  const dis=distractors(pool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.city===cor.city,x=>x.city);
   return{type:"citymark",prompt:t("q_citymark"),subj:cor.name,ans:cor.city,opts:sh([cor.city,...dis]),meta:cor.country,lid:cor.name,cc:cor.cc};
 }
 function genSubwayQ(){
@@ -2452,32 +2562,35 @@ function genRcityQ(){
   const cor=pool[~~(rng()*pool.length)];
   const cc2=CITIES.filter(c=>c.c===cor.c);if(\!cc2.length)return genRcityQ();
   const corCity=cc2[~~(rng()*cc2.length)];
-  const dis=distractors(CITIES,x=>x.sub===corCity.sub||x.cont===corCity.cont,x=>x.c===cor.c,x=>x.n);
+  const _citpool=_rfilt(CITIES,4);const dis=distractors(_citpool,x=>x.sub===corCity.sub||x.cont===corCity.cont,x=>x.c===cor.c,x=>x.n);
   return{type:"rcity",prompt:t("q_rcity"),subj:cor.c,ans:corCity.n,opts:sh([corCity.n,...dis]),meta:cor.ct,lid:cor.c,cc:cor.cc};
 }
 function genRriverQ(){
-  const ctries=[...new Set(RIVERS.map(r=>r.country))].filter(c=>c\!==S.lid);if(\!ctries.length)return null;
+  const _rpool=_rfilt(RIVERS,3);
+  const ctries=[...new Set(_rpool.map(r=>r.country))].filter(c=>c\!==S.lid);if(\!ctries.length)return null;
   const corC=ctries[~~(rng()*ctries.length)];
-  const cRivers=RIVERS.filter(r=>r.country===corC);
+  const cRivers=_rpool.filter(r=>r.country===corC);
   const cor=cRivers[~~(rng()*cRivers.length)];
-  const dis=distractors(RIVERS,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.country===corC,x=>x.name);
+  const dis=distractors(_rpool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.country===corC,x=>x.name);
   return{type:"rriver",prompt:t("q_rriver"),subj:corC,ans:cor.name,opts:sh([cor.name,...dis]),meta:cor.continent,lid:corC,cc:cor.cc};
 }
 function genFoodQ(){
   if(\!FOOD_DATA.length)return null;
   const _fp=_rfilt(FOOD_DATA,3);const item=_fp[~~(rng()*_fp.length)];
   const corC=item.country;
-  const dis=FOOD_DATA.filter(f=>f.country\!==corC).map(f=>f.country);
-  const uniq=[...new Set(dis)];const picked=sh(uniq).slice(0,3);
+  const _fDisR=[...new Set(_fp.filter(f=>f.country\!==corC).map(f=>f.country))];
+  const _fDisAll=[...new Set(FOOD_DATA.filter(f=>f.country\!==corC).map(f=>f.country))];
+  const picked=sh(_fDisR.length>=3?_fDisR:_fDisAll).slice(0,3);
   return{type:"food",prompt:t("q_food"),subj:item.dish,emoji:item.emoji,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
 }
 function genBrandQ(){
   if(\!BRANDS_DATA.length)return null;
   const _bp=_rfilt(BRANDS_DATA,3);const item=_bp[~~(rng()*_bp.length)];
   const corC=item.country;
-  const sameSub=BRANDS_DATA.filter(b=>b.sub===item.sub&&b.country\!==corC).map(b=>b.country);
-  const fallback=BRANDS_DATA.filter(b=>b.country\!==corC).map(b=>b.country);
-  const pool=[...new Set(sameSub.length>=3?sameSub:fallback)];
+  const sameSub=_bp.filter(b=>b.sub===item.sub&&b.country\!==corC).map(b=>b.country);
+  const fallback=_bp.filter(b=>b.country\!==corC).map(b=>b.country);
+  const _pool=[...new Set(sameSub.length>=3?sameSub:fallback)];
+  const pool=_pool.length>=3?_pool:[...new Set(BRANDS_DATA.filter(b=>b.country\!==corC).map(b=>b.country))];
   const picked=sh(pool).slice(0,3);
   return{type:"brand",prompt:t("q_brand"),subj:item.brand,industry:item.industry,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
 }
@@ -2485,9 +2598,10 @@ function genCurrencyQ(){
   if(\!CURRENCIES_DATA.length)return null;
   const _cp=_rfilt(CURRENCIES_DATA,3);const item=_cp[~~(rng()*_cp.length)];
   const corC=item.country;
-  const sameSub=CURRENCIES_DATA.filter(c=>c.sub===item.sub&&c.country\!==corC).map(c=>c.country);
-  const fallback=CURRENCIES_DATA.filter(c=>c.country\!==corC).map(c=>c.country);
-  const pool=[...new Set(sameSub.length>=3?sameSub:fallback)];
+  const sameSub=_cp.filter(c=>c.sub===item.sub&&c.country\!==corC).map(c=>c.country);
+  const fallback=_cp.filter(c=>c.country\!==corC).map(c=>c.country);
+  const _pool=[...new Set(sameSub.length>=3?sameSub:fallback)];
+  const pool=_pool.length>=3?_pool:[...new Set(CURRENCIES_DATA.filter(c=>c.country\!==corC).map(c=>c.country))];
   const picked=sh(pool).slice(0,3);
   return{type:"currency",prompt:t("q_currency"),subj:item.currency,symbol:item.symbol,ans:corC,opts:sh([corC,...picked]),lid:item.cc,cc:item.cc};
 }
@@ -2682,102 +2796,6 @@ function shareResult(){
   const stars="\u{1F525}".repeat(Math.min(5,Math.ceil(S.correct/2)));
   const text=`\u{1F30D} GeoQuest: ${S.sc.toLocaleString()} Punkte\! ${stars}\n${S.correct}/${ROUNDS} richtig \u2022 Streak: ${S.bs}\u00d7\nKannst du das toppen? \u{1F3C6}`;
   navigator.clipboard.writeText(text).then(showCopyToast).catch(()=>{});
-}
-/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
-function loadAd(){
-  /* adsbygoogle.push({}); */
-}
-/* Phase 61: Viral share — Web Share API with clipboard fallback */
-function shareGame(){
-  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\! Schaffst du mehr?`;
-  const url=window.location.href;
-  if(navigator.share){
-    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
-  }else{
-    navigator.clipboard.writeText(text+" "+url)
-      .then(()=>showToast(t("link_copied")||"Link kopiert\!"))
-      .catch(()=>showToast("Link kopiert\!"));
-  }
-}
-/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
-function loadAd(){
-  /* adsbygoogle.push({}); */
-}
-/* Phase 61: Viral share — Web Share API with clipboard fallback */
-function shareGame(){
-  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\! Schaffst du mehr?`;
-  const url=window.location.href;
-  if(navigator.share){
-    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
-  }else{
-    navigator.clipboard.writeText(text+" "+url)
-      .then(()=>showToast(t("link_copied")||"Link kopiert\!"))
-      .catch(()=>showToast("Link kopiert\!"));
-  }
-}
-/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
-function loadAd(){
-  /* adsbygoogle.push({}); */
-}
-/* Phase 61: Viral share — Web Share API with clipboard fallback */
-function shareGame(){
-  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\! Schaffst du mehr?`;
-  const url=window.location.href;
-  if(navigator.share){
-    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
-  }else{
-    navigator.clipboard.writeText(text+" "+url)
-      .then(()=>showToast(t("link_copied")||"Link kopiert\!"))
-      .catch(()=>showToast("Link kopiert\!"));
-  }
-}
-/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
-function loadAd(){
-  /* adsbygoogle.push({}); */
-}
-/* Phase 61: Viral share — Web Share API with clipboard fallback */
-function shareGame(){
-  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\! Schaffst du mehr?`;
-  const url=window.location.href;
-  if(navigator.share){
-    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
-  }else{
-    navigator.clipboard.writeText(text+" "+url)
-      .then(()=>showToast(t("link_copied")||"Link kopiert\!"))
-      .catch(()=>showToast("Link kopiert\!"));
-  }
-}
-/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
-function loadAd(){
-  /* adsbygoogle.push({}); */
-}
-/* Phase 61: Viral share — Web Share API with clipboard fallback */
-function shareGame(){
-  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\! Schaffst du mehr?`;
-  const url=window.location.href;
-  if(navigator.share){
-    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
-  }else{
-    navigator.clipboard.writeText(text+" "+url)
-      .then(()=>showToast(t("link_copied")||"Link kopiert\!"))
-      .catch(()=>showToast("Link kopiert\!"));
-  }
-}
-/* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
-function loadAd(){
-  /* adsbygoogle.push({}); */
-}
-/* Phase 61: Viral share — Web Share API with clipboard fallback */
-function shareGame(){
-  const text=`Ich habe gerade ${S.sc.toLocaleString()} Punkte in GeoQuest erreicht\! Schaffst du mehr?`;
-  const url=window.location.href;
-  if(navigator.share){
-    navigator.share({title:"GeoQuest",text,url}).catch(()=>{});
-  }else{
-    navigator.clipboard.writeText(text+" "+url)
-      .then(()=>showToast(t("link_copied")||"Link kopiert\!"))
-      .catch(()=>showToast("Link kopiert\!"));
-  }
 }
 /* Phase 60: Ad hook — swap in real adsbygoogle.push({}) when AdSense is live */
 function loadAd(){
@@ -3053,20 +3071,8 @@ function render(){
 </div>`:""}
       ${S.challenge?renderChallengeResult(S.challenge,S.sc,S.mode):""}
       <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
-      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
-      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
-      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
-      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
-      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
-      <div id="ad-container-score" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.85rem 1rem;margin-bottom:.6rem;text-align:center;color:var(--text3);font-size:.8rem">Danke, dass du GeoQuest spielst\! \u{1F499}</div>
       <button class="share-btn" onclick="shareResult()">\u{1F4CB} Ergebnis teilen</button>
-      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
-      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
-      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
-      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
-      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
-      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
-      <button class="btn-share-viral" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
+      <button class="btn-g" style="color:#60a5fa;border-color:#3b82f6" onclick="shareGame()">\u{1F4E4} Spiel teilen</button>
       <button class="btn-p" onclick="rngSeed=null;S.challenge=null;S.challengeStarted=false;startGame()">NOCHMAL</button>
       <button class="btn-g" onclick="S.ph='menu';S.tab='home';rngSeed=null;render()">Hauptmen\u00fc</button>
       ${S.mpOpponent?`
@@ -3764,12 +3770,12 @@ function renderHomeTab(){
   const _gc=(sbProfile?.geo_coins||0).toLocaleString();
   const _hdr=_li
     ?`<div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem .6rem;margin-bottom:.1rem">
-        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">Hallo, ${_un} \u{1F44B}</div>
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">${t("home_hi",{name:_un})}</div>
         <div style="display:flex;align-items:center;gap:5px;background:var(--bg2);border-radius:20px;padding:.28rem .75rem;font-size:.82rem;font-weight:700;color:#f59e0b;border:1px solid rgba(245,158,11,.25)">\u{1FA99} ${_gc}</div>
       </div>`
     :`<div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem .6rem;margin-bottom:.1rem">
-        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">Willkommen, Gast \u{1F30D}</div>
-        <button onclick="S.tab='profil';render()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:20px;padding:.3rem .8rem;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(99,102,241,.35)">\u{1F510} Fortschritt sichern</button>
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text)">${t("home_guest")}</div>
+        <button onclick="S.tab='profil';render()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:20px;padding:.3rem .8rem;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(99,102,241,.35)">${t("home_save")}</button>
       </div>`;
   return`${_hdr}${renderDailyHero()}
     <div class="pvp-hero" onclick="S.mpModal=true;render()" role="button" aria-label="Live 1vs1 starten">
@@ -3777,7 +3783,7 @@ function renderHomeTab(){
         <div style="font-size:2.2rem">⚔️</div>
         <div>
           <div style="font-size:1rem;font-weight:900;color:#fff">Live 1vs1 Duell</div>
-          <div style="font-size:.74rem;color:rgba(255,255,255,.75);margin-top:2px">Echtzeit gegen einen Freund spielen</div>
+          <div style="font-size:.74rem;color:rgba(255,255,255,.75);margin-top:2px">${t("home_pvp_sub")}</div>
         </div>
         <div style="margin-left:auto;background:#7c3aed;color:#fff;border-radius:20px;padding:.3rem .85rem;font-size:.76rem;font-weight:700">▶ Spielen</div>
       </div>
@@ -4065,46 +4071,47 @@ function finishOb(){
   localStorage.setItem("gq_lang",l);
   S.diff=d;S.obStep=0;render();
 }
+const OB_LANGS=[["de","\u{1F1E9}\u{1F1EA}","Deutsch"],["en","\u{1F1EC}\u{1F1E7}","English"],["fr","\u{1F1EB}\u{1F1F7}","Fran\u00e7ais"],["es","\u{1F1EA}\u{1F1F8}","Espa\u00f1ol"],["it","\u{1F1EE}\u{1F1F9}","Italiano"],["pl","\u{1F1F5}\u{1F1F1}","Polski"]];
 function renderOnboarding(step){
   const dots=[0,1,2].map(i=>`<div class="ob-dot ${i===step?"active":""}"></div>`).join("");
   if(step===0)return`<div class="ob-overlay"><div class="ob-card">
     <div class="ob-emoji">\u{1F30D}</div>
-    <div class="ob-title">Willkommen bei GeoQuest</div>
-    <div class="ob-sub">Das Geografie-Quiz \u2014 sammle Stempel, steige in der Liga auf\!</div>
+    <div class="ob-title">${t("ob_welcome")}</div>
+    <div class="ob-sub">${t("ob_sub1")}</div>
     <div class="ob-dots">${dots}</div>
     <p style="color:var(--text3);font-size:.7rem;font-weight:700;letter-spacing:1px;margin-bottom:.6rem">SPRACHE / LANGUAGE</p>
     <div class="ob-lang-grid">
-      <div class="ob-lang ${S.obLang==="de"?"sel":""}" onclick="S.obLang='de';render()">\u{1F1E9}\u{1F1EA} Deutsch</div>
-      <div class="ob-lang ${S.obLang==="en"?"sel":""}" onclick="S.obLang='en';render()">\u{1F1EC}\u{1F1E7} English</div>
+      ${OB_LANGS.map(([l,f,n])=>`<div class="ob-lang ${S.obLang===l?"sel":""}" onclick="S.obLang='${l}';S.language='${l}';render()">${f} ${n}</div>`).join("")}
     </div>
-    <button class="btn-p" onclick="S.obStep=1;render()">Weiter \u2192</button>
-    <button class="btn-g" style="margin-top:.3rem;margin-bottom:0;font-size:.82rem;color:var(--text3);background:transparent;border:none;text-decoration:underline" onclick="const ob=loadOb();if(!ob)localStorage.setItem('gq_onboarding',JSON.stringify({done:true,lang:'de',diff:'casual'}));S.obStep=0;S.tab='profil';S.authMode='login';render()">Ich habe bereits einen Account</button>
+    <button class="btn-p" onclick="S.obStep=1;render()">${t("btn_next")}</button>
+    <button class="btn-g" style="margin-top:.3rem;margin-bottom:0;font-size:.82rem;color:var(--text3);background:transparent;border:none;text-decoration:underline" onclick="const ob=loadOb();if(!ob)localStorage.setItem('gq_onboarding',JSON.stringify({done:true,lang:'de',diff:'casual'}));S.obStep=0;S.tab='profil';S.authMode='login';render()">${t("ob_have_account")}</button>
+    <button class="btn-g" style="margin-top:.2rem;margin-bottom:0;font-size:.82rem;color:var(--text3);background:transparent;border:none;text-decoration:underline" onclick="const ob=loadOb();if(!ob)localStorage.setItem('gq_onboarding',JSON.stringify({done:true,lang:'de',diff:'casual'}));S.obStep=0;S.tab='profil';S.authMode='register';render()">${t("ob_register")}</button>
   </div></div>`;
   if(step===1)return`<div class="ob-overlay"><div class="ob-card">
     <div class="ob-emoji">\u{1F9E0}</div>
-    <div class="ob-title">Schwierigkeitsgrad</div>
-    <div class="ob-sub">W\u00e4hle deinen Stil. \u00c4nderbar jederzeit.</div>
+    <div class="ob-title">${t("ob_difficulty")}</div>
+    <div class="ob-sub">${t("ob_diff_sub")}</div>
     <div class="ob-dots">${dots}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
-      <div class="ob-lang ${S.obDiff==="casual"?"sel":""}" onclick="S.obDiff='casual';render()" style="padding:.9rem"><div style="font-size:1.6rem;margin-bottom:4px">\u{1F7E2}</div><div style="font-weight:900;font-size:.88rem">Casual</div><div style="color:var(--text3);font-size:.7rem;margin-top:3px">Gro\u00dfe St\u00e4dte \u2022 12 Sek.</div></div>
-      <div class="ob-lang ${S.obDiff==="hardcore"?"sel":""}" onclick="S.obDiff='hardcore';render()" style="padding:.9rem"><div style="font-size:1.6rem;margin-bottom:4px">\u{1F525}</div><div style="font-weight:900;font-size:.88rem">Hardcore</div><div style="color:var(--text3);font-size:.7rem;margin-top:3px">Alle St\u00e4dte \u2022 8 Sek.</div></div>
+      <div class="ob-lang ${S.obDiff==="casual"?"sel":""}" onclick="S.obDiff='casual';render()" style="padding:.9rem"><div style="font-size:1.6rem;margin-bottom:4px">\u{1F7E2}</div><div style="font-weight:900;font-size:.88rem">Casual</div><div style="color:var(--text3);font-size:.7rem;margin-top:3px">${t("ob_diff_casual_desc")}</div></div>
+      <div class="ob-lang ${S.obDiff==="hardcore"?"sel":""}" onclick="S.obDiff='hardcore';render()" style="padding:.9rem"><div style="font-size:1.6rem;margin-bottom:4px">\u{1F525}</div><div style="font-weight:900;font-size:.88rem">Hardcore</div><div style="color:var(--text3);font-size:.7rem;margin-top:3px">${t("ob_diff_hc_desc")}</div></div>
     </div>
-    <button class="btn-p" onclick="S.obStep=2;render()">Weiter \u2192</button>
-    <button class="btn-g" style="margin-bottom:0" onclick="S.obStep=0;render()">\u2190 Zur\u00fcck</button>
+    <button class="btn-p" onclick="S.obStep=2;render()">${t("btn_next")}</button>
+    <button class="btn-g" style="margin-bottom:0" onclick="S.obStep=0;render()">${t("ob_back")}</button>
   </div></div>`;
   return`<div class="ob-overlay"><div class="ob-card">
     <div class="ob-emoji">\u{1F9ED}</div>
-    <div class="ob-title">Spielmodi</div>
-    <div class="ob-sub">19 Modi, ein Ziel: Die Welt kennenlernen.</div>
+    <div class="ob-title">${t("ob_modes_title")}</div>
+    <div class="ob-sub">${t("ob_modes_sub")}</div>
     <div class="ob-dots">${dots}</div>
     <div style="margin-bottom:1rem">
       <div class="ob-mode-row"><div class="ob-mode-icon">\u{1F3D9}</div><div><div style="color:var(--text);font-weight:700;font-size:.83rem">Stadt \u2192 Land</div><div class="ob-mode-desc">Welchem Land geh\u00f6rt diese Stadt?</div></div></div>
       <div class="ob-mode-row"><div class="ob-mode-icon">\u{1F697}</div><div><div style="color:var(--text);font-weight:700;font-size:.83rem">EU-Kennzeichen</div><div class="ob-mode-desc">Woher kommt dieses Kennzeichen?</div></div></div>
       <div class="ob-mode-row"><div class="ob-mode-icon">\u{1F687}</div><div><div style="color:var(--text);font-weight:700;font-size:.83rem">U-Bahn-Netz</div><div class="ob-mode-desc">Linien und km der Metros.</div></div></div>
-      <div style="color:var(--text3);font-size:.7rem;text-align:center;margin-top:4px">\u2026 und 16 weitere Modi</div>
+      <div style="color:var(--text3);font-size:.7rem;text-align:center;margin-top:4px">${t("ob_more_modes")}</div>
     </div>
-    <button class="btn-p" onclick="finishOb()">\u{1F680} Los geht's\!</button>
-    <button class="btn-g" style="margin-bottom:0" onclick="S.obStep=1;render()">\u2190 Zur\u00fcck</button>
+    <button class="btn-p" onclick="finishOb()">${t("ob_start")}</button>
+    <button class="btn-g" style="margin-bottom:0" onclick="S.obStep=1;render()">${t("ob_back")}</button>
   </div></div>`;
 }
 

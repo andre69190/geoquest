@@ -549,6 +549,42 @@ patch('genRiverRealQ region filter',
     '  const cor=_rrSrc[idx];\n'
     '  const countries=[...new Set(RIVERS_REAL.map(r=>r.c))];')
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Fix 15 — Phase 68: Onboarding i18n, browser lang, OB_LANGS, register link
+# Applied directly via /tmp/phase68.py (20 patches).
+# Idempotency check on one unique anchor that cannot cause double-application.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# 15 (idempotency only — unique new string, OLD is absent after phase68.py ran)
+patch('Phase 68 OB_LANGS + browser lang (idempotency)',
+    'language:localStorage.getItem("gq_lang")||"de",',
+    'language:(()=>{const _sl=localStorage.getItem("gq_lang");if(_sl&&LANG[_sl])return _sl;'
+    'const _bl=(navigator.language||"de").substring(0,2).toLowerCase();return LANG[_bl]?_bl:"de";})(),()')
+
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Fix 16 — Phase 69: Region filter for genRriverQ (Land → Fluss)
+# genRiverQ (Fluss → Land) already had _rfilt from Fix 10.
+# genRriverQ picks a country first, then finds rivers in it — the country pool
+# must come from _rfilt(RIVERS,3). RIVERS has .cc + .continent so _rfilt works.
+# Distractors stay from global RIVERS for variety.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# 16a: filter country pool via _rfilt
+patch('genRriverQ: _rfilt on country pool',
+    'function genRriverQ(){\n'
+    '  const ctries=[...new Set(RIVERS.map(r=>r.country))].filter(c=>c\\!==S.lid);if(\\!ctries.length)return null;',
+    'function genRriverQ(){\n'
+    '  const _rpool=_rfilt(RIVERS,3);\n'
+    '  const ctries=[...new Set(_rpool.map(r=>r.country))].filter(c=>c\\!==S.lid);if(\\!ctries.length)return null;')
+
+# 16b: draw correct river from filtered pool (not full RIVERS)
+patch('genRriverQ: cRivers from _rpool',
+    '  const cRivers=RIVERS.filter(r=>r.country===corC);',
+    '  const cRivers=_rpool.filter(r=>r.country===corC);')
+
 # ─── Summary ──────────────────────────────────────────────────────────────────
 print()
 print('=' * 60)
@@ -572,3 +608,94 @@ if missing:
 
 print()
 print('All done. Now run:  python gen.py')
+
+print()
+print("=== Fix 17 — Phase 70: Region filter for Distractor pools ===")
+
+# 17a — genRiverQ: country distractors filtered
+patch('genRiverQ: filtered country distractors',
+    '  const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);\n'
+    '  return{type:"river",',
+    '  const _cpool=_rfilt(COUNTRIES,4);const dis=distractors(_cpool,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);\n'
+    '  return{type:"river",')
+
+# 17b — genLandmarkQ: country distractors filtered
+patch('genLandmarkQ: filtered country distractors',
+    '  const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);\n'
+    '  return{type:"landmark",',
+    '  const _cpool=_rfilt(COUNTRIES,4);const dis=distractors(_cpool,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);\n'
+    '  return{type:"landmark",')
+
+# 17c — genParkQ: country distractors filtered
+patch('genParkQ: filtered country distractors',
+    '  const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);\n'
+    '  return{type:"park",',
+    '  const _cpool=_rfilt(COUNTRIES,4);const dis=distractors(_cpool,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);\n'
+    '  return{type:"park",')
+
+# 17d — genUnescoQ: country distractors filtered
+patch('genUnescoQ: filtered country distractors',
+    '  const dis=distractors(COUNTRIES,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);\n'
+    '  return{type:"unesco",',
+    '  const _cpool=_rfilt(COUNTRIES,4);const dis=distractors(_cpool,x=>x.sr===cor.subregion||x.ct===cor.continent,x=>x.c===cor.country,x=>x.c);\n'
+    '  return{type:"unesco",')
+
+# 17e — genCitymarkQ: city distractors from filtered pool
+patch('genCitymarkQ: filtered city distractors',
+    '  const dis=distractors(CITY_LANDMARKS,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.city===cor.city,x=>x.city);\n'
+    '  return{type:"citymark",',
+    '  const dis=distractors(pool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.city===cor.city,x=>x.city);\n'
+    '  return{type:"citymark",')
+
+# 17f — genRcityQ: city distractors from filtered CITIES
+patch('genRcityQ: filtered city distractors',
+    '  const dis=distractors(CITIES,x=>x.sub===corCity.sub||x.cont===corCity.cont,x=>x.c===cor.c,x=>x.n);\n'
+    '  return{type:"rcity",',
+    '  const _citpool=_rfilt(CITIES,4);const dis=distractors(_citpool,x=>x.sub===corCity.sub||x.cont===corCity.cont,x=>x.c===cor.c,x=>x.n);\n'
+    '  return{type:"rcity",')
+
+# 17g — genRriverQ: river name distractors from _rpool
+patch('genRriverQ: river name distractors from _rpool',
+    '  const dis=distractors(RIVERS,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.country===corC,x=>x.name);\n'
+    '  return{type:"rriver",',
+    '  const dis=distractors(_rpool,x=>x.subregion===cor.subregion||x.continent===cor.continent,x=>x.country===corC,x=>x.name);\n'
+    '  return{type:"rriver",')
+
+# 17h — genFoodQ: food country distractors filtered
+patch('genFoodQ: filtered country distractors',
+    '  const dis=FOOD_DATA.filter(f=>f.country\\!==corC).map(f=>f.country);\n'
+    '  const uniq=[...new Set(dis)];const picked=sh(uniq).slice(0,3);\n'
+    '  return{type:"food",',
+    '  const _fDisR=[...new Set(_fp.filter(f=>f.country\\!==corC).map(f=>f.country))];\n'
+    '  const _fDisAll=[...new Set(FOOD_DATA.filter(f=>f.country\\!==corC).map(f=>f.country))];\n'
+    '  const picked=sh(_fDisR.length>=3?_fDisR:_fDisAll).slice(0,3);\n'
+    '  return{type:"food",')
+
+# 17i — genBrandQ: brand country distractors filtered
+patch('genBrandQ: filtered country distractors',
+    '  const sameSub=BRANDS_DATA.filter(b=>b.sub===item.sub&&b.country\\!==corC).map(b=>b.country);\n'
+    '  const fallback=BRANDS_DATA.filter(b=>b.country\\!==corC).map(b=>b.country);\n'
+    '  const pool=[...new Set(sameSub.length>=3?sameSub:fallback)];\n'
+    '  const picked=sh(pool).slice(0,3);\n'
+    '  return{type:"brand",',
+    '  const sameSub=_bp.filter(b=>b.sub===item.sub&&b.country\\!==corC).map(b=>b.country);\n'
+    '  const fallback=_bp.filter(b=>b.country\\!==corC).map(b=>b.country);\n'
+    '  const _pool=[...new Set(sameSub.length>=3?sameSub:fallback)];\n'
+    '  const pool=_pool.length>=3?_pool:[...new Set(BRANDS_DATA.filter(b=>b.country\\!==corC).map(b=>b.country))];\n'
+    '  const picked=sh(pool).slice(0,3);\n'
+    '  return{type:"brand",')
+
+# 17j — genCurrencyQ: currency country distractors filtered
+patch('genCurrencyQ: filtered country distractors',
+    '  const sameSub=CURRENCIES_DATA.filter(c=>c.sub===item.sub&&c.country\\!==corC).map(c=>c.country);\n'
+    '  const fallback=CURRENCIES_DATA.filter(c=>c.country\\!==corC).map(c=>c.country);\n'
+    '  const pool=[...new Set(sameSub.length>=3?sameSub:fallback)];\n'
+    '  const picked=sh(pool).slice(0,3);\n'
+    '  return{type:"currency",',
+    '  const sameSub=_cp.filter(c=>c.sub===item.sub&&c.country\\!==corC).map(c=>c.country);\n'
+    '  const fallback=_cp.filter(c=>c.country\\!==corC).map(c=>c.country);\n'
+    '  const _pool=[...new Set(sameSub.length>=3?sameSub:fallback)];\n'
+    '  const pool=_pool.length>=3?_pool:[...new Set(CURRENCIES_DATA.filter(c=>c.country\\!==corC).map(c=>c.country))];\n'
+    '  const picked=sh(pool).slice(0,3);\n'
+    '  return{type:"currency",')
+
