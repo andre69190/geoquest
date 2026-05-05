@@ -2074,6 +2074,17 @@ if(sbOK){
 
 async function initAuth(){
   if(!sb)return;
+  /* Phase 83: handle token refresh + password recovery */
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==="PASSWORD_RECOVERY"){
+      S.authMode="new_password";S.tab="profil";S.ph="menu";
+      showToast("\u{1F511} Gib jetzt dein neues Passwort ein.");
+      render();return;
+    }
+    if((event==="TOKEN_REFRESHED"||event==="SIGNED_IN")&&session?.user){
+      if(!sbUser||sbUser.id!==session.user.id){sbUser=session.user;await loadProfile();}
+    }
+  });
   const{data:{session}}=await sb.auth.getSession();
   if(session){sbUser=session.user;await loadProfile();}
   else{const{data,error}=await sb.auth.signInAnonymously();if(!error){sbUser=data.user;await loadProfile();}}
@@ -2195,7 +2206,7 @@ async function doLogin(){
   if(!email||!pw){S.authError="E-Mail und Passwort eingeben.";render();return;}
   S.authLoading=true;S.authError="";render();
   const{data,error}=await sb.auth.signInWithPassword({email,password:pw});
-  if(error){S.authError=error.message==="Invalid login credentials"?"E-Mail oder Passwort falsch.":error.message;S.authLoading=false;render();return;}
+  if(error){const _m=error.message;S.authError=_m==="Invalid login credentials"?"E-Mail oder Passwort falsch.":_m.includes("Email not confirmed")?"Bitte best\u00e4tige zuerst deine E-Mail-Adresse!":_m.includes("Too many requests")?"Zu viele Versuche. Bitte kurz warten.":_m;S.authLoading=false;render();return;}
   sbUser=data.user;
   await loadProfile();
   S.authLoading=false;S.authEmail="";S.authPassword="";S.authConfirm="";S.authError="";
@@ -2215,6 +2226,31 @@ async function doLogout(){
   const{data}=await sb.auth.signInAnonymously();
   if(data)sbUser=data.user;
   render();
+}
+/* Phase 83: Password reset */
+async function doForgotPassword(){
+  if(!sb){showToast("Supabase nicht verbunden");return;}
+  const email=S.authEmail.trim();
+  if(!email){S.authError="Bitte E-Mail-Adresse eingeben.";render();return;}
+  S.authLoading=true;S.authError="";render();
+  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+  S.authLoading=false;
+  if(error){S.authError=error.message;render();return;}
+  showToast("\u2705 Reset-Link gesendet an "+email+"!");
+  S.authMode="login";S.authEmail="";render();
+}
+async function doSetNewPassword(){
+  if(!sb){showToast("Supabase nicht verbunden");return;}
+  const pw=S.authPassword;
+  if(!pw||!S.authConfirm){S.authError="Bitte beide Felder ausf\u00fcllen.";render();return;}
+  if(pw.length<6){S.authError="Passwort mind. 6 Zeichen.";render();return;}
+  if(pw!==S.authConfirm){S.authError="Passw\u00f6rter stimmen nicht \u00fcberein.";render();return;}
+  S.authLoading=true;S.authError="";render();
+  const{error}=await sb.auth.updateUser({password:pw});
+  S.authLoading=false;
+  if(error){S.authError=error.message;render();return;}
+  showToast("\u2705 Passwort erfolgreich ge\u00e4ndert!");
+  S.authMode="login";S.authPassword="";S.authConfirm="";render();
 }
 async function saveSession(mode,score,bs,correct,durationMs){
   /* Sanity-cap score before submitting — max honest = ROUNDS*(BASE+12*TB)*3*3 */
@@ -4122,23 +4158,40 @@ function renderMehrTab(){
     authSection=`<div class="auth-card" style="text-align:center"><p style="color:var(--text3);font-size:.85rem">Supabase nicht konfiguriert.</p></div>`;
   } else if(isAnon||!hasName){
     const isReg=S.authMode==="register";
+    const isForgot=S.authMode==="forgot";
+    const isNewPw=S.authMode==="new_password";
+    const _aIcon=isReg?"\uD83C\uDF31":"\uD83D\uDD11";
+    const _aTitle=isReg?"Konto erstellen":isForgot?"Passwort vergessen":isNewPw?"Neues Passwort":"Anmelden";
+    const _aSub=isReg?"Dein Fortschritt wird gesichert.":isForgot?"Wir senden dir einen Reset-Link.":isNewPw?"W\u00e4hle ein neues Passwort.":"Willkommen zur\u00fcck!";
     authSection=`<div class="auth-card">
-      <div style="text-align:center;font-size:1.5rem;margin-bottom:.75rem">${isReg?"\uD83C\uDF31":"\uD83D\uDD11"}</div>
-      <div style="font-size:1rem;font-weight:900;color:var(--text);text-align:center;margin-bottom:.3rem">${isReg?"Konto erstellen":"Anmelden"}</div>
-      <div style="color:var(--text3);font-size:.78rem;text-align:center;margin-bottom:1rem">${isReg?"Dein Fortschritt wird gesichert.":"Willkommen zur\u00fcck!"}</div>
-      <div class="auth-tabs">
+      <div style="text-align:center;font-size:1.5rem;margin-bottom:.75rem">${_aIcon}</div>
+      <div style="font-size:1rem;font-weight:900;color:var(--text);text-align:center;margin-bottom:.3rem">${_aTitle}</div>
+      <div style="color:var(--text3);font-size:.78rem;text-align:center;margin-bottom:1rem">${_aSub}</div>
+      ${isForgot||isNewPw?"":`<div class="auth-tabs">
         <button class="auth-tab${S.authMode==="login"?" active":""}" onclick="S.authMode='login';S.authError='';render()">Anmelden</button>
         <button class="auth-tab${S.authMode==="register"?" active":""}" onclick="S.authMode='register';S.authError='';render()">Registrieren</button>
-      </div>
+      </div>`}
       ${S.authError?`<div class="auth-err">${S.authError}</div>`:""}
-      ${isReg?`<div class="auth-field"><label>BENUTZERNAME</label><input type="text" placeholder="Dein Spielername" maxlength="20" value="${S.authUsername}" oninput="S.authUsername=this.value"></div>`:""}
-      <div class="auth-field"><label>E-MAIL</label><input type="email" placeholder="deine@email.de" value="${S.authEmail}" oninput="S.authEmail=this.value"></div>
-      <div class="auth-field"><label>PASSWORT</label><div style="position:relative"><input id="pw-main" type="password" style="padding-right:2.4rem" placeholder="${isReg?"Mind. 6 Zeichen":"\u2022\u2022\u2022\u2022\u2022\u2022"}" value="${S.authPassword}" oninput="S.authPassword=this.value" onkeydown="if(event.key==='Enter'){${isReg?"doRegister":"doLogin"}();}"><button type="button" onclick="togglePw('pw-main',this)" style="position:absolute;right:.55rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">\u{1F441}</button></div></div>
-      ${isReg?`<div class="auth-field"><label>PASSWORT BESTÄTIGEN</label><div style="position:relative"><input id="pw-confirm" type="password" style="padding-right:2.4rem" placeholder="Passwort wiederholen" value="${S.authConfirm}" oninput="S.authConfirm=this.value" onkeydown="if(event.key==='Enter')doRegister();"><button type="button" onclick="togglePw('pw-confirm',this)" style="position:absolute;right:.55rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">\u{1F441}</button></div></div>`:""}
-      <button class="btn-p" onclick="${isReg?"doRegister":"doLogin"}()" ${S.authLoading?"disabled":""}>
-        ${S.authLoading?"Bitte warten \u2026":isReg?"\uD83C\uDF31 Konto erstellen &amp; Fortschritt sichern":"\uD83D\uDD11 Anmelden"}
-      </button>
-      ${isAnon&&isReg&&totalStamps>0?`<div style="background:rgba(16,185,129,.08);border:1px solid #10b981;border-radius:8px;padding:.5rem .75rem;font-size:.74rem;color:#10b981;margin-top:.25rem">\uD83D\uDCBE ${totalStamps} Stempel &amp; deine Punkte werden \u00fcbernommen.</div>`:""}
+      ${isNewPw?`
+        <div class="auth-field"><label>NEUES PASSWORT</label><div style="position:relative"><input id="pw-main" type="password" style="padding-right:2.4rem" placeholder="Mind. 6 Zeichen" value="${S.authPassword}" oninput="S.authPassword=this.value" onkeydown="if(event.key==='Enter')doSetNewPassword();"><button type="button" onclick="togglePw('pw-main',this)" style="position:absolute;right:.55rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">\u{1F441}</button></div></div>
+        <div class="auth-field"><label>PASSWORT BEST\u00c4TIGEN</label><div style="position:relative"><input id="pw-confirm" type="password" style="padding-right:2.4rem" placeholder="Passwort wiederholen" value="${S.authConfirm}" oninput="S.authConfirm=this.value" onkeydown="if(event.key==='Enter')doSetNewPassword();"><button type="button" onclick="togglePw('pw-confirm',this)" style="position:absolute;right:.55rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">\u{1F441}</button></div></div>
+        <button class="btn-p" onclick="doSetNewPassword()" ${S.authLoading?"disabled":""}>${S.authLoading?"Bitte warten \u2026":"\uD83D\uDD11 Passwort setzen"}</button>
+        <button class="btn-g" style="margin-bottom:0;background:transparent;border:none;color:var(--text3);font-size:.78rem;text-decoration:underline;cursor:pointer" onclick="S.authMode='login';S.authError='';render()">Zur\u00fcck zum Login</button>
+      `:isForgot?`
+        <div class="auth-field"><label>E-MAIL</label><input type="email" placeholder="deine@email.de" value="${S.authEmail}" oninput="S.authEmail=this.value" onkeydown="if(event.key==='Enter')doForgotPassword()"></div>
+        <button class="btn-p" onclick="doForgotPassword()" ${S.authLoading?"disabled":""}>${S.authLoading?"Bitte warten \u2026":"\uD83D\uDCE7 Reset-Link senden"}</button>
+        <button class="btn-g" style="margin-bottom:0;background:transparent;border:none;color:var(--text3);font-size:.78rem;text-decoration:underline;cursor:pointer" onclick="S.authMode='login';S.authError='';render()">Zur\u00fcck zum Login</button>
+      `:`
+        ${isReg?`<div class="auth-field"><label>BENUTZERNAME</label><input type="text" placeholder="Dein Spielername" maxlength="20" value="${S.authUsername}" oninput="S.authUsername=this.value"></div>`:""}
+        <div class="auth-field"><label>E-MAIL</label><input type="email" placeholder="deine@email.de" value="${S.authEmail}" oninput="S.authEmail=this.value"></div>
+        <div class="auth-field"><label>PASSWORT</label><div style="position:relative"><input id="pw-main" type="password" style="padding-right:2.4rem" placeholder="${isReg?"Mind. 6 Zeichen":"\u2022\u2022\u2022\u2022\u2022\u2022"}" value="${S.authPassword}" oninput="S.authPassword=this.value" onkeydown="if(event.key==='Enter'){${isReg?"doRegister":"doLogin"}();}"><button type="button" onclick="togglePw('pw-main',this)" style="position:absolute;right:.55rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">\u{1F441}</button></div></div>
+        ${isReg?`<div class="auth-field"><label>PASSWORT BEST\u00c4TIGEN</label><div style="position:relative"><input id="pw-confirm" type="password" style="padding-right:2.4rem" placeholder="Passwort wiederholen" value="${S.authConfirm}" oninput="S.authConfirm=this.value" onkeydown="if(event.key==='Enter')doRegister();"><button type="button" onclick="togglePw('pw-confirm',this)" style="position:absolute;right:.55rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:0;line-height:1">\u{1F441}</button></div></div>`:""}
+        <button class="btn-p" onclick="${isReg?"doRegister":"doLogin"}()" ${S.authLoading?"disabled":""}>
+          ${S.authLoading?"Bitte warten \u2026":isReg?"\uD83C\uDF31 Konto erstellen &amp; Fortschritt sichern":"\uD83D\uDD11 Anmelden"}
+        </button>
+        ${isAnon&&isReg&&totalStamps>0?`<div style="background:rgba(16,185,129,.08);border:1px solid #10b981;border-radius:8px;padding:.5rem .75rem;font-size:.74rem;color:#10b981;margin-top:.25rem">\uD83D\uDCBE ${totalStamps} Stempel &amp; deine Punkte werden \u00fcbernommen.</div>`:""}
+        ${!isReg?`<button class="btn-g" style="margin-top:.25rem;margin-bottom:0;background:transparent;border:none;color:var(--text3);font-size:.78rem;text-decoration:underline;cursor:pointer" onclick="S.authMode='forgot';S.authError='';render()">Passwort vergessen?</button>`:""}
+      `}
     </div>`;
   } else {
     const name=getDisplayName();
