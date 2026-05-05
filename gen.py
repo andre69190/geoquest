@@ -5095,3 +5095,7 @@ out = 'GeoQuest.html'
 with open(out, 'w', encoding='utf-8') as _f:
     _f.write(HTML)
 print(f'Written: {len(HTML):,} chars → {out}')
+# Also write index.html for Netlify / direct hosting
+with open('index.html', 'w', encoding='utf-8') as _f:
+    _f.write(HTML)
+print('Also written \u2192 index.html (Netlify deploy target)')

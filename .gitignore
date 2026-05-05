@@ -1,4 +1,39 @@
-.DS_Store
+# ── Python ────────────────────────────────────────────────
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+
+# ── Environment / Secrets ─────────────────────────────────
 .env
+.env.local
+.env.*.local
+secrets.txt
+
+# ── OS files ──────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ── Editor / IDE ──────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Temporary / scratch patch scripts ─────────────────────
+fix*.py
+patch_log*.txt
+
+# ── Node (if ever needed) ─────────────────────────────────
+node_modules/
+npm-debug.log*
+
+# ── Deployment scratch ────────────────────────────────────
+.netlify/
