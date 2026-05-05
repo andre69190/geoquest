@@ -2038,6 +2038,15 @@ function useFreeze(){
 }
 
 const ROUNDS=10,BASE=100,TB=10;
+/* Phase 81 — Titel-Schwellenwerte */
+const TITLE_THRESHOLDS=[
+  {min:750000,title:"Meister",  coins:500, icon:"\u{1F451}"},
+  {min:300000,title:"Platin",   coins:250, icon:"\u{1F48E}"},
+  {min:100000,title:"Gold",     coins:150, icon:"\u{1F947}"},
+  {min:25000, title:"Silber",   coins:100, icon:"\u{1F948}"},
+  {min:5000,  title:"Bronze",   coins:50,  icon:"\u{1F949}"},
+  {min:0,     title:"Erkunder", coins:0,   icon:"\u{1F30D}"},
+];
 const TIERS=[
   {m:10,x:3.0,l:"\u{1F525}\u{1F525}\u{1F525} LEGEND\u00c4R \u2014 3\u00d7"},
   {m:5, x:2.0,l:"\u{1F525}\u{1F525} ON FIRE \u2014 2\u00d7"},
@@ -2074,6 +2083,15 @@ async function loadProfile(){
   const{data}=await sb.from("profiles").select("*").eq("id",sbUser.id).single();
   sbProfile=data;
   syncJokersFromProfile();
+  /* Phase 82: sync stats from Supabase -> localStorage */
+  if(data){
+    if(Array.isArray(data.stats_history)&&data.stats_history.length>0)_gqSave("gq_history",data.stats_history);
+    if(data.stats_mastery&&typeof data.stats_mastery==="object"&&Object.keys(data.stats_mastery).length>0)_gqSave("gq_mastery",data.stats_mastery);
+    if(data.last_daily_date){
+      const _today=new Date().toISOString().slice(0,10);
+      if(data.last_daily_date===_today){const _dk=getDailyKey();if(!localStorage.getItem(_dk)){try{localStorage.setItem(_dk,JSON.stringify({score:0,ts:Date.now()}));}catch(_e){}}}
+    }
+  }
   /* Admin privileges handled server-side via Supabase trigger */
   const{data:stamps}=await sb.from("user_stamps").select("stamp_id,stamps(country_code)").eq("user_id",sbUser.id);
   if(stamps)stamps.forEach(s=>s.stamps&&sbStamps.add(s.stamps.country_code));
@@ -2215,16 +2233,44 @@ async function saveSession(mode,score,bs,correct,durationMs){
   /* Use RPC to prevent client-side score tampering */
   await sb.rpc("add_score",{p_user_id:sbUser.id,p_score:score,p_coins:Math.floor(score/100),p_rounds:ROUNDS,p_duration_ms:durationMs||0});
   if(sbProfile){sbProfile.total_score=(sbProfile.total_score||0)+score;sbProfile.games_played=(sbProfile.games_played||0)+1;}
+  if(sbProfile)checkTitleUp(sbProfile.total_score||0).catch(()=>{});
 }
 async function fetchLeaderboard(mode){
   if(!sb)return[];
   const{data}=await sb.from("leaderboard_weekly").select("*").eq("mode",mode).order("rank",{ascending:true}).limit(30);
   return data||[];
 }
+/* Phase 81 — Titel-System */
+function getTitleForScore(ts){
+  return(TITLE_THRESHOLDS.find(t=>ts>=t.min)||TITLE_THRESHOLDS[TITLE_THRESHOLDS.length-1]).title;
+}
+async function checkTitleUp(newTotal){
+  if(!sb||!sbUser||!sbProfile)return;
+  const oldTitle=sbProfile.current_title||"Erkunder";
+  const newTitle=getTitleForScore(newTotal);
+  if(newTitle===oldTitle)return;
+  const oldIdx=TITLE_THRESHOLDS.findIndex(t=>t.title===oldTitle);
+  const newIdx=TITLE_THRESHOLDS.findIndex(t=>t.title===newTitle);
+  if(newIdx>=oldIdx)return;
+  const reward=TITLE_THRESHOLDS[newIdx];
+  sbProfile.current_title=newTitle;
+  sb.from("profiles").update({current_title:newTitle}).eq("id",sbUser.id).then(()=>{},()=>{});
+  if(reward.coins>0){
+    try{const _cr=await sb.rpc("add_coins",{p_user_id:sbUser.id,p_amount:reward.coins});
+      if(_cr.data!=null&&sbProfile)sbProfile.geo_coins=_cr.data;
+      else if(sbProfile)sbProfile.geo_coins=(sbProfile.geo_coins||0)+reward.coins;
+    }catch(_){}
+  }
+  showToast(reward.icon+" Rang-Aufstieg! Du bist jetzt "+newTitle+"!"+(reward.coins>0?" +"+reward.coins+" GeoCoins":""));
+  render();
+}
 
 /* MASTERY */
 function loadMastery(){return _gqLoad("gq_mastery",{});}
-function saveMastery(d){_gqSave("gq_mastery",d);}
+function saveMastery(d){
+  _gqSave("gq_mastery",d);
+  if(sb&&sbUser)sb.from("profiles").update({stats_mastery:d}).eq("id",sbUser.id).then(()=>{},()=>{});
+}
 function getMasteryRank(v,p){if(v>=15||p>=3)return"gold";if(v>=5||p>=1)return"silver";if(v>=1)return"bronze";return null;}
 function getTravelRank(n){return n>=50?"Weltbuerger":n>=30?"Globetrotter":n>=15?"Weltenbummler":n>=5?"Reisender":"Einheimischer";}
 function checkMastery(){
@@ -2975,7 +3021,10 @@ function getRarity(code){
 function rarityLabel(r){return{common:"\u{1F7E2} Common",rare:"\u{1F535} Rare",epic:"\u{1F7E3} Epic",legendary:"\u{1F7E1} Legendary"}[r]||r;}
 function rarityColor(r){return{common:"#10b981",rare:"#3b82f6",epic:"#8b5cf6",legendary:"#f59e0b"}[r]||"#999";}
 function isDailyDone(){try{return!!JSON.parse(localStorage.getItem(getDailyKey())||"null");}catch(e){return false;}}
-function markDailyDone(score){try{localStorage.setItem(getDailyKey(),JSON.stringify({score,ts:Date.now()}));}catch(e){}}
+function markDailyDone(score){
+  try{localStorage.setItem(getDailyKey(),JSON.stringify({score,ts:Date.now()}));}catch(e){}
+  if(sb&&sbUser){const _d=new Date().toISOString().slice(0,10);sb.from("profiles").update({last_daily_date:_d}).eq("id",sbUser.id).then(()=>{},()=>{});}
+}
 function getDailySeed(){
   const d=new Date().toISOString().slice(0,10).replace(/-/g,"");
   let h=0;for(let i=0;i<d.length;i++){h=(Math.imul(31,h)+d.charCodeAt(i))|0;}
@@ -3992,7 +4041,13 @@ function renderStatsTab(){
 /* LIGA TAB — Leaderboard */
 function renderLigaTab(){
   const isGuest=!sbUser?.email;
-  return`<div style="font-size:1.1rem;font-weight:900;color:var(--text);margin-bottom:.75rem">\u{1F3C6} Liga</div>
+  const _wkStart=new Date();_wkStart.setDate(_wkStart.getDate()-(_wkStart.getDay()||7)+1);_wkStart.setHours(0,0,0,0);
+  const _wkEnd=new Date(_wkStart);_wkEnd.setDate(_wkEnd.getDate()+6);
+  const _wkLbl=_wkStart.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"})+" \u2013 "+_wkEnd.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"});
+  return`<div style="margin-bottom:.75rem">
+    <div style="font-size:1.1rem;font-weight:900;color:var(--text)">\u{1F3C6} W\u00f6chentlicher Wettkampf</div>
+    <div style="font-size:.72rem;color:var(--text3);margin-top:2px">KW ${_wkLbl} \u00b7 Reset jeden Montag 00:00 Uhr</div>
+  </div>
   ${!sbOK?`<div class="panel"><p style="color:var(--text3);font-size:.85rem">Supabase nicht konfiguriert.</p></div>`:
     isGuest?`<div class="panel" style="text-align:center;padding:1.5rem">
       <div style="font-size:2rem;margin-bottom:.5rem">\u{1F464}</div>
@@ -4006,8 +4061,8 @@ function renderLigaTab(){
     <div class="panel" style="padding:.5rem">${S.ligaData.map((r,i)=>{
       const rc=i===0?'gold':i===1?'silver':i===2?'bronze':'';
       const isMe=sbUser&&r.user_id===sbUser.id;
-      const title=r.equipped_title?`<span style="font-size:.62rem;color:#a78bfa;margin-left:4px">${r.equipped_title}</span>`:'';
-      return`<div class="lb-row${isMe?' me':''}${i<5?' promo':''}"><span class="lb-rank ${rc}">${r.rank||i+1}</span><span class="lb-name">${r.username||'Anonym'}${title}</span><span class="lb-score">${Number(r.best_score||0).toLocaleString()}</span></div>`;
+      const titleBadge=r.current_title&&r.current_title!=='Erkunder'?`<span style="font-size:.62rem;color:#a78bfa;margin-left:4px">${r.current_title}</span>`:'';
+      return`<div class="lb-row${isMe?' me':''}${i<5?' promo':''}"><span class="lb-rank ${rc}">${r.rank||i+1}</span><span class="lb-name">${r.username||'Anonym'}${titleBadge}</span><span class="lb-score">${Number(r.weekly_score||r.best_score||0).toLocaleString()}</span></div>`;
     }).join('')}</div>`}`;
 }
 async function loadLiga(){
@@ -4090,7 +4145,7 @@ function renderMehrTab(){
     authSection=`<div class="auth-card">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
         <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#10b981,#0891b2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:900;color:#fff;flex-shrink:0">${name?name[0].toUpperCase():"\uD83D\uDC64"}</div>
-        <div><div style="font-size:1rem;font-weight:900;color:var(--text)">${name||"Spieler"}</div><div style="font-size:.72rem;color:var(--text3)">${sbUser?.email||"Gast-Konto"}</div></div>
+        <div><div style="font-size:1rem;font-weight:900;color:var(--text)">${name||"Spieler"}</div><div style="font-size:.72rem;color:var(--text3)">${sbUser?.email||"Gast-Konto"}</div>${sbProfile?.current_title&&sbProfile.current_title!=="Erkunder"?`<div style="display:inline-block;margin-top:3px;background:rgba(167,139,250,.15);border:1px solid #a78bfa;border-radius:20px;padding:1px 8px;font-size:.68rem;color:#a78bfa;font-weight:700">${sbProfile.current_title}</div>`:""}</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:1rem">
         <div style="background:var(--bg3);border-radius:10px;padding:.6rem"><div style="color:#34d399;font-size:1.2rem;font-weight:700">${(sbProfile?.total_score||0).toLocaleString()}</div><div style="color:var(--text3);font-size:.65rem">Punkte</div></div>
@@ -4152,7 +4207,10 @@ function renderLeaderboard(lbData,lbLoading,mode){
 
 /* GAME HISTORY */
 function loadHistory(){return _gqLoad("gq_history",[]);}
-function saveHistory(entry){const h=loadHistory();h.unshift(entry);if(h.length>60)h.length=60;_gqSave("gq_history",h);}
+function saveHistory(entry){
+  const h=loadHistory();h.unshift(entry);if(h.length>60)h.length=60;_gqSave("gq_history",h);
+  if(sb&&sbUser)sb.from("profiles").update({stats_history:h}).eq("id",sbUser.id).then(()=>{},()=>{});
+}
 
 /* ONBOARDING */
 function loadOb(){try{return JSON.parse(localStorage.getItem("gq_onboarding")||"null")}catch(e){return null}}
